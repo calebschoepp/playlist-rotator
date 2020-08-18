@@ -18,12 +18,7 @@ var serveCmd = &cobra.Command{
 	Short: "Spin up the playlist-rotator HTTP server",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Setup config
-		config := &server.Config{
-			ClientID:     "",
-			ClientSecret: "",
-			Addr:         "localhost:8080",
-			DatabaseURL:  os.Getenv("DATABASE_URL"),
-		}
+		config := server.NewConfig()
 
 		// Setup DB
 		var db *sql.DB

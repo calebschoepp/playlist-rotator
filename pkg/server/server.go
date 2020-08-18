@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -24,13 +25,6 @@ type Server struct {
 	Templates   *template.Template
 }
 
-type Config struct {
-	ClientID     string
-	ClientSecret string
-	Addr         string
-	DatabaseURL  string
-}
-
 const stateCookieName = "oauthState"
 const stateCookieExpiry = 30 * time.Minute
 
@@ -42,7 +36,7 @@ func New(log *log.Logger, config *Config, db *sql.DB, router *mux.Router) (*Serv
 		spotify.ScopePlaylistModifyPrivate,
 		spotify.ScopeUserLibraryRead,
 	}
-	spotifyAuth := spotify.NewAuthenticator("http://"+config.Addr+"/callback", scopes...)
+	spotifyAuth := spotify.NewAuthenticator(fmt.Sprintf("%s%s:%d/callback", "http://", config.Host, config.Port), scopes...)
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
 	pwd, err := os.Getwd()
@@ -76,8 +70,8 @@ func (s *Server) SetupRoutes() {
 
 // Run makes the Server start listening and serving on the configured addr
 func (s *Server) Run() {
-	s.Log.Printf("Serving on %s", s.Config.Addr)
-	s.Log.Fatal(http.ListenAndServe(s.Config.Addr, s.Router))
+	s.Log.Printf("Listening on port %d", s.Config.Port)
+	s.Log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.Config.Port), s.Router))
 }
 
 func (s *Server) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
