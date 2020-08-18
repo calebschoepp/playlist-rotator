@@ -1,1 +1,1 @@
-web: go run . serve
+web: bin/playlist-rotator serve
