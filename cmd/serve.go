@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/lib/pq"
+
 	"github.com/gorilla/mux"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/server"
@@ -20,14 +22,15 @@ var serveCmd = &cobra.Command{
 			ClientID:     "",
 			ClientSecret: "",
 			Addr:         "localhost:8080",
+			DatabaseURL:  os.Getenv("DATABASE_URL"),
 		}
 
 		// Setup DB
-		var db sql.DB
-		// db, err := sql.Open("postgres", "user=theUser dbname=theDbName sslmode=verify-full")
-		// if err != nil {
-		// 	panic(err)
-		// }
+		var db *sql.DB
+		db, err := sql.Open("postgres", config.DatabaseURL)
+		if err != nil {
+			log.Fatalf("cmd: failed to setup db: %v", err)
+		}
 
 		// Setup log
 		log := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
@@ -36,7 +39,7 @@ var serveCmd = &cobra.Command{
 		router := mux.NewRouter()
 
 		// Setup server
-		server, err := server.New(log, config, &db, router)
+		server, err := server.New(log, config, db, router)
 		if err != nil {
 			log.Fatalf("cmd: failed to build server: %v", err)
 		}

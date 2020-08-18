@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Playlist</title>
+</head>
+<body>
+    <p>Go back <a href="/">Home</a>.</p>
+    <form method="POST" action="new-playlist">
+        <h1>New Playlist</h1>
+        <label>Name</label>
+        <input type="text" name="playlistName" maxlength="255" value="{{ .Name }}"/>
+        <input type="submit" name="submit" value="Save"/>
+    </form>
+    {{ if .Saved }}
+    <p>Saved</p>
+    {{ end }}
+</body>
+</html>
+
+		<!-- <form id="form_121398" class="appnitro"  method="post" action="">
+					<div class="form_description">
+			<h2>Untitled Form</h2>
+			<p>This is your form description. Click here to edit.</p>
+		</div>						
+			<ul >
+			
+					<li id="li_2" >
+		<label class="description" for="element_2">Checkboxes </label>
+		<span>
+			<input id="element_2_1" name="element_2_1" class="element checkbox" type="checkbox" value="1" />
+<label class="choice" for="element_2_1">First option</label>
+<input id="element_2_2" name="element_2_2" class="element checkbox" type="checkbox" value="1" />
+<label class="choice" for="element_2_2">Second option</label>
+<input id="element_2_3" name="element_2_3" class="element checkbox" type="checkbox" value="1" />
+<label class="choice" for="element_2_3">Third option</label>
+
+		</span> 
+		</li>		<li id="li_3" >
+		<label class="description" for="element_3">Multiple Choice </label>
+		<span>
+			<input id="element_3_1" name="element_3" class="element radio" type="radio" value="1" />
+<label class="choice" for="element_3_1">First option</label>
+<input id="element_3_2" name="element_3" class="element radio" type="radio" value="2" />
+<label class="choice" for="element_3_2">Second option</label>
+<input id="element_3_3" name="element_3" class="element radio" type="radio" value="3" />
+<label class="choice" for="element_3_3">Third option</label>
+
+		</span> 
+		</li>		<li id="li_1" >
+		<label class="description" for="element_1">Text </label>
+		<div>
+			<input id="element_1" name="element_1" class="element text medium" type="text" maxlength="255" value=""/> 
+		</div> 
+		</li>
+			
+					<li class="buttons">
+			    <input type="hidden" name="form_id" value="121398" />
+			    
+				<input id="saveForm" class="button_text" type="submit" name="submit" value="Submit" />
+		</li>
+			</ul> -->

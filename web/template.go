@@ -1,11 +1,16 @@
 package web
 
+import "github.com/calebschoepp/playlist-rotator/pkg/playlist"
+
 type Home struct {
+	Playlists []playlist.Playlist
 }
 
 type Login struct {
 	SpotifyAuthURL string
 }
 
-type Callback struct {
+type NewPlaylist struct {
+	Name  string
+	Saved bool
 }

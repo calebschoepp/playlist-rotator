@@ -1,0 +1,2 @@
+- Make state cookie a random string
+- Make session cookie a random string

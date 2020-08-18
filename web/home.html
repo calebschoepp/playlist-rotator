@@ -1,1 +1,22 @@
-<p>Please go <a href="{{ .Link }}">here</a>.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    <h1>Home Page</h1>
+    <p>If you want to login again go <a href="/login">here</a>.</p>
+    {{ if not .Playlists }}
+        <p>You have no playlists. <a href="/new-playlist">Add a playlist</a>.</p>
+    {{ else }}
+        <ul>
+        {{ range .Playlists }}
+            <li>{{ .Name }}</li>
+        {{ end }}
+        </ul>
+        <p><a href="/new-playlist">Add new playlist</a>.</p>
+    {{ end }}
+</body>
+</html>
