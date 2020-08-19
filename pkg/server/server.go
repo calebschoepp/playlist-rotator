@@ -36,7 +36,7 @@ func New(log *log.Logger, config *Config, db *sql.DB, router *mux.Router) (*Serv
 		spotify.ScopePlaylistModifyPrivate,
 		spotify.ScopeUserLibraryRead,
 	}
-	spotifyAuth := spotify.NewAuthenticator(fmt.Sprintf("%s%s:%d/callback", "http://", config.Host, config.Port), scopes...)
+	spotifyAuth := spotify.NewAuthenticator(fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port), scopes...)
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
 	pwd, err := os.Getwd()
