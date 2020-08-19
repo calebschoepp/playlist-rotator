@@ -46,7 +46,17 @@ SELECT exists
 }
 
 func (u *UserService) GetSessionExpiry(sessionToken string) (*time.Time, error) {
-	return nil, errors.New("not implemented")
+	query := `
+SELECT session_expiry
+FROM users
+WHERE session_token=$1
+`
+	var sessionExpiry time.Time
+	err := u.db.Get(&sessionExpiry, query, sessionToken)
+	if err != nil {
+		return nil, err
+	}
+	return &sessionExpiry, nil
 }
 
 // CreateUser creates a new user row in the DB

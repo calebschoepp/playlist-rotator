@@ -1,11 +1,8 @@
 package server
 
 import (
-	"context"
-	"errors"
 	"math/rand"
-
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
+	"time"
 )
 
 // TODO make this random
@@ -28,12 +25,8 @@ func randomString(n int) string {
 	return string(s)
 }
 
-// TODO handle empty case properly
-func getUser(ctx context.Context) (*user.User, error) {
-	val := ctx.Value(userKey)
-	user, ok := val.(user.User)
-	if !ok {
-		return nil, errors.New("stored user is of invalid type")
-	}
-	return &user, nil
-}
+// TODO move these to config?
+const stateCookieName = "oauthState"
+const stateCookieExpiry = 30 * time.Minute
+const sessionCookieName = "playlistRotatorSession"
+const sessionCokkieExpiry = 30 * time.Second // TODO fine tune this
