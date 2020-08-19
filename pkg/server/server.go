@@ -11,6 +11,7 @@ import (
 
 	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/calebschoepp/playlist-rotator/web"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/gorilla/mux"
 	"github.com/zmb3/spotify"
@@ -19,17 +20,20 @@ import (
 type Server struct {
 	Log         *log.Logger
 	Config      *Config
-	DB          *sql.DB
+	DB          *sqlx.DB
 	Router      *mux.Router
 	SpotifyAuth *spotify.Authenticator
 	Templates   *template.Template
 }
 
+// TODO move these to config?
 const stateCookieName = "oauthState"
 const stateCookieExpiry = 30 * time.Minute
+const sessionCookieName = "playlistRotatorSession"
+const sessionCokkieExpiry = 30 * time.Second // TODO fine tune this
 
 // New builds a new Server struct
-func New(log *log.Logger, config *Config, db *sql.DB, router *mux.Router) (*Server, error) {
+func New(log *log.Logger, config *Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
 	// TODO make sure I use the correct and minimal scopes
 	scopes := []string{
 		spotify.ScopeUserReadPrivate,
@@ -108,6 +112,7 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	s.renderTemplate(w, "login", web.Login{SpotifyAuthURL: spotifyAuthURL})
 }
 
+// TODO improve error handling
 func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	// Get oauth2 tokens
 	stateCookie, err := r.Cookie(stateCookieName)
@@ -121,16 +126,69 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(token.AccessToken)
-	log.Println(token.RefreshToken)
-
+	// Generate new session token with expiry
+	sessionToken := randomSessionToken()
+	sessionExpiry := time.Now().Add(sessionCokkieExpiry)
 	sessionCookie := http.Cookie{
 		Name:    sessionCookieName,
-		Value:   "TODO_MAKE_THIS_A_RANDOM_SESSION_VALUE",
-		Expires: time.Now().Add(stateCookieExpiry),
+		Value:   sessionToken,
+		Expires: sessionExpiry,
 	}
-	http.SetCookie(w, &sessionCookie)
 
+	// Get spotify ID
+	client := s.SpotifyAuth.NewClient(token)
+	privateUser, err := client.CurrentUser()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// TODO confirm this is the right spotify ID to be using
+	spotifyID := privateUser.User.ID
+
+	// Check if user already exists for the spotify ID
+	var user User
+	err = s.DB.Get(&user, "SELECT * FROM users WHERE spotify_id=$1", spotifyID)
+	if err != nil && err != sql.ErrNoRows {
+		// Something went wrong in DB lookup, error out
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if err == sql.ErrNoRows {
+		// User does not exist for spotify ID yet, make one
+		_, err = s.DB.Exec(`
+		INSERT INTO users (
+			spotify_id,
+			session_token,
+			session_expiry,
+			playlists_built,
+			access_token,
+			refresh_token
+			)
+		VALUES ($1, $2, $3, $4, $5, $6);`,
+			spotifyID, sessionToken, sessionExpiry, 0, token.AccessToken, token.RefreshToken)
+		if err != nil {
+			s.Log.Printf("failed to build new user: %v", err)
+			http.Error(w, "failed to build new user", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// User already exists for spotify ID, update it
+		_, err = s.DB.Exec(`
+		UPDATE users SET
+			session_token=$1,
+			session_expiry=$2,
+			access_token=$3,
+			refresh_token=$4
+		WHERE spotify_id=$5;`,
+			sessionToken, sessionExpiry, token.AccessToken, token.RefreshToken, spotifyID)
+		if err != nil {
+			s.Log.Printf("failed to update existing user: %v", err)
+			http.Error(w, "failed to update existing user", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Set session cookie and redirect to home
+	http.SetCookie(w, &sessionCookie)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

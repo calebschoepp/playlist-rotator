@@ -1,14 +1,22 @@
 package server
 
 import (
-	"database/sql"
+	"context"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
-const sessionCookieName = "playlistRotatorSession"
+// TODO this key thing is gross
+type contextKey int
 
-func newSessionAuthMiddleware(db *sql.DB, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
+const (
+	userKey contextKey = iota
+)
+
+func newSessionAuthMiddleware(db *sqlx.DB, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Ignore blacklisted paths
@@ -18,16 +26,34 @@ func newSessionAuthMiddleware(db *sql.DB, log *log.Logger, blacklist []string) f
 					return
 				}
 			}
+
 			// Get session cookie
-			_, err := r.Cookie(sessionCookieName)
+			sessionCookie, err := r.Cookie(sessionCookieName)
 			if err != nil {
-				log.Println("User not authenticated: redirecting to /login")
+				log.Println("User not authenticated: no session: redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
 
-			// TODO
+			// Get user
+			var user User
+			err = db.Get(&user, "SELECT * FROM users WHERE session_token=$1", sessionCookie.Value)
+			if err != nil {
+				log.Printf("%v", err)
+				log.Println("User not authenticated: no matching user: redirecting to /login")
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+
+			// Store user in context
+			r.WithContext(context.WithValue(r.Context(), userKey, user))
+
 			// Verify session is not expired
+			if time.Now().Sub(user.SessionExpiry) > 0 {
+				log.Println("User not authenticated: session expired: redirecting to /login")
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
 
 			// Call the next handler in chain
 			next.ServeHTTP(w, r)

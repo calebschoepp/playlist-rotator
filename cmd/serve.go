@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
-	_ "github.com/lib/pq"
-
-	"github.com/gorilla/mux"
-
 	"github.com/calebschoepp/playlist-rotator/pkg/server"
+	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
 )
 
@@ -21,8 +19,8 @@ var serveCmd = &cobra.Command{
 		config := server.NewConfig()
 
 		// Setup DB
-		var db *sql.DB
-		db, err := sql.Open("postgres", config.DatabaseURL)
+		var db *sqlx.DB
+		db, err := sqlx.Open("postgres", config.DatabaseURL)
 		if err != nil {
 			log.Fatalf("cmd: failed to setup db: %v", err)
 		}
