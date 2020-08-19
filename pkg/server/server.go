@@ -36,7 +36,14 @@ func New(log *log.Logger, config *Config, db *sql.DB, router *mux.Router) (*Serv
 		spotify.ScopePlaylistModifyPrivate,
 		spotify.ScopeUserLibraryRead,
 	}
-	spotifyAuth := spotify.NewAuthenticator(fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port), scopes...)
+	// TODO proabably a more idiomatic way to build redirectURL
+	var redirectURL string
+	if config.Host == "localhost" {
+		redirectURL = fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port)
+	} else {
+		redirectURL = fmt.Sprintf("%s%s/callback", config.Protocol, config.Host)
+	}
+	spotifyAuth := spotify.NewAuthenticator(redirectURL, scopes...)
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
 	pwd, err := os.Getwd()
