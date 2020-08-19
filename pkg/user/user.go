@@ -22,6 +22,7 @@ type User struct {
 type UserServicer interface {
 	GetUserByID(id uuid.UUID) (*User, error)
 	GetUserBySpotifyID(spotifyID string) (*User, error)
+	UserExists(spotifyID string) (bool, error)
 	GetSessionExpiry(sessionToken string) (*time.Time, error)
 	CreateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
 	UpdateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error

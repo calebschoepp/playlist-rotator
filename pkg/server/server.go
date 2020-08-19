@@ -1,17 +1,15 @@
 package server
 
 import (
-	"database/sql"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
+	userPostgres "github.com/calebschoepp/playlist-rotator/pkg/user/postgres"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/gorilla/mux"
@@ -24,7 +22,8 @@ type Server struct {
 	DB          *sqlx.DB
 	Router      *mux.Router
 	SpotifyAuth *spotify.Authenticator
-	Templates   *template.Template
+	UserService user.UserServicer
+	TmplService tmpl.TmplServicer
 }
 
 // TODO move these to config?
@@ -51,11 +50,11 @@ func New(log *log.Logger, config *Config, db *sqlx.DB, router *mux.Router) (*Ser
 	spotifyAuth := spotify.NewAuthenticator(redirectURL, scopes...)
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
-	pwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	templates, err := template.ParseGlob(pwd + "/pkg/tmpl/*.html")
+	// Build UserService
+	userService := userPostgres.New(db)
+
+	// Build TmplService
+	tmplService, err := tmpl.New()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +65,8 @@ func New(log *log.Logger, config *Config, db *sqlx.DB, router *mux.Router) (*Ser
 		DB:          db,
 		Router:      router,
 		SpotifyAuth: &spotifyAuth,
-		Templates:   templates,
+		UserService: userService,
+		TmplService: tmplService,
 	}, nil
 }
 
@@ -86,15 +86,8 @@ func (s *Server) Run() {
 	s.Log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.Config.Port), s.Router))
 }
 
-func (s *Server) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	err := s.Templates.ExecuteTemplate(w, tmpl+".html", data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
-	s.renderTemplate(w, "home", tmpl.Home{Playlists: []playlist.Playlist{playlist.Playlist{Name: "This is the name of a playlist"}}})
+	s.TmplService.TmplHome(w, tmpl.Home{Playlists: []playlist.Playlist{playlist.Playlist{Name: "This is the name of a playlist"}}})
 }
 
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +103,7 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 
 	spotifyAuthURL := s.SpotifyAuth.AuthURL(state)
 
-	s.renderTemplate(w, "login", tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
+	s.TmplService.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
 }
 
 // TODO improve error handling
@@ -147,44 +140,31 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	spotifyID := privateUser.User.ID
 
 	// Check if user already exists for the spotify ID
-	var user user.User
-	err = s.DB.Get(&user, "SELECT * FROM users WHERE spotify_id=$1", spotifyID)
-	if err != nil && err != sql.ErrNoRows {
-		// Something went wrong in DB lookup, error out
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else if err == sql.ErrNoRows {
-		// User does not exist for spotify ID yet, make one
-		_, err = s.DB.Exec(`
-		INSERT INTO users (
-			spotify_id,
-			session_token,
-			session_expiry,
-			playlists_built,
-			access_token,
-			refresh_token
-			)
-		VALUES ($1, $2, $3, $4, $5, $6);`,
-			spotifyID, sessionToken, sessionExpiry, 0, token.AccessToken, token.RefreshToken)
+	userExists, err := s.UserService.UserExists(spotifyID)
+	if err != nil {
+		// TODO handle error
+	}
+	if userExists {
+		// Update user with new token and session data
+		err = s.UserService.UpdateUser(
+			spotifyID,
+			sessionToken,
+			sessionExpiry,
+			*token,
+		)
 		if err != nil {
-			s.Log.Printf("failed to build new user: %v", err)
-			http.Error(w, "failed to build new user", http.StatusInternalServerError)
-			return
+			// TODO handle error
 		}
 	} else {
-		// User already exists for spotify ID, update it
-		_, err = s.DB.Exec(`
-		UPDATE users SET
-			session_token=$1,
-			session_expiry=$2,
-			access_token=$3,
-			refresh_token=$4
-		WHERE spotify_id=$5;`,
-			sessionToken, sessionExpiry, token.AccessToken, token.RefreshToken, spotifyID)
+		// Create a new user
+		err = s.UserService.CreateUser(
+			spotifyID,
+			sessionToken,
+			sessionExpiry,
+			*token,
+		)
 		if err != nil {
-			s.Log.Printf("failed to update existing user: %v", err)
-			http.Error(w, "failed to update existing user", http.StatusInternalServerError)
-			return
+			// TODO handle error
 		}
 	}
 
@@ -194,7 +174,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) newPlaylistPage(w http.ResponseWriter, r *http.Request) {
-	s.renderTemplate(w, "new-playlist", tmpl.NewPlaylist{Name: "", Saved: false})
+	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: "", Saved: false})
 }
 
 func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
@@ -202,5 +182,5 @@ func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
 
 	// TODO do something with form data
 
-	s.renderTemplate(w, "new-playlist", tmpl.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
+	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
 }
