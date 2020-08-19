@@ -15,7 +15,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	// State should be randomly generated and passed along with Oauth request
 	// in cookie for security purposes
-	state := randomState()
+	state := randomString(32)
 	cookie := http.Cookie{
 		Name:    stateCookieName,
 		Value:   state,
@@ -43,7 +43,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate new session token with expiry
-	sessionToken := randomSessionToken()
+	sessionToken := randomString(64)
 	sessionExpiry := time.Now().Add(sessionCokkieExpiry)
 	sessionCookie := http.Cookie{
 		Name:    sessionCookieName,

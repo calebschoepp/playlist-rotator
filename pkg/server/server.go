@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	userPostgres "github.com/calebschoepp/playlist-rotator/pkg/user/postgres"
@@ -17,7 +18,7 @@ import (
 // Server congregates all of the services required to listen and serve HTTP requests
 type Server struct {
 	Log         *log.Logger
-	Config      *Config
+	Config      *config.Config
 	Router      *mux.Router
 	SpotifyAuth *spotify.Authenticator
 	UserService user.UserServicer
@@ -25,7 +26,7 @@ type Server struct {
 }
 
 // New builds a new Server struct
-func New(log *log.Logger, config *Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
+func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
 	// Build spotifyAuth
 	// TODO proabably a more idiomatic way to build redirectURL
 	var redirectURL string

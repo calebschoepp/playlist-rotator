@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/server"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
@@ -16,23 +17,24 @@ var serveCmd = &cobra.Command{
 	Short: "Spin up the playlist-rotator HTTP server",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Setup config
-		config := server.NewConfig()
+		conf := config.NewConfig()
 
 		// Setup DB
 		var db *sqlx.DB
-		db, err := sqlx.Open("postgres", config.DatabaseURL)
+		db, err := sqlx.Open("postgres", conf.DatabaseURL)
 		if err != nil {
 			log.Fatalf("cmd: failed to setup db: %v", err)
 		}
 
 		// Setup log
+		// TODO switch to zap
 		log := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
 
 		// Setup router
 		router := mux.NewRouter()
 
 		// Setup server
-		server, err := server.New(log, config, db, router)
+		server, err := server.New(log, conf, db, router)
 		if err != nil {
 			log.Fatalf("cmd: failed to build server: %v", err)
 		}
