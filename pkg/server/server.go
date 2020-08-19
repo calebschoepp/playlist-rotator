@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
-	"github.com/calebschoepp/playlist-rotator/web"
+	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
+	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/gorilla/mux"
@@ -54,7 +55,7 @@ func New(log *log.Logger, config *Config, db *sqlx.DB, router *mux.Router) (*Ser
 	if err != nil {
 		return nil, err
 	}
-	templates, err := template.ParseGlob(pwd + "/web/*.html")
+	templates, err := template.ParseGlob(pwd + "/pkg/tmpl/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (s *Server) renderTemplate(w http.ResponseWriter, tmpl string, data interfa
 }
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
-	s.renderTemplate(w, "home", web.Home{Playlists: []playlist.Playlist{playlist.Playlist{Name: "This is the name of a playlist"}}})
+	s.renderTemplate(w, "home", tmpl.Home{Playlists: []playlist.Playlist{playlist.Playlist{Name: "This is the name of a playlist"}}})
 }
 
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +110,7 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 
 	spotifyAuthURL := s.SpotifyAuth.AuthURL(state)
 
-	s.renderTemplate(w, "login", web.Login{SpotifyAuthURL: spotifyAuthURL})
+	s.renderTemplate(w, "login", tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
 }
 
 // TODO improve error handling
@@ -146,7 +147,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	spotifyID := privateUser.User.ID
 
 	// Check if user already exists for the spotify ID
-	var user User
+	var user user.User
 	err = s.DB.Get(&user, "SELECT * FROM users WHERE spotify_id=$1", spotifyID)
 	if err != nil && err != sql.ErrNoRows {
 		// Something went wrong in DB lookup, error out
@@ -193,7 +194,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) newPlaylistPage(w http.ResponseWriter, r *http.Request) {
-	s.renderTemplate(w, "new-playlist", web.NewPlaylist{Name: "", Saved: false})
+	s.renderTemplate(w, "new-playlist", tmpl.NewPlaylist{Name: "", Saved: false})
 }
 
 func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
@@ -201,5 +202,5 @@ func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
 
 	// TODO do something with form data
 
-	s.renderTemplate(w, "new-playlist", web.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
+	s.renderTemplate(w, "new-playlist", tmpl.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
 }

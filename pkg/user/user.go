@@ -1,12 +1,12 @@
-package server
+package user
 
 import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/oauth2"
 )
 
-// User TODO move this somewhere better
 type User struct {
 	ID             uuid.UUID `db:"id"`
 	SpotifyID      string    `db:"spotify_id"`
@@ -17,4 +17,12 @@ type User struct {
 	RefreshToken   string    `db:"refresh_token"`
 	CreatedAt      time.Time `db:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at"`
+}
+
+type UserServicer interface {
+	GetUserByID(id uuid.UUID) (*User, error)
+	GetUserBySpotifyID(spotifyID string) (*User, error)
+	GetSessionExpiry(sessionToken string) (*time.Time, error)
+	CreateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
+	UpdateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
 }

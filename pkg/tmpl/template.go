@@ -1,4 +1,4 @@
-package web
+package tmpl
 
 import "github.com/calebschoepp/playlist-rotator/pkg/playlist"
 

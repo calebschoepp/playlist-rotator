@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+
+	"github.com/calebschoepp/playlist-rotator/pkg/user"
 )
 
 // TODO make this random
@@ -27,9 +29,9 @@ func randomString(n int) string {
 }
 
 // TODO handle empty case properly
-func getUser(ctx context.Context) (*User, error) {
+func getUser(ctx context.Context) (*user.User, error) {
 	val := ctx.Value(userKey)
-	user, ok := val.(User)
+	user, ok := val.(user.User)
 	if !ok {
 		return nil, errors.New("stored user is of invalid type")
 	}

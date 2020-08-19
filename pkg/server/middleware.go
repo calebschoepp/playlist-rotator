@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -36,7 +37,7 @@ func newSessionAuthMiddleware(db *sqlx.DB, log *log.Logger, blacklist []string) 
 			}
 
 			// Get user
-			var user User
+			var user user.User
 			err = db.Get(&user, "SELECT * FROM users WHERE session_token=$1", sessionCookie.Value)
 			if err != nil {
 				log.Printf("%v", err)
