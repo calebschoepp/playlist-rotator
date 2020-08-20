@@ -1,15 +1,24 @@
 package server
 
 import (
+	"context"
 	"math/rand"
 	"time"
+
+	"github.com/google/uuid"
+)
+
+type ctxKey int
+
+const (
+	userIDCtxKey ctxKey = iota
 )
 
 // TODO move these to config?
 const stateCookieName = "oauthState"
 const stateCookieExpiry = 30 * time.Minute
 const sessionCookieName = "playlistRotatorSession"
-const sessionCokkieExpiry = 30 * time.Second // TODO fine tune this
+const sessionCookieExpiry = 10 * time.Second // TODO fine tune this
 
 // TODO use crypto/rand?
 func randomString(n int) string {
@@ -20,4 +29,12 @@ func randomString(n int) string {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+func getUserID(ctx context.Context) *uuid.UUID {
+	userID, ok := ctx.Value(userIDCtxKey).(*uuid.UUID)
+	if !ok {
+		return nil
+	}
+	return userID
 }

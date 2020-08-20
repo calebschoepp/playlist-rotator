@@ -4,12 +4,24 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
-	s.TmplService.TmplHome(w, tmpl.Home{Playlists: []playlist.Playlist{playlist.Playlist{Name: "This is the name of a playlist"}}})
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		// TODO handle error
+	}
+
+	// Get playlists
+	playlists, err := s.PlaylistService.GetPlaylists(*userID)
+	if err != nil {
+		s.Log.Printf("Error fetching playlists: %v", err)
+		// TODO handle error
+	}
+
+	s.TmplService.TmplHome(w, tmpl.Home{Playlists: playlists})
 }
 
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +56,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 
 	// Generate new session token with expiry
 	sessionToken := randomString(64)
-	sessionExpiry := time.Now().Add(sessionCokkieExpiry)
+	sessionExpiry := time.Now().Add(sessionCookieExpiry)
 	sessionCookie := http.Cookie{
 		Name:    sessionCookieName,
 		Value:   sessionToken,
@@ -65,6 +77,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	userExists, err := s.UserService.UserExists(spotifyID)
 	if err != nil {
 		// TODO handle error
+		s.Log.Printf("Error checking if user exists: %v", err)
 	}
 	if userExists {
 		// Update user with new token and session data
@@ -100,9 +113,23 @@ func (s *Server) newPlaylistPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		s.Log.Println("Failed to get userID from context")
+		// TODO handle error
+	}
+
 	r.ParseForm()
 
-	// TODO do something with form data
+	// TODO validate name
+	playlistName := r.FormValue("playlistName")
+
+	err := s.PlaylistService.CreatePlaylist(playlistName, *userID)
+	if err != nil {
+		s.Log.Printf("Failed to create new playlist: %v", err)
+		// TODO handle error
+	}
 
 	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
 }

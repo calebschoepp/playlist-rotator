@@ -6,23 +6,25 @@ import (
 	"net/http"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
+	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
+	playlistpostgres "github.com/calebschoepp/playlist-rotator/pkg/playlist/postgres"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
-	userPostgres "github.com/calebschoepp/playlist-rotator/pkg/user/postgres"
-	"github.com/jmoiron/sqlx"
-
+	userpostgres "github.com/calebschoepp/playlist-rotator/pkg/user/postgres"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify"
 )
 
 // Server congregates all of the services required to listen and serve HTTP requests
 type Server struct {
-	Log         *log.Logger
-	Config      *config.Config
-	Router      *mux.Router
-	SpotifyAuth *spotify.Authenticator
-	UserService user.UserServicer
-	TmplService tmpl.TmplServicer
+	Log             *log.Logger
+	Config          *config.Config
+	Router          *mux.Router
+	SpotifyAuth     *spotify.Authenticator
+	UserService     user.UserServicer
+	PlaylistService playlist.PlaylistServicer
+	TmplService     tmpl.TmplServicer
 }
 
 // New builds a new Server struct
@@ -45,7 +47,10 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
 	// Build UserService
-	userService := userPostgres.New(db)
+	userService := userpostgres.New(db)
+
+	// Build PlaylistService
+	playlistService := playlistpostgres.New(db)
 
 	// Build TmplService
 	tmplService, err := tmpl.New()
@@ -54,18 +59,21 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	}
 
 	return &Server{
-		Log:         log,
-		Config:      config,
-		Router:      router,
-		SpotifyAuth: &spotifyAuth,
-		UserService: userService,
-		TmplService: tmplService,
+		Log:             log,
+		Config:          config,
+		Router:          router,
+		SpotifyAuth:     &spotifyAuth,
+		UserService:     userService,
+		PlaylistService: playlistService,
+		TmplService:     tmplService,
 	}, nil
 }
 
 // SetupRoutes wires up the handlers to the appropriate routes
 func (s *Server) SetupRoutes() {
-	s.Router.Use(newSessionAuthMiddleware(s.UserService, s.Log, []string{"/login", "/callback"}))
+	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
+	authMiddleware := newSessionAuthMiddleware(s.UserService, s.Log, []string{"/login", "/callback"})
+	s.Router.Use(loggingMiddleware, authMiddleware)
 	s.Router.Path("/").Methods("GET").HandlerFunc(s.homePage)
 	s.Router.Path("/login").Methods("GET").HandlerFunc(s.loginPage)
 	s.Router.Path("/callback").Methods("GET").HandlerFunc(s.callbackPage)

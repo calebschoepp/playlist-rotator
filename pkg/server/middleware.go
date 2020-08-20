@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -15,6 +16,19 @@ const (
 	userKey contextKey = iota
 )
 
+func newRequestLoggerMiddleware(log *log.Logger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Call the next handler in chain
+			next.ServeHTTP(w, r)
+
+			// Log the request
+			log.Printf("Served request method=%s path=%s", r.Method, r.URL.Path)
+		})
+	}
+}
+
+// TODO fix bug where auth is flaky and takes multiple times because of expiry date
 func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +65,18 @@ func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, bl
 				return
 			}
 
+			// Store userID in context
+			userID, err := userService.GetUserID(sessionCookie.Value)
+			if err != nil {
+				// TODO is this the right thing to do here?
+				log.Println("Something went wrong when fetching userID")
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+			ctx := context.WithValue(r.Context(), userIDCtxKey, userID)
+
 			// Call the next handler in chain
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

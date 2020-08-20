@@ -14,6 +14,7 @@ CREATE TABLE users (
 
 CREATE TABLE playlists (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name          varchar(128),
   user_id       UUID REFERENCES users ON DELETE RESTRICT,
 
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),

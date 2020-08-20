@@ -29,14 +29,30 @@ func (u *UserService) GetUserBySpotifyID(spotifyID string) (*user.User, error) {
 	return nil, errors.New("not implemented")
 }
 
+// GetUserID returns the UUID for a user based off of a session token
+func (u *UserService) GetUserID(sessionToken string) (*uuid.UUID, error) {
+	var id uuid.UUID
+	query := `
+SELECT id
+FROM users
+WHERE session_token=$1;
+`
+	err := u.db.Get(&id, query, sessionToken)
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
 // UserExists determines if there is a user for the give spotifyID already
 func (u *UserService) UserExists(spotifyID string) (bool, error) {
 	var exists bool
 	query := `
-SELECT exists
+SELECT exists (
 	SELECT *
 	FROM users
-	WHERE spotify_id=$1;
+	WHERE spotify_id=$1
+);
 `
 	err := u.db.QueryRow(query, spotifyID).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
@@ -49,7 +65,7 @@ func (u *UserService) GetSessionExpiry(sessionToken string) (*time.Time, error) 
 	query := `
 SELECT session_expiry
 FROM users
-WHERE session_token=$1
+WHERE session_token=$1;
 `
 	var sessionExpiry time.Time
 	err := u.db.Get(&sessionExpiry, query, sessionToken)
