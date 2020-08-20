@@ -17,3 +17,6 @@
 # For Heroku
 .env
 bin/*
+
+# For air hot reloader
+tmp/*
