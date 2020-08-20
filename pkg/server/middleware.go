@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
@@ -30,11 +31,21 @@ func newRequestLoggerMiddleware(log *log.Logger) func(next http.Handler) http.Ha
 
 // TODO fix bug where auth is flaky and takes multiple times because of expiry date
 func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
+	// Cache the regex object of each route
+	var blacklistRegexp []*regexp.Regexp
+	for _, expr := range blacklist {
+		regexp, err := regexp.Compile(expr)
+		if err != nil {
+			panic("Invalid regex expression for path blacklist")
+		}
+		blacklistRegexp = append(blacklistRegexp, regexp)
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Ignore blacklisted paths
-			for _, path := range blacklist {
-				if r.URL.Path == path {
+			for _, regexp := range blacklistRegexp {
+				if regexp.MatchString(r.URL.Path) {
 					next.ServeHTTP(w, r)
 					return
 				}

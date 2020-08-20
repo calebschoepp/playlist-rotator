@@ -1,0 +1,13 @@
+{{ template "head" "Home" }}
+{{ template "header" "/logout" }}
+{{ if not .Playlists }}
+    <p>You have no playlists. <a href="/new-playlist">Add a playlist</a>.</p>
+{{ else }}
+    <ul>
+    {{ range .Playlists }}
+        <li>{{ .Name }}</li>
+    {{ end }}
+    </ul>
+    <p><a href="/new-playlist">Add new playlist</a>.</p>
+{{ end }}
+{{ template "foot" }}

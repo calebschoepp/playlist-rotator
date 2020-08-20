@@ -1,11 +1,11 @@
+{{ define "head" }}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <title>{{ . }}</title>
 </head>
 <body>
-    <p>Go <a href="{{ .SpotifyAuthURL }}">Here</a>.</p>
-</body>
-</html>
+{{ end }}

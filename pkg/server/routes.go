@@ -40,6 +40,19 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	s.TmplService.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
 }
 
+func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
+	// Delete session cookie to logout
+	expire := time.Now().Add(-7 * 24 * time.Hour)
+	cookie := http.Cookie{
+		Name:    sessionCookieName,
+		Value:   "",
+		MaxAge:  -1,
+		Expires: expire,
+	}
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
 // TODO improve error handling
 func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	// Get oauth2 tokens

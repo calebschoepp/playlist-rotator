@@ -71,11 +71,18 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 
 // SetupRoutes wires up the handlers to the appropriate routes
 func (s *Server) SetupRoutes() {
+	// Build middleware
 	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
-	authMiddleware := newSessionAuthMiddleware(s.UserService, s.Log, []string{"/login", "/callback"})
+	authMiddleware := newSessionAuthMiddleware(s.UserService, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`})
+
+	// Serve static files
+	s.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
+
+	// Serve routes
 	s.Router.Use(loggingMiddleware, authMiddleware)
 	s.Router.Path("/").Methods("GET").HandlerFunc(s.homePage)
 	s.Router.Path("/login").Methods("GET").HandlerFunc(s.loginPage)
+	s.Router.Path("/logout").Methods("GET").HandlerFunc(s.logoutPage)
 	s.Router.Path("/callback").Methods("GET").HandlerFunc(s.callbackPage)
 	s.Router.Path("/new-playlist").Methods("GET").HandlerFunc(s.newPlaylistPage)
 	s.Router.Path("/new-playlist").Methods("POST").HandlerFunc(s.newPlaylistForm)

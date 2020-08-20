@@ -18,7 +18,7 @@ const (
 const stateCookieName = "oauthState"
 const stateCookieExpiry = 30 * time.Minute
 const sessionCookieName = "playlistRotatorSession"
-const sessionCookieExpiry = 10 * time.Second // TODO fine tune this
+const sessionCookieExpiry = 120 * time.Second // TODO fine tune this
 
 // TODO use crypto/rand?
 func randomString(n int) string {

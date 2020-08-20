@@ -37,7 +37,7 @@ func New() (*TmplService, error) {
 		return nil, err
 	}
 
-	templates, err := template.ParseGlob(pwd + "/pkg/tmpl/*.html")
+	templates, err := template.ParseGlob(pwd + "/pkg/tmpl/*.gohtml")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (t *TmplService) TmplNewPlaylist(w http.ResponseWriter, data NewPlaylist) e
 }
 
 func (t *TmplService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) error {
-	err := t.templates.ExecuteTemplate(w, tmpl+".html", data)
+	err := t.templates.ExecuteTemplate(w, tmpl+".gohtml", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return err
