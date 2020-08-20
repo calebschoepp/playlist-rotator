@@ -1,2 +1,4 @@
-- Make state cookie a random string
-- Make session cookie a random string
+- Add input/output/cadence to playlists
+- Figure out login/logout semantics
+- Add full fledged UI to create/read/update/delete/build playlists
+
