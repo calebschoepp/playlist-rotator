@@ -1,11 +1,10 @@
-package postgres
+package user
 
 import (
 	"database/sql"
 	"errors"
 	"time"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
@@ -21,11 +20,11 @@ func New(db *sqlx.DB) *UserService {
 	}
 }
 
-func (u *UserService) GetUserByID(id uuid.UUID) (*user.User, error) {
+func (u *UserService) GetUserByID(id uuid.UUID) (*User, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (u *UserService) GetUserBySpotifyID(spotifyID string) (*user.User, error) {
+func (u *UserService) GetUserBySpotifyID(spotifyID string) (*User, error) {
 	return nil, errors.New("not implemented")
 }
 

@@ -1,9 +1,8 @@
-package postgres
+package playlist
 
 import (
 	"errors"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -41,13 +40,13 @@ func (p *PlaylistService) UpdatePlaylist(id uuid.UUID, name string, userID uuid.
 	return errors.New("not implemented")
 }
 
-func (p *PlaylistService) GetPlaylist(id uuid.UUID) (*playlist.Playlist, error) {
+func (p *PlaylistService) GetPlaylist(id uuid.UUID) (*Playlist, error) {
 	return nil, errors.New("not implemented")
 }
 
 // GetPlaylists retrieves all the playlists associated with a given userID
-func (p *PlaylistService) GetPlaylists(userID uuid.UUID) ([]playlist.Playlist, error) {
-	playlists := []playlist.Playlist{}
+func (p *PlaylistService) GetPlaylists(userID uuid.UUID) ([]Playlist, error) {
+	playlists := []Playlist{}
 	query := `
 SELECT *
 FROM playlists

@@ -7,10 +7,8 @@ import (
 
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
-	playlistpostgres "github.com/calebschoepp/playlist-rotator/pkg/playlist/postgres"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
-	userpostgres "github.com/calebschoepp/playlist-rotator/pkg/user/postgres"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify"
@@ -47,10 +45,10 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
 	// Build UserService
-	userService := userpostgres.New(db)
+	userService := user.New(db)
 
 	// Build PlaylistService
-	playlistService := playlistpostgres.New(db)
+	playlistService := playlist.New(db)
 
 	// Build TmplService
 	tmplService, err := tmpl.New()
