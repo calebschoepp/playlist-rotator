@@ -10,13 +10,18 @@ import (
 type User struct {
 	ID             uuid.UUID `db:"id"`
 	SpotifyID      string    `db:"spotify_id"`
-	SessionToken   string    `db:"session_token"`
-	SessionExpiry  time.Time `db:"session_expiry"`
 	PlaylistsBuilt int       `db:"playlists_built"`
-	AccessToken    string    `db:"access_token"`
-	RefreshToken   string    `db:"refresh_token"`
-	CreatedAt      time.Time `db:"created_at"`
-	UpdatedAt      time.Time `db:"updated_at"`
+
+	SessionToken  string    `db:"session_token"`
+	SessionExpiry time.Time `db:"session_expiry"`
+
+	AccessToken  string    `db:"access_token"`
+	RefreshToken string    `db:"refresh_token"`
+	TokenType    string    `db:"token_type"`
+	TokenExpiry  time.Time `db:"token_expiry"`
+
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type UserServicer interface {

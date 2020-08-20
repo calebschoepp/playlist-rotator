@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
+	"golang.org/x/oauth2"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +22,30 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		s.Log.Printf("Error fetching playlists: %v", err)
 		// TODO handle error
 	}
+
+	// TODO REMOVE THIS
+	user, err := s.UserService.GetUserByID(*userID)
+	if err != nil {
+		s.Log.Printf("ERROR: %v", err)
+	}
+	token := oauth2.Token{
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
+		TokenType:    user.TokenType,
+		Expiry:       user.TokenExpiry,
+	}
+	client := s.SpotifyAuth.NewClient(&token)
+	tracks, err := client.CurrentUsersTracks()
+	if err != nil {
+		s.Log.Printf("ERROR: %v", err)
+	}
+	s.Log.Println(tracks.Total)
+	s.Log.Println(tracks.Endpoint)
+	s.Log.Println(tracks.Limit)
+	s.Log.Println(tracks.Offset)
+	s.Log.Println(tracks.Next)
+	s.Log.Println(tracks.Tracks)
+	// END
 
 	s.TmplService.TmplHome(w, tmpl.Home{Playlists: playlists})
 }
@@ -136,13 +162,15 @@ func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	// TODO validate name
-	playlistName := r.FormValue("playlistName")
+	name := r.FormValue("name")
+	description := r.FormValue("description")
+	public := false
 
-	err := s.PlaylistService.CreatePlaylist(playlistName, *userID)
+	err := s.PlaylistService.CreatePlaylist(*userID, playlist.INPUTODOREMOVE{}, name, description, public)
 	if err != nil {
 		s.Log.Printf("Failed to create new playlist: %v", err)
 		// TODO handle error
 	}
 
-	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("playlistName"), Saved: true})
+	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("name"), Saved: true})
 }

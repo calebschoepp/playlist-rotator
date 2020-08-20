@@ -20,8 +20,19 @@ func New(db *sqlx.DB) *UserService {
 	}
 }
 
+// GetUserByID returns a User matching the given id
 func (u *UserService) GetUserByID(id uuid.UUID) (*User, error) {
-	return nil, errors.New("not implemented")
+	var user User
+	query := `
+SELECT *
+FROM users
+WHERE id=$1;	
+`
+	err := u.db.Get(&user, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (u *UserService) GetUserBySpotifyID(spotifyID string) (*User, error) {
@@ -79,23 +90,27 @@ func (u *UserService) CreateUser(spotifyID, sessionToken string, sessionExpiry t
 	query := `
 INSERT INTO users (
 	spotify_id,
+	playlists_built,
 	session_token,
 	session_expiry,
-	playlists_built,
 	access_token,
-	refresh_token
+	refresh_token,
+	token_type,
+	token_expiry
 )
 VALUES 
-	($1, $2, $3, $4, $5, $6);
+	($1, $2, $3, $4, $5, $6, $7, $8);
 `
 	_, err := u.db.Exec(
 		query,
 		spotifyID,
+		0,
 		sessionToken,
 		sessionExpiry,
-		0,
 		token.AccessToken,
 		token.RefreshToken,
+		token.TokenType,
+		token.Expiry,
 	)
 	if err != nil {
 		return err
@@ -110,9 +125,11 @@ UPDATE users SET
 	session_token=$1,
 	session_expiry=$2,
 	access_token=$3,
-	refresh_token=$4
+	refresh_token=$4,
+	token_type=$5,
+	token_expiry=$6
 WHERE
-	spotify_id=$5;
+	spotify_id=$7;
 `
 	_, err := u.db.Exec(
 		query,
@@ -120,6 +137,8 @@ WHERE
 		sessionExpiry,
 		token.AccessToken,
 		token.RefreshToken,
+		token.TokenType,
+		token.Expiry,
 		spotifyID,
 	)
 	if err != nil {

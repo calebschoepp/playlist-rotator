@@ -3,19 +3,30 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE users (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   spotify_id      TEXT,
-  session_token   VARCHAR(128),
-  session_expiry  TIMESTAMPTZ,
   playlists_built INTEGER,
-  access_token    TEXT,
-  refresh_token   TEXT,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+  session_token  VARCHAR(128),
+  session_expiry TIMESTAMPTZ,
+
+  access_token  TEXT,
+  refresh_token TEXT,
+  token_type    TEXT,
+  token_expiry  TIMESTAMPTZ,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE playlists (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name          varchar(128),
-  user_id       UUID REFERENCES users ON DELETE RESTRICT,
+  id      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users ON DELETE RESTRICT,
+  
+  input       JSONB NOT NULL,
+  name        TEXT NOT NULL,
+  description TEXT NOT NULL,
+  public      BOOLEAN NOT NULL,
+  spotify_id  TEXT,
+  failure_msg TEXT,
 
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
