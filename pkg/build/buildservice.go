@@ -26,11 +26,16 @@ type trackFetcherMapping map[extractMethod]map[bool]trackFetcher
 var trackFetchers trackFetcherMapping
 
 func init() {
-	trackFetchers[top] = map[bool]trackFetcher{}
-	trackFetchers[top][false] = getTopPlaylistTracks
-	trackFetchers[top][true] = getTopSavedTracks
-	trackFetchers[random][false] = getRandomPlaylistTracks
-	trackFetchers[random][true] = getRandomSavedTracks
+	trackFetchers = map[extractMethod]map[bool]trackFetcher{
+		Top: map[bool]trackFetcher{
+			false: getTopPlaylistTracks,
+			true:  getTopSavedTracks,
+		},
+		Random: map[bool]trackFetcher{
+			false: getRandomPlaylistTracks,
+			true:  getRandomSavedTracks,
+		},
+	}
 }
 
 // New returns a pointer to a new BuildService
@@ -47,16 +52,20 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Get playlist configuration
 	playlist, err := b.ps.GetPlaylist(playlistID)
 	if err != nil {
+		b.logBuildError(userID, playlistID, err)
 		// TODO handle error (jump to function to write failure info to db)
-		fmt.Printf("ERROR: %v", err)
+		fmt.Printf("ERROR 1: %v", err)
+		return
 	}
 
 	// Build and validate input
 	var input Input
 	err = json.Unmarshal([]byte(playlist.Input), &input)
 	if err != nil {
+		b.logBuildError(userID, playlistID, err)
 		// TODO handle error
-		fmt.Printf("ERROR: %v", err)
+		fmt.Printf("ERROR 2: %v", err)
+		return
 	}
 
 	// Build and validate output
@@ -69,8 +78,10 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Build spotify client
 	user, err := b.us.GetUserByID(userID)
 	if err != nil {
+		b.logBuildError(userID, playlistID, err)
 		// TODO handle error
-		fmt.Printf("ERROR: %v", err)
+		fmt.Printf("ERROR 3: %v", err)
+		return
 	}
 	token := oauth2.Token{
 		AccessToken:  user.AccessToken,
@@ -83,14 +94,26 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Build the playlist
 	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, input, output)
 	if err != nil {
+		b.logBuildError(userID, playlistID, err)
 		// TODO handle error
-		fmt.Printf("ERROR: %v", err)
+		fmt.Printf("ERROR 4: %v", err)
+		return
 	}
 
 	// Update database for successful case
 	err = b.ps.UpdatePlaylistGoodBuild(playlistID, string(*spotifyPlaylistID))
 	if err != nil {
+		b.logBuildError(userID, playlistID, err)
 		// TODO handle error
+		fmt.Printf("ERROR 5: %v", err)
+		return
+	}
+
+	err = b.us.IncrementUserBuildCount(userID)
+	if err != nil {
+		// TODO handle error
+		// What do I do here, call out to metrics?
+		fmt.Printf("SOMETHING HAS GONE SUPER EXTRA WRONG")
 	}
 }
 
@@ -98,6 +121,13 @@ func (b *BuildService) logBuildError(userID, playlistID uuid.UUID, err error) {
 	err = b.ps.UpdatePlaylistBadBuild(playlistID, err.Error())
 	if err != nil {
 		fmt.Printf("SOMETHING HAS GONE VERY WRONG: %v", err)
+	}
+
+	err = b.us.IncrementUserBuildCount(userID)
+	if err != nil {
+		// TODO handle error
+		// What do I do here, call out to metrics?
+		fmt.Printf("SOMETHING HAS GONE SUPER EXTRA WRONG")
 	}
 }
 

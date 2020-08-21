@@ -2,16 +2,16 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
   id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  spotify_id      TEXT,
-  playlists_built INTEGER,
+  spotify_id      TEXT NOT NULL,
+  playlists_built INTEGER NOT NULL,
 
   session_token  VARCHAR(128),
   session_expiry TIMESTAMPTZ,
 
-  access_token  TEXT,
-  refresh_token TEXT,
-  token_type    TEXT,
-  token_expiry  TIMESTAMPTZ,
+  access_token  TEXT NOT NULL,
+  refresh_token TEXT NOT NULL,
+  token_type    TEXT NOT NULL,
+  token_expiry  TIMESTAMPTZ NOT NULL,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -32,4 +32,5 @@ type UserServicer interface {
 	GetSessionExpiry(sessionToken string) (*time.Time, error)
 	CreateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error // TODO should this return the user
 	UpdateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
+	IncrementUserBuildCount(userID uuid.UUID) error
 }

@@ -16,6 +16,6 @@ type PlaylistInput struct {
 type extractMethod string
 
 const (
-	random extractMethod = "random"
-	top                  = "top"
+	Random extractMethod = "random"
+	Top                  = "top"
 )

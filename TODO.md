@@ -2,3 +2,4 @@
 - Figure out login/logout semantics
 - Add full fledged UI to create/read/update/delete/build playlists
 - Combine userservice and playlistservice into a single store package
+- Add a test command to cobra to test out playlist builder

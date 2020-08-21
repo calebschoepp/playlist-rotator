@@ -146,3 +146,17 @@ WHERE
 	}
 	return nil
 }
+
+// IncrementUserBuildCount increments playlists_built by one for the given userID
+func (u *UserService) IncrementUserBuildCount(userID uuid.UUID) error {
+	query := `
+UPDATE users SET
+	playlists_built=playlists_built+1
+WHERE id=$1;
+`
+	_, err := u.db.Exec(query, userID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
