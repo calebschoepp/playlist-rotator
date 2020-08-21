@@ -2,9 +2,7 @@ package build
 
 import "github.com/google/uuid"
 
-type Build struct {
-}
-
-type BuildServicer interface {
+// Builder provides methods for working with real Spotify playlists
+type Builder interface {
 	BuildPlaylist(userID, playlistID uuid.UUID)
 }

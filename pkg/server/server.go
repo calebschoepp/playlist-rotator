@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
+	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify"
@@ -16,13 +15,12 @@ import (
 
 // Server congregates all of the services required to listen and serve HTTP requests
 type Server struct {
-	Log             *log.Logger
-	Config          *config.Config
-	Router          *mux.Router
-	SpotifyAuth     *spotify.Authenticator
-	UserService     user.UserServicer
-	PlaylistService playlist.PlaylistServicer
-	TmplService     tmpl.TmplServicer
+	Log         *log.Logger
+	Config      *config.Config
+	Router      *mux.Router
+	SpotifyAuth *spotify.Authenticator
+	Store       store.Store
+	Tmpl        tmpl.Templater
 }
 
 // New builds a new Server struct
@@ -44,26 +42,22 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	spotifyAuth := spotify.NewAuthenticator(redirectURL, scopes...)
 	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
 
-	// Build UserService
-	userService := user.New(db)
-
-	// Build PlaylistService
-	playlistService := playlist.New(db)
+	// Build store
+	store := store.New(db)
 
 	// Build TmplService
-	tmplService, err := tmpl.New()
+	tmpl, err := tmpl.New()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Server{
-		Log:             log,
-		Config:          config,
-		Router:          router,
-		SpotifyAuth:     &spotifyAuth,
-		UserService:     userService,
-		PlaylistService: playlistService,
-		TmplService:     tmplService,
+		Log:         log,
+		Config:      config,
+		Router:      router,
+		SpotifyAuth: &spotifyAuth,
+		Store:       store,
+		Tmpl:        tmpl,
 	}, nil
 }
 
@@ -71,7 +65,7 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 func (s *Server) SetupRoutes() {
 	// Build middleware
 	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
-	authMiddleware := newSessionAuthMiddleware(s.UserService, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`})
+	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`})
 
 	// Serve static files
 	s.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))

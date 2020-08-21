@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
+	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"golang.org/x/oauth2"
 )
@@ -17,14 +17,14 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get playlists
-	playlists, err := s.PlaylistService.GetPlaylists(*userID)
+	playlists, err := s.Store.GetPlaylists(*userID)
 	if err != nil {
 		s.Log.Printf("Error fetching playlists: %v", err)
 		// TODO handle error
 	}
 
 	// TODO REMOVE THIS
-	user, err := s.UserService.GetUserByID(*userID)
+	user, err := s.Store.GetUserByID(*userID)
 	if err != nil {
 		s.Log.Printf("ERROR: %v", err)
 	}
@@ -47,7 +47,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	s.Log.Println(tracks.Tracks)
 	// END
 
-	s.TmplService.TmplHome(w, tmpl.Home{Playlists: playlists})
+	s.Tmpl.TmplHome(w, tmpl.Home{Playlists: playlists})
 }
 
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +63,7 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 
 	spotifyAuthURL := s.SpotifyAuth.AuthURL(state)
 
-	s.TmplService.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
+	s.Tmpl.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
 }
 
 func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
@@ -113,14 +113,14 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	spotifyID := privateUser.User.ID
 
 	// Check if user already exists for the spotify ID
-	userExists, err := s.UserService.UserExists(spotifyID)
+	userExists, err := s.Store.UserExists(spotifyID)
 	if err != nil {
 		// TODO handle error
 		s.Log.Printf("Error checking if user exists: %v", err)
 	}
 	if userExists {
 		// Update user with new token and session data
-		err = s.UserService.UpdateUser(
+		err = s.Store.UpdateUser(
 			spotifyID,
 			sessionToken,
 			sessionExpiry,
@@ -131,7 +131,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Create a new user
-		err = s.UserService.CreateUser(
+		err = s.Store.CreateUser(
 			spotifyID,
 			sessionToken,
 			sessionExpiry,
@@ -148,7 +148,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) newPlaylistPage(w http.ResponseWriter, r *http.Request) {
-	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: "", Saved: false})
+	s.Tmpl.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: "", Saved: false})
 }
 
 func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
@@ -162,15 +162,16 @@ func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	// TODO validate name
+	// TODO all of this
 	name := r.FormValue("name")
 	description := r.FormValue("description")
 	public := false
 
-	err := s.PlaylistService.CreatePlaylist(*userID, playlist.INPUTODOREMOVE{}, name, description, public)
+	err := s.Store.CreatePlaylist(*userID, store.Input{}, name, description, public)
 	if err != nil {
 		s.Log.Printf("Failed to create new playlist: %v", err)
 		// TODO handle error
 	}
 
-	s.TmplService.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("name"), Saved: true})
+	s.Tmpl.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("name"), Saved: true})
 }

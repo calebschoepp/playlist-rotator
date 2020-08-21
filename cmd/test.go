@@ -8,8 +8,7 @@ import (
 	"github.com/zmb3/spotify"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/build"
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
+	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
@@ -26,11 +25,8 @@ var testCmd = &cobra.Command{
 			log.Fatalf("cmd: failed to setup db: %v", err)
 		}
 
-		// Build UserService
-		userService := user.New(db)
-
-		// Build PlaylistService
-		playlistService := playlist.New(db)
+		// Build store
+		store := store.New(db)
 
 		// Build spotify auth
 		scopes := []string{
@@ -59,7 +55,7 @@ var testCmd = &cobra.Command{
 		// }
 		// fmt.Println(string(b))
 
-		buildService := build.New(userService, playlistService, spotifyAuth)
+		buildService := build.New(store, spotifyAuth)
 		uid, _ := uuid.Parse("5a85837b-e8c9-4b72-9bad-adaf68edd488")
 		pid, _ := uuid.Parse("bfe53ae7-2ee8-48a2-aed3-fae3c25ea1f7")
 		buildService.BuildPlaylist(uid, pid)

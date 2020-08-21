@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
+	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
 
 // TODO this key thing is gross
@@ -30,7 +30,7 @@ func newRequestLoggerMiddleware(log *log.Logger) func(next http.Handler) http.Ha
 }
 
 // TODO fix bug where auth is flaky and takes multiple times because of expiry date
-func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
+func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
 	// Cache the regex object of each route
 	var blacklistRegexp []*regexp.Regexp
 	for _, expr := range blacklist {
@@ -60,7 +60,7 @@ func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, bl
 			}
 
 			// Get session expiry
-			sessionExpiry, err := userService.GetSessionExpiry(sessionCookie.Value)
+			sessionExpiry, err := store.GetSessionExpiry(sessionCookie.Value)
 			if err != nil {
 				// TODO better error handling here
 				log.Printf("%v", err)
@@ -77,7 +77,7 @@ func newSessionAuthMiddleware(userService user.UserServicer, log *log.Logger, bl
 			}
 
 			// Store userID in context
-			userID, err := userService.GetUserID(sessionCookie.Value)
+			userID, err := store.GetUserID(sessionCookie.Value)
 			if err != nil {
 				// TODO is this the right thing to do here?
 				log.Println("Something went wrong when fetching userID")

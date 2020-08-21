@@ -9,29 +9,26 @@ import (
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
-	"github.com/calebschoepp/playlist-rotator/pkg/user"
+	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
 
-// BuildService manages building the actual spotify playlists
-type BuildService struct {
-	us   user.UserServicer
-	ps   playlist.PlaylistServicer
-	auth spotify.Authenticator
+// Service manages building the actual spotify playlists
+type Service struct {
+	store store.Store
+	auth  spotify.Authenticator
 }
 
-type trackFetcher func(client *spotify.Client, tracks []spotify.ID, plInput PlaylistInput) ([]spotify.ID, error)
-type trackFetcherMapping map[extractMethod]map[bool]trackFetcher
+type trackFetcher func(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error)
 
-var trackFetchers trackFetcherMapping
+var trackFetchers map[store.ExtractMethod]map[bool]trackFetcher
 
 func init() {
-	trackFetchers = map[extractMethod]map[bool]trackFetcher{
-		Top: map[bool]trackFetcher{
+	trackFetchers = map[store.ExtractMethod]map[bool]trackFetcher{
+		store.Top: map[bool]trackFetcher{
 			false: getTopPlaylistTracks,
 			true:  getTopSavedTracks,
 		},
-		Random: map[bool]trackFetcher{
+		store.Random: map[bool]trackFetcher{
 			false: getRandomPlaylistTracks,
 			true:  getRandomSavedTracks,
 		},
@@ -39,46 +36,45 @@ func init() {
 }
 
 // New returns a pointer to a new BuildService
-func New(us user.UserServicer, ps playlist.PlaylistServicer, auth spotify.Authenticator) *BuildService {
-	return &BuildService{
-		us:   us,
-		ps:   ps,
-		auth: auth,
+func New(store store.Store, auth spotify.Authenticator) *Service {
+	return &Service{
+		store: store,
+		auth:  auth,
 	}
 }
 
 // BuildPlaylist uses the configuration from playlistID to build a spotify playlist for userID
-func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
+func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Get playlist configuration
-	playlist, err := b.ps.GetPlaylist(playlistID)
+	playlist, err := s.store.GetPlaylist(playlistID)
 	if err != nil {
-		b.logBuildError(userID, playlistID, err)
+		s.logBuildError(userID, playlistID, err)
 		// TODO handle error (jump to function to write failure info to db)
 		fmt.Printf("ERROR 1: %v", err)
 		return
 	}
 
 	// Build and validate input
-	var input Input
+	var input store.Input
 	err = json.Unmarshal([]byte(playlist.Input), &input)
 	if err != nil {
-		b.logBuildError(userID, playlistID, err)
+		s.logBuildError(userID, playlistID, err)
 		// TODO handle error
 		fmt.Printf("ERROR 2: %v", err)
 		return
 	}
 
 	// Build and validate output
-	output := Output{
+	output := store.Output{
 		Name:        playlist.Name,
 		Description: playlist.Description,
 		Public:      playlist.Public,
 	}
 
 	// Build spotify client
-	user, err := b.us.GetUserByID(userID)
+	user, err := s.store.GetUserByID(userID)
 	if err != nil {
-		b.logBuildError(userID, playlistID, err)
+		s.logBuildError(userID, playlistID, err)
 		// TODO handle error
 		fmt.Printf("ERROR 3: %v", err)
 		return
@@ -89,7 +85,7 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 		TokenType:    user.TokenType,
 		Expiry:       user.TokenExpiry,
 	}
-	client := b.auth.NewClient(&token)
+	client := s.auth.NewClient(&token)
 
 	// Unfollow a possibly pre-existing spotify playlist
 	if playlist.SpotifyID != nil {
@@ -104,22 +100,22 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Build the playlist
 	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, input, output)
 	if err != nil {
-		b.logBuildError(userID, playlistID, err)
+		s.logBuildError(userID, playlistID, err)
 		// TODO handle error
 		fmt.Printf("ERROR 4: %v", err)
 		return
 	}
 
 	// Update database for successful case
-	err = b.ps.UpdatePlaylistGoodBuild(playlistID, string(*spotifyPlaylistID))
+	err = s.store.UpdatePlaylistGoodBuild(playlistID, string(*spotifyPlaylistID))
 	if err != nil {
-		b.logBuildError(userID, playlistID, err)
+		s.logBuildError(userID, playlistID, err)
 		// TODO handle error
 		fmt.Printf("ERROR 5: %v", err)
 		return
 	}
 
-	err = b.us.IncrementUserBuildCount(userID)
+	err = s.store.IncrementUserBuildCount(userID)
 	if err != nil {
 		// TODO handle error
 		// What do I do here, call out to metrics?
@@ -127,13 +123,13 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	}
 }
 
-func (b *BuildService) logBuildError(userID, playlistID uuid.UUID, err error) {
-	err = b.ps.UpdatePlaylistBadBuild(playlistID, err.Error())
+func (s *Service) logBuildError(userID, playlistID uuid.UUID, err error) {
+	err = s.store.UpdatePlaylistBadBuild(playlistID, err.Error())
 	if err != nil {
 		fmt.Printf("SOMETHING HAS GONE VERY WRONG: %v", err)
 	}
 
-	err = b.us.IncrementUserBuildCount(userID)
+	err = s.store.IncrementUserBuildCount(userID)
 	if err != nil {
 		// TODO handle error
 		// What do I do here, call out to metrics?
@@ -141,7 +137,7 @@ func (b *BuildService) logBuildError(userID, playlistID uuid.UUID, err error) {
 	}
 }
 
-func buildPlaylist(client *spotify.Client, userID string, input Input, output Output) (*spotify.ID, error) {
+func buildPlaylist(client *spotify.Client, userID string, input store.Input, output store.Output) (*spotify.ID, error) {
 	var tracks []spotify.ID
 	var err error
 
@@ -189,7 +185,7 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 	return &playlistID, nil
 }
 
-func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput PlaylistInput) ([]spotify.ID, error) {
+func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
@@ -225,7 +221,7 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput P
 	return tracks, nil
 }
 
-func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput PlaylistInput) ([]spotify.ID, error) {
+func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
@@ -261,10 +257,10 @@ func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput Play
 	return tracks, nil
 }
 
-func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput PlaylistInput) ([]spotify.ID, error) {
+func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }
 
-func getRandomSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput PlaylistInput) ([]spotify.ID, error) {
+func getRandomSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }

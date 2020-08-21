@@ -1,6 +1,5 @@
-- Add input/output/cadence to playlists
-- Figure out login/logout semantics
 - Add full fledged UI to create/read/update/delete/build playlists
 - Combine userservice and playlistservice into a single store package
 - Add a test command to cobra to test out playlist builder
 - Add cadence to DB schema
+- Write unit/integration tests
