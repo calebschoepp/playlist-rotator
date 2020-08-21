@@ -3,3 +3,4 @@
 - Add a test command to cobra to test out playlist builder
 - Add cadence to DB schema
 - Write unit/integration tests
+- Make the illustrations more relevant
