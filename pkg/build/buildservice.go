@@ -91,6 +91,16 @@ func (b *BuildService) BuildPlaylist(userID, playlistID uuid.UUID) {
 	}
 	client := b.auth.NewClient(&token)
 
+	// Unfollow a possibly pre-existing spotify playlist
+	if playlist.SpotifyID != nil {
+		err = client.UnfollowPlaylist(spotify.ID(user.SpotifyID), spotify.ID(*playlist.SpotifyID))
+		if err != nil {
+			// TODO handle this case
+			// Do nothing for now
+			fmt.Printf("Failed to unfollow playlist: %v", err)
+		}
+	}
+
 	// Build the playlist
 	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, input, output)
 	if err != nil {

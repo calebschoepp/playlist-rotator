@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/calebschoepp/playlist-rotator/pkg/build"
 	"github.com/google/uuid"
 	"github.com/zmb3/spotify"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/build"
 	"github.com/calebschoepp/playlist-rotator/pkg/playlist"
 	"github.com/calebschoepp/playlist-rotator/pkg/user"
 	"github.com/jmoiron/sqlx"
