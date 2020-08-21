@@ -1,0 +1,19 @@
+{{ define "home-empty" }}
+{{/* Vertical flex box around illustration and CTA */}}
+<div class="flex flex-col justify-center items-center">
+    {{/* Illustration */}}
+    <div>
+        <img src="/static/home_illustration.svg" alt="People talking" class="mx-auto">
+    </div>
+
+    {{/* CTA */}}
+    <div class="w-3/5">
+        <h3 class="text-xl text-center text-gray-700 pb-8">You don’t have any playlists yet. Click below to get started and make your first one.</h3>
+        <div class="text-center">
+            <a href="/playlist/new" class="PRIMARY_BUTTON bg-green-500 hover:bg-green-600 border-green-500 hover:border-green-600 border-2 text-white py-2 px-4 rounded-full">
+                Get Started
+            </a>
+        </div>
+    </div>
+</div>
+{{ end }}

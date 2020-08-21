@@ -1,7 +1,8 @@
 {{ define "header" }}
-<header class="shadow-xl fixed w-full bg-white">
+<div class="pt-16 absolute top-0 left-0 right-0 bottom-0">
+<header class="shadow-xl h-16 fixed bg-white -m-16 mx-auto w-full">
     <div class="ACCENT h-1 w-full bg-green-500"></div>
-    <div class="flex items-center justify-between px-6 py-2">
+    <div class="flex items-center justify-between px-6 h-full">
         <div>
             <a href="/"><img src="/static/logo.svg"></a>
         </div>
@@ -19,5 +20,8 @@
         </div>
     </div>
 </header>
-<main class="container mx-auto pt-24 flex">
+<main class="container mx-auto min-h-full flex items-stretch justify-center">
 {{ end }}
+
+{{/* For information on how header is done with offset */}}
+{{/* https://stackoverflow.com/questions/15021573/get-div-to-take-up-100-body-height-minus-fixed-height-header-and-footer */}}
