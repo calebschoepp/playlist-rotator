@@ -11,7 +11,7 @@
 		{{/* Count */}}
 		<div class="mr-16">
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="count1" maxlength="100" value="{{ .Name }}"/>
 			<span class="pl-1 text-gray-700">songs</span>
 		</div>
 
@@ -20,7 +20,7 @@
 			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
 			<div class="flex flex-row justify-start items-center">
 				<div class="inline-block relative">
-					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
+					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="method1">
 						<option>Latest</option>
 						<option>Randomly</option>
 					</select>
@@ -32,10 +32,8 @@
 				<div class="pl-10 hover:hidden">
 					<img src="/static/delete.svg" alt="delete">
 				</div>
-				{{/* <img class="pl-10 hidden hover:block" src="/static/delete_highlight.svg" alt="delete"> */}}
 			</div>
 		</div>
-
 	</div>
 
 	{{/* Source 2 */}}
@@ -49,25 +47,29 @@
 		{{/* Count */}}
 		<div class="mr-16">
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="count2" maxlength="100" value="{{ .Name }}"/>
 			<span class="pl-1 text-gray-700">songs</span>
 		</div>
 
 		{{/* Method */}}
 		<div>
 			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
-			<div class="inline-block relative">
-				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
-					<option>Latest</option>
-					<option>Randomly</option>
-				</select>
-				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-					<img src="/static/chevron_down.svg" alt="v">
+			<div class="flex flex-row justify-start items-center">
+				<div class="inline-block relative">
+					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="method2">
+						<option>Latest</option>
+						<option>Randomly</option>
+					</select>
+					<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+						<img src="/static/chevron_down.svg" alt="v">
+					</div>
+				</div>
+				<span class="pl-2 text-gray-700">chosen</span>
+				<div class="pl-10 hover:hidden">
+					<img src="/static/delete.svg" alt="delete">
 				</div>
 			</div>
 		</div>
-		{{/* Use a margin to hack this down into place TODO make this less hack */}}
-		<span class="mt-12 pl-2 text-gray-700">chosen</span>
 	</div>
 
 	{{/* Source 3 */}}
@@ -81,25 +83,29 @@
 		{{/* Count */}}
 		<div class="mr-16">
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="count3" maxlength="100" value="{{ .Name }}"/>
 			<span class="pl-1 text-gray-700">songs</span>
 		</div>
 
 		{{/* Method */}}
 		<div>
 			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
-			<div class="inline-block relative">
-				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
-					<option>Latest</option>
-					<option>Randomly</option>
-				</select>
-				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-					<img src="/static/chevron_down.svg" alt="v">
+			<div class="flex flex-row justify-start items-center">
+				<div class="inline-block relative">
+					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="method3">
+						<option>Latest</option>
+						<option>Randomly</option>
+					</select>
+					<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+						<img src="/static/chevron_down.svg" alt="v">
+					</div>
+				</div>
+				<span class="pl-2 text-gray-700">chosen</span>
+				<div class="pl-10 hover:hidden">
+					<img src="/static/delete.svg" alt="delete">
 				</div>
 			</div>
 		</div>
-		{{/* Use a margin to hack this down into place TODO make this less hack */}}
-		<span class="mt-12 pl-2 text-gray-700">chosen</span>
 	</div>
 
 	{{/* Source 4 */}}
@@ -113,25 +119,29 @@
 		{{/* Count */}}
 		<div class="mr-16">
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="count4" maxlength="100" value="{{ .Name }}"/>
 			<span class="pl-1 text-gray-700">songs</span>
 		</div>
 
 		{{/* Method */}}
 		<div>
 			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
-			<div class="inline-block relative">
-				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
-					<option>Latest</option>
-					<option>Randomly</option>
-				</select>
-				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-					<img src="/static/chevron_down.svg" alt="v">
+			<div class="flex flex-row justify-start items-center">
+				<div class="inline-block relative">
+					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="method4">
+						<option>Latest</option>
+						<option>Randomly</option>
+					</select>
+					<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+						<img src="/static/chevron_down.svg" alt="v">
+					</div>
+				</div>
+				<span class="pl-2 text-gray-700">chosen</span>
+				<div class="pl-10 hover:hidden">
+					<img src="/static/delete.svg" alt="delete">
 				</div>
 			</div>
 		</div>
-		{{/* Use a margin to hack this down into place TODO make this less hack */}}
-		<span class="mt-12 pl-2 text-gray-700">chosen</span>
 	</div>
 
 	{{/* Source 5 */}}
@@ -145,27 +155,50 @@
 		{{/* Count */}}
 		<div class="mr-16">
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="count5" maxlength="100" value="{{ .Name }}"/>
 			<span class="pl-1 text-gray-700">songs</span>
 		</div>
 
 		{{/* Method */}}
 		<div>
 			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
+			<div class="flex flex-row justify-start items-center">
+				<div class="inline-block relative">
+					<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="method5">
+						<option>Latest</option>
+						<option>Randomly</option>
+					</select>
+					<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+						<img src="/static/chevron_down.svg" alt="v">
+					</div>
+				</div>
+				<span class="pl-2 text-gray-700">chosen</span>
+				<div class="pl-10 hover:hidden">
+					<img src="/static/delete.svg" alt="delete">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{{/* Add source */}}
+	<div class="flex flex-row justify-end items-center">
+		{{/* Cheating here by adding a top margin to align button to input */}}
+		<a href="/" class="mt-6 SECONDARY_BUTTON_GREEN bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
+			New Source
+		</a>
+		<div class="ml-8">
+			<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1">Source</p>
 			<div class="inline-block relative">
 				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
-					<option>Latest</option>
-					<option>Randomly</option>
+					<option>Liked Songs</option>
+					<option>Discover Weekly</option>
+					<option>Top Songs of 2018</option>
 				</select>
 				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
 					<img src="/static/chevron_down.svg" alt="v">
 				</div>
 			</div>
 		</div>
-		{{/* Use a margin to hack this down into place TODO make this less hack */}}
-		<span class="mt-12 pl-2 text-gray-700">chosen</span>
 	</div>
-
-	Add source
 </div>
 {{ end }}

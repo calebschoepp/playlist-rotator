@@ -13,12 +13,13 @@ type Playlist struct {
 	ID     uuid.UUID `db:"id"`
 	UserID uuid.UUID `db:"user_id"`
 
-	Input       string  `db:"input"`
-	Name        string  `db:"name"`
-	Description string  `db:"description"`
-	Public      bool    `db:"public"`
-	SpotifyID   *string `db:"spotify_id"`
-	FailureMsg  *string `db:"failure_msg"`
+	Input       string   `db:"input"`
+	Name        string   `db:"name"`
+	Description string   `db:"description"`
+	Public      bool     `db:"public"`
+	Schedule    Schedule `db:"schedule"`
+	SpotifyID   *string  `db:"spotify_id"`
+	FailureMsg  *string  `db:"failure_msg"`
 
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`

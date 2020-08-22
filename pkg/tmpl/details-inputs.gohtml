@@ -11,7 +11,7 @@
 		{{/* Description */}}
 		<div>
 			<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Description</label>
-			<textarea class="TEXT_AREA_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg w-11/12 px-2 py-1" rows="5" type="text" placeholder="This is some of my favorite music." name="name" maxlength="300" value="{{ .Description }}"></textarea>
+			<textarea class="TEXT_AREA_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg w-11/12 px-2 py-1" rows="5" type="text" placeholder="This is some of my favorite music." name="description" maxlength="300" value="{{ .Description }}"></textarea>
 		</div>
 	</div>
 
@@ -20,11 +20,11 @@
 		{{/* Schedule */}}
 		<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Schedule</p>
 		<div class="inline-block relative w-11/12">
-			<select class="block appearance-none w-full h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline">
-				<option>Daily</option>
-				<option>Weekly</option>
-				<option>Bi-Weekly</option>
-				<option>Monthly</option>
+			<select class="block appearance-none w-full h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="schedule">
+				<option {{ if eq "Daily" .Schedule}} selected {{ end }}>Daily</option>
+				<option {{ if eq "Weekly" .Schedule}} selected {{ end }}>Weekly</option>
+				<option {{ if eq "Bi-Weekly" .Schedule}} selected {{ end }}>Bi-Weekly</option>
+				<option {{ if eq "Monthly" .Schedule}} selected {{ end }}>Monthly</option>
 			</select>
 			<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
 				<img src="/static/chevron_down.svg" alt="v">
@@ -44,12 +44,12 @@
 			<div>
 				<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Access</p>
 				<div class="mb-2">
-					<input type="radio" id="private" name="access" value="private" checked>
+					<input type="radio" id="private" name="access" value="private" {{ if not .Public }} checked {{ end }}>
 					<label class="text-gray-700 text-lg pl-2" for="private">Private</label>
 					<br>
 				</div>
 				<div class="mb-2">
-					<input type="radio" id="public" name="access" value="public">
+					<input type="radio" id="public" name="access" value="public"{{ if .Public }} checked {{ end }}>
 					<label class="text-gray-700 text-lg pl-2" for="public">Public</label>
 					<br>
 				</div>

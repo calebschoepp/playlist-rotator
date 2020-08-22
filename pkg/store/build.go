@@ -30,3 +30,12 @@ const (
 	// Top songs are chosen from the source TODO change this to latest
 	Top = "top"
 )
+
+type Schedule string
+
+const (
+	Daily    Schedule = "Daily"
+	Weekly            = "Weekly"
+	BiWeekly          = "Bi-Weekly"
+	Monthly           = "Monthly"
+)

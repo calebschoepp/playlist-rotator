@@ -25,6 +25,7 @@ CREATE TABLE playlists (
   name        TEXT NOT NULL,
   description TEXT NOT NULL,
   public      BOOLEAN NOT NULL,
+  schedule    VARCHAR(64) NOT NULL,
   spotify_id  TEXT,
   failure_msg TEXT,
 

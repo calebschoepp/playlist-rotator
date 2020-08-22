@@ -1,11 +1,16 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -147,7 +152,42 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
-	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{IsNew: true, Name: "", Saved: false})
+	vars := mux.Vars(r)
+	playlistID := vars["playlistID"]
+	var tmplData tmpl.Playlist
+	if playlistID != "new" {
+		// Build up the form with the existing playlist data
+		tmplData.IsNew = false
+
+		pid, err := uuid.Parse(playlistID)
+		if err != nil {
+			// TODO handl error
+			// Probably return generic error page
+		}
+		playlist, err := s.Store.GetPlaylist(pid)
+		if err != nil {
+			// TODO handl error
+			// Probably return generic error page
+		}
+
+		tmplData.Name = playlist.Name
+		tmplData.Description = playlist.Description
+		tmplData.Public = playlist.Public
+		tmplData.Schedule = playlist.Schedule
+
+		var input store.Input
+		err = json.Unmarshal([]byte(playlist.Input), &input)
+		if err != nil {
+			// TODO handl error
+			// Probably return generic error page
+		}
+		tmplData.Sources = input.PlaylistInputs
+	} else {
+		// New playlist so everything is empty
+		tmplData.IsNew = true
+	}
+
+	s.Tmpl.TmplPlaylist(w, tmplData)
 }
 
 func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
@@ -160,17 +200,22 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	// TODO validate name
-	// TODO all of this
-	name := r.FormValue("name")
-	description := r.FormValue("description")
-	public := false
-
-	err := s.Store.CreatePlaylist(*userID, store.Input{}, name, description, public)
-	if err != nil {
-		s.Log.Printf("Failed to create new playlist: %v", err)
-		// TODO handle error
+	for k, v := range r.Form {
+		fmt.Println("key:", k)
+		fmt.Println("val:", strings.Join(v, ""))
 	}
 
-	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{Name: r.FormValue("name"), Saved: true})
+	// TODO validate name
+	// TODO all of this
+	// name := r.FormValue("name")
+	// description := r.FormValue("description")
+	// public := false
+
+	// err := s.Store.CreatePlaylist(*userID, store.Input{}, name, description, public)
+	// if err != nil {
+	// 	s.Log.Printf("Failed to create new playlist: %v", err)
+	// 	// TODO handle error
+	// }
+
+	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{Name: r.FormValue("name")})
 }

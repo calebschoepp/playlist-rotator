@@ -29,8 +29,12 @@ type Login struct {
 type Playlist struct {
 	IsNew bool
 
-	Name  string
-	Saved bool
+	Name        string
+	Description string
+	Schedule    store.Schedule
+	Public      bool
+
+	Sources []store.PlaylistInput
 }
 
 // TemplateService is the concrete implmentation of Templater backed by html/template
