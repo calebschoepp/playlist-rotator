@@ -1,0 +1,66 @@
+{{ define "playlist-info-box" }}
+<div class="relative mt-10 shadow-xl">
+	{{/* Cover image */}}
+	<div class="absolute top-0 left-0 px-4 py-4">
+		<div class="h-40 w-40 bg-gray-400 rounded-lg"></div>
+	</div>
+
+	{{/* Top bar */}}
+	<div class="flex flex-row items-stretch justify-between bg-white border-b border-gray-400 pl-48 px-4 py-4">
+		{{/* Name, description and tag */}}
+		<div class="w-9/12">
+			{{/* Name and tag */}}
+			<div class="flex flex-row justify-start items-center">
+				<h1 class="slab text-2xl text-gray-900 font-black mr-4">Scary tunes for my bedtime</h1>
+				<img src="/static/built_pill.svg" alt="built">
+			</div>
+
+			{{/* description */}}
+			<p class="text-gray-500 text-lg">This is a description</p>
+		</div>
+
+		{{/* Song count and schedule */}}
+		<div class="flex flex-col justify-start items-center">
+			<h2 class="slab text-4xl text-gray-900 font-black leading-none">142</h2>
+			<h4 class="text-gray-500">songs</h4>
+			<h3 class="text-gray-700 text-lg">Built Daily</h3>
+		</div>
+	</div>
+
+	{{/* Middle bar */}}
+	<div class="grid grid-cols-3 gap-4 items-center bg-gray-100 pl-64 pr-10">
+		{{/* Headers */}}
+		<div class="pt-4">
+			<h2 class="text-lg underline text-gray-700">Source</h2>
+		</div>
+		<div class="pt-4">
+			<h2 class="text-lg underline text-gray-700">Count</h2>
+		</div>
+		<div class="pt-4">
+			<h2 class="text-lg underline text-gray-700">Method</h2>
+		</div>
+		{{ template "playlist-info-box-source-row" }}
+	</div>
+
+
+	{{/* Bottom bars */}}
+	<div class="flex flex-row items-stretch justify-between bg-white border-t border-gray-400 px-4 py-4">
+		{{/* Scheduled to build */}}
+		<div class="flex flex-row items-center justify-start">
+			<img src="/static/clock.svg" alt="clock">
+			<span class="pl-2 text-base text-gray-500">Scheduled to build again at 1PM on Saturday June 1st</span>
+		</div>
+
+		{{/* Buttons */}}
+		<div>
+			<a href="/playlist/{{ "TODO FILL THIS IN" }}" class="pr-6 TERTIARY_BUTTON text-gray-700 hover:text-green-500 py-2 px-2">
+				Edit
+			</a>
+			<a href="{{ "TODO FILL THIS IN" }}" class="SECONDARY_BUTTON bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
+				Build
+			</a>
+		</div>
+
+	</div>
+</div>
+{{ end }}

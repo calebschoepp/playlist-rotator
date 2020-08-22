@@ -16,7 +16,7 @@
 {{ template "head" "Home" }}
 {{ template "header" "/logout" }}
 {{/* TODO flip logic */}}
-{{ if not .Playlists }}
+{{ if .Playlists }}
     {{ template "home-empty" }}
 {{ else }}
     {{ template "home-used" . }}

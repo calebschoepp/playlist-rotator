@@ -34,7 +34,8 @@ const (
 type Schedule string
 
 const (
-	Daily    Schedule = "Daily"
+	Never    Schedule = "Never"
+	Daily             = "Daily"
 	Weekly            = "Weekly"
 	BiWeekly          = "Bi-Weekly"
 	Monthly           = "Monthly"

@@ -1,3 +1,14 @@
 {{ define "home-used" }}
-asdf
+<div class="flex flex-col items-stretch justify-start w-full pb-10">
+	{{ template "playlist-info-box" . }}
+	{{ template "playlist-info-box" . }}
+	{{ template "playlist-info-box" . }}
+</div>
+
+{{/* New playlist button */}}
+<div class="fixed bottom-0 right-0 px-16 py-10">
+	<a href="/playlist/new" class="PRIMARY_BUTTON bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full">
+		New Playlist
+	</a>
+</div>
 {{ end }}
