@@ -1,8 +1,8 @@
 {{ define "home-used" }}
 <div class="flex flex-col items-stretch justify-start w-full pb-10">
-	{{ template "playlist-info-box" . }}
-	{{ template "playlist-info-box" . }}
-	{{ template "playlist-info-box" . }}
+	{{ range .Playlists }}
+		{{ template "playlist-info-box" . }}
+	{{ end }}
 </div>
 
 {{/* New playlist button */}}

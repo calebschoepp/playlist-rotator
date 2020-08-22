@@ -18,19 +18,19 @@ type Service struct {
 	auth  spotify.Authenticator
 }
 
-type trackFetcher func(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error)
+type trackFetcher func(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error)
 
-var trackFetchers map[store.ExtractMethod]map[bool]trackFetcher
+var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 
 func init() {
-	trackFetchers = map[store.ExtractMethod]map[bool]trackFetcher{
-		store.Top: map[bool]trackFetcher{
-			false: getTopPlaylistTracks,
-			true:  getTopSavedTracks,
+	trackFetchers = map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher{
+		store.Top: map[store.TrackSourceType]trackFetcher{
+			store.PlaylistSrc:   getTopPlaylistTracks,
+			store.LikedSongsSrc: getTopLikedSongsTracks,
 		},
-		store.Random: map[bool]trackFetcher{
-			false: getRandomPlaylistTracks,
-			true:  getRandomSavedTracks,
+		store.Random: map[store.TrackSourceType]trackFetcher{
+			store.PlaylistSrc:   getRandomPlaylistTracks,
+			store.LikedSongsSrc: getRandomLikedSongsTracks,
 		},
 	}
 }
@@ -141,8 +141,8 @@ func buildPlaylist(client *spotify.Client, userID string, input store.Input, out
 	var tracks []spotify.ID
 	var err error
 
-	for _, plInput := range input.PlaylistInputs {
-		tracks, err = trackFetchers[plInput.Method][plInput.IsSaved](client, tracks, plInput)
+	for _, trackSource := range input.TrackSources {
+		tracks, err = trackFetchers[trackSource.Method][trackSource.Type](client, tracks, trackSource)
 		if err != nil {
 			return nil, err
 		}
@@ -185,16 +185,16 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 	return &playlistID, nil
 }
 
-func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
+func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
 
 	for {
-		if plInput.Count-count <= 0 {
+		if trackSource.Count-count <= 0 {
 			break
-		} else if plInput.Count-count < 50 {
-			limit = plInput.Count - count
+		} else if trackSource.Count-count < 50 {
+			limit = trackSource.Count - count
 		} else {
 			limit = 50
 		}
@@ -203,12 +203,12 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput s
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(plInput.PlaylistID, &opts, "items(track(id)))")
+		trackPage, err := client.GetPlaylistTracksOpt(trackSource.ID, &opts, "items(track(id)))")
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in playlist but did not find that many", plInput.Count)
+			return nil, fmt.Errorf("expected %d songs in playlist but did not find that many", trackSource.Count)
 		}
 
 		count += limit
@@ -221,16 +221,16 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput s
 	return tracks, nil
 }
 
-func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
+func getTopLikedSongsTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
 
 	for {
-		if plInput.Count-count <= 0 {
+		if trackSource.Count-count <= 0 {
 			break
-		} else if plInput.Count-count < 50 {
-			limit = plInput.Count - count
+		} else if trackSource.Count-count < 50 {
+			limit = trackSource.Count - count
 		} else {
 			limit = 50
 		}
@@ -244,7 +244,7 @@ func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput stor
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in Liked Songs but did not find that many", plInput.Count)
+			return nil, fmt.Errorf("expected %d songs in Liked Songs but did not find that many", trackSource.Count)
 		}
 
 		count += limit
@@ -257,10 +257,10 @@ func getTopSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput stor
 	return tracks, nil
 }
 
-func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
+func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }
 
-func getRandomSavedTracks(client *spotify.Client, tracks []spotify.ID, plInput store.PlaylistInput) ([]spotify.ID, error) {
+func getRandomLikedSongsTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }

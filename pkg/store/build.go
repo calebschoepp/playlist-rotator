@@ -11,15 +11,16 @@ type Output struct {
 
 // Input configures the sources used to generate a new Spotify playlist
 type Input struct {
-	PlaylistInputs []PlaylistInput `json:"playlistInputs"`
+	TrackSources []TrackSource `json:"trackSources"`
 }
 
-// PlaylistInput represents a single source for a generated Spotify playlist
-type PlaylistInput struct {
-	PlaylistID spotify.ID    `json:"playlistID"`
-	IsSaved    bool          `json:"isSaved"`
-	Count      int           `json:"count"`
-	Method     ExtractMethod `json:"method"`
+// TrackSource represents a single source of tracks for a generated Spotify playlist
+type TrackSource struct {
+	Name   string          `json:"name"`
+	ID     spotify.ID      `json:"playlistID"`
+	Type   TrackSourceType `json:"type"`
+	Count  int             `json:"count"`
+	Method ExtractMethod   `json:"method"`
 }
 
 type ExtractMethod string
@@ -39,4 +40,12 @@ const (
 	Weekly            = "Weekly"
 	BiWeekly          = "Bi-Weekly"
 	Monthly           = "Monthly"
+)
+
+type TrackSourceType string
+
+const (
+	LikedSongsSrc TrackSourceType = "Liked"
+	AlbumSrc                      = "Album"
+	PlaylistSrc                   = "Playlist"
 )

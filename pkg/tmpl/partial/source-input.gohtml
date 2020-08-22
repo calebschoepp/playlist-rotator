@@ -1,0 +1,40 @@
+{{ define "source-input" }}
+<div class="flex flex-row justify-start items-center">
+	{{/* Source info */}}
+	<div class="mr-16">
+		<h4 class="text-lg text-gray-700 text-left p-2 mt-6 w-40">{{ .Name }}</h2>
+		<div class="bg-gray-300 border border-gray-400 hover:border-gray-500 rounded-lg" style="height:145px;width:145px;"></div>
+	</div>
+
+	{{/* Count */}}
+	<div class="mr-16">
+		<label class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Count</label>
+		<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="{{- .ID -}}::count" maxlength="100" value="{{ .Count }}"/>
+		<span class="pl-1 text-gray-700">songs</span>
+	</div>
+
+	{{/* Method */}}
+	<div>
+		<p class="INPUT_LABEL text-gray-500 text-sm block pl-2 pb-1 pt-6">Method</p>
+		<div class="flex flex-row justify-start items-center">
+			<div class="inline-block relative">
+				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="{{- .ID -}}::method">
+					<option {{ if eq "Latest" .Method}} selected {{ end }}>Latest</option>
+					<option {{ if eq "Randomly" .Method}} selected {{ end }}>Randomly</option>
+				</select>
+				<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+					<img src="/static/chevron_down.svg" alt="v">
+				</div>
+			</div>
+			<span class="pl-2 text-gray-700">chosen</span>
+			<div class="pl-10 hover:hidden">
+				<img src="/static/delete.svg" alt="delete">
+			</div>
+		</div>
+	</div>
+
+	{{/* Hidden inputs */}}
+	 <input type="hidden" name="{{- .ID -}}::id" value="{{ .ID }}">
+	 <input type="hidden" name="{{- .ID -}}::type" value="{{ .Type }}">
+</div>
+{{ end }}

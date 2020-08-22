@@ -78,6 +78,7 @@ func (s *Server) SetupRoutes() {
 	s.Router.Path("/callback").Methods("GET").HandlerFunc(s.callbackPage)
 	s.Router.Path("/playlist/{playlistID}").Methods("GET").HandlerFunc(s.playlistPage)
 	s.Router.Path("/playlist/{playlistID}").Methods("POST").HandlerFunc(s.playlistForm)
+	s.Router.Path("/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}").Methods("GET").HandlerFunc(s.playlistTrackSourceAPI)
 }
 
 // Run makes the Server start listening and serving on the configured addr

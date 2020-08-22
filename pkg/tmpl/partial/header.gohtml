@@ -1,0 +1,32 @@
+{{ define "header" }}
+<div class="pt-16 absolute top-0 left-0 right-0 bottom-0">
+<header class="shadow-xl h-16 fixed bg-white -m-16 mx-auto w-full z-40">
+<div class="ACCENT h-1 w-full bg-green-500"></div>
+	<div class="flex items-center justify-between px-6 h-full">
+		<div>
+			<a href="/"><img src="/static/logo.svg"></a>
+		</div>
+		<div class="flex flex-row items-center justify-right">
+			{{ if eq . "/logout" }}
+			<a href="/help"><img class="inline pr-6" src="/static/help.svg" alt="?"></a>
+			{{ end }}
+			<a href="/about" class="pr-6 TERTIARY_BUTTON text-gray-700 hover:text-green-500 py-2 px-2">
+				About
+			</a>
+			<div>
+				<a href="{{ . }}" class="SECONDARY_BUTTON bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
+					{{ if eq . "/logout" }}
+					Logout
+					{{ else }}
+					Login
+					{{ end }}
+				</a>
+			</div>
+		</div>
+	</div>
+</header>
+<main class="container mx-auto min-h-full flex items-stretch justify-center">
+{{ end }}
+
+{{/* For information on how header is done with offset */}}
+{{/* https://stackoverflow.com/questions/15021573/get-div-to-take-up-100-body-height-minus-fixed-height-header-and-footer */}}

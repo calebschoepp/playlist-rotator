@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/zmb3/spotify"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -20,38 +22,17 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		// TODO handle error
 	}
 
+	tmplData := tmpl.Home{}
+
 	// Get playlists
 	playlists, err := s.Store.GetPlaylists(*userID)
 	if err != nil {
 		s.Log.Printf("Error fetching playlists: %v", err)
 		// TODO handle error
 	}
+	tmplData.Playlists = playlists
 
-	// TODO REMOVE THIS
-	// user, err := s.Store.GetUserByID(*userID)
-	// if err != nil {
-	// 	s.Log.Printf("ERROR: %v", err)
-	// }
-	// token := oauth2.Token{
-	// 	AccessToken:  user.AccessToken,
-	// 	RefreshToken: user.RefreshToken,
-	// 	TokenType:    user.TokenType,
-	// 	Expiry:       user.TokenExpiry,
-	// }
-	// client := s.SpotifyAuth.NewClient(&token)
-	// tracks, err := client.CurrentUsersTracks()
-	// if err != nil {
-	// 	s.Log.Printf("ERROR: %v", err)
-	// }
-	// s.Log.Println(tracks.Total)
-	// s.Log.Println(tracks.Endpoint)
-	// s.Log.Println(tracks.Limit)
-	// s.Log.Println(tracks.Offset)
-	// s.Log.Println(tracks.Next)
-	// s.Log.Println(tracks.Tracks)
-	// END
-
-	s.Tmpl.TmplHome(w, tmpl.Home{Playlists: playlists})
+	s.Tmpl.TmplHome(w, tmplData)
 }
 
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
@@ -152,8 +133,17 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		s.Log.Println("Failed to get userID from context")
+		// TODO handle error
+	}
+
+	// Get playlistID
 	vars := mux.Vars(r)
 	playlistID := vars["playlistID"]
+
 	var tmplData tmpl.Playlist
 	if playlistID != "new" {
 		// Build up the form with the existing playlist data
@@ -178,14 +168,23 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		var input store.Input
 		err = json.Unmarshal([]byte(playlist.Input), &input)
 		if err != nil {
-			// TODO handl error
+			// TODO handle error
 			// Probably return generic error page
 		}
-		tmplData.Sources = input.PlaylistInputs
+		tmplData.Sources = input.TrackSources
 	} else {
 		// New playlist so everything is empty
 		tmplData.IsNew = true
 	}
+
+	// Regardless we gather the potential sources
+	potentialSources, err := getPotentialSources(s.Store, s.SpotifyAuth, userID)
+	if err != nil {
+		// TODO handle error
+		// Probably return generic error page
+	}
+	tmplData.PotentialSources = potentialSources
+	s.Log.Println(potentialSources)
 
 	s.Tmpl.TmplPlaylist(w, tmplData)
 }
@@ -201,8 +200,7 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ""))
+		fmt.Printf("%v: %v\n", k, strings.Join(v, ""))
 	}
 
 	// TODO validate name
@@ -218,4 +216,34 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{Name: r.FormValue("name")})
+}
+
+func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) {
+	// Get ids
+	// TODO validate IDs
+	vars := mux.Vars(r)
+	encodedName := vars["name"]
+	id := vars["id"]
+	typeString := vars["type"]
+
+	name, err := url.QueryUnescape(encodedName)
+	if err != nil {
+		// TODO handle error
+	}
+
+	source := store.TrackSource{}
+	source.Count = 0
+	source.Method = store.Random
+	source.Name = name
+	source.ID = spotify.ID(id)
+	switch typeString {
+	case string(store.LikedSongsSrc):
+		source.Type = store.LikedSongsSrc
+	case string(store.AlbumSrc):
+		source.Type = store.AlbumSrc
+	case string(store.PlaylistSrc):
+		source.Type = store.PlaylistSrc
+	}
+
+	s.Tmpl.TmplTrackSource(w, tmpl.TrackSource{Source: source})
 }
