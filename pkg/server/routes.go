@@ -6,7 +6,6 @@ import (
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
-	"golang.org/x/oauth2"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -24,27 +23,27 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO REMOVE THIS
-	user, err := s.Store.GetUserByID(*userID)
-	if err != nil {
-		s.Log.Printf("ERROR: %v", err)
-	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := s.SpotifyAuth.NewClient(&token)
-	tracks, err := client.CurrentUsersTracks()
-	if err != nil {
-		s.Log.Printf("ERROR: %v", err)
-	}
-	s.Log.Println(tracks.Total)
-	s.Log.Println(tracks.Endpoint)
-	s.Log.Println(tracks.Limit)
-	s.Log.Println(tracks.Offset)
-	s.Log.Println(tracks.Next)
-	s.Log.Println(tracks.Tracks)
+	// user, err := s.Store.GetUserByID(*userID)
+	// if err != nil {
+	// 	s.Log.Printf("ERROR: %v", err)
+	// }
+	// token := oauth2.Token{
+	// 	AccessToken:  user.AccessToken,
+	// 	RefreshToken: user.RefreshToken,
+	// 	TokenType:    user.TokenType,
+	// 	Expiry:       user.TokenExpiry,
+	// }
+	// client := s.SpotifyAuth.NewClient(&token)
+	// tracks, err := client.CurrentUsersTracks()
+	// if err != nil {
+	// 	s.Log.Printf("ERROR: %v", err)
+	// }
+	// s.Log.Println(tracks.Total)
+	// s.Log.Println(tracks.Endpoint)
+	// s.Log.Println(tracks.Limit)
+	// s.Log.Println(tracks.Offset)
+	// s.Log.Println(tracks.Next)
+	// s.Log.Println(tracks.Tracks)
 	// END
 
 	s.Tmpl.TmplHome(w, tmpl.Home{Playlists: playlists})
@@ -147,11 +146,11 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (s *Server) newPlaylistPage(w http.ResponseWriter, r *http.Request) {
-	s.Tmpl.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: "", Saved: false})
+func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
+	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{IsNew: true, Name: "", Saved: false})
 }
 
-func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
+func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
@@ -173,5 +172,5 @@ func (s *Server) newPlaylistForm(w http.ResponseWriter, r *http.Request) {
 		// TODO handle error
 	}
 
-	s.Tmpl.TmplNewPlaylist(w, tmpl.NewPlaylist{Name: r.FormValue("name"), Saved: true})
+	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{Name: r.FormValue("name"), Saved: true})
 }

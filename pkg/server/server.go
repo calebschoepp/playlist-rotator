@@ -76,8 +76,8 @@ func (s *Server) SetupRoutes() {
 	s.Router.Path("/login").Methods("GET").HandlerFunc(s.loginPage)
 	s.Router.Path("/logout").Methods("GET").HandlerFunc(s.logoutPage)
 	s.Router.Path("/callback").Methods("GET").HandlerFunc(s.callbackPage)
-	s.Router.Path("/new-playlist").Methods("GET").HandlerFunc(s.newPlaylistPage)
-	s.Router.Path("/new-playlist").Methods("POST").HandlerFunc(s.newPlaylistForm)
+	s.Router.Path("/playlist/{playlistID}").Methods("GET").HandlerFunc(s.playlistPage)
+	s.Router.Path("/playlist/{playlistID}").Methods("POST").HandlerFunc(s.playlistForm)
 }
 
 // Run makes the Server start listening and serving on the configured addr

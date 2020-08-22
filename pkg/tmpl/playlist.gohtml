@@ -1,0 +1,61 @@
+{{/* {{ template "head" "New Playlist" }}
+{{ template "header" "/logout" }}
+<p>Go back <a href="/">Home</a>.</p>
+<form method="POST" action="#">
+	<h1>New Playlist</h1>
+	<label>Name</label>
+	<input type="text" name="playlistName" maxlength="255" value="{{ .Name }}"/>
+	<input type="submit" name="submit" value="Save"/>
+</form>
+{{ if .Saved }}
+<p>Saved</p>
+{{ end }}
+{{ template "foot" }} */}}
+
+{{ template "head" "New Playlist" }}
+{{ template "header" "/logout" }}
+<div class="w-full">
+	<h2 class="text-4xl font-black slab text-gray-700 my-2">
+	{{ if .IsNew }}
+	New Playlist
+	{{ else }}
+	TODO fill in name.
+	{{ end }}
+	</h2>
+
+	<form method="POST" action="#">
+	{{/* Vertical flexbox for all the playlists */}}
+	<div class="flex flex-col justify-left items-center">
+		{{/* Details edit modal */}}
+		{{ template "start-edit-modal" "Details" }}
+		<div class="text-gray-700 text-lg">
+			<p class="mb-4">Set the Name, Description, and Cover Image for the Spotify playlist that is going to be built.</p>
+			<p class="mb-4">Access determines who can see your newly built playlist.</p>
+			<p class="mb-4">The Schedule is how often we’ll rebuild your playlist with new tracks.</p>
+		</div>
+		{{ template "start-edit-modal-input" }}
+		{{ template "details-inputs" }}
+		{{ template "end-edit-modal" }}
+
+		{{/* Sources edit modal */}}
+		{{ template "start-edit-modal" "Sources" }}
+		<div class="text-gray-700 text-lg">
+			<p class="mb-4">Add new sources to build your playlist from. You can use your Liked Songs, Albums, and followed Playlists as sources.</p>
+			<p class="mb-4">Count is the number of songs pulled from a source and Method is how the are selected.</p>
+		</div>
+		{{ template "start-edit-modal-input" }}
+		{{ template "sources-inputs" }}
+		{{ template "end-edit-modal" }}
+	</div>
+
+	{{/* Save and cancel buttons */}}
+	<div class="text-right">
+		<a href="/" class="SECONDARY_BUTTON_RED bg-white hover:bg-red-500 border-red-500 border-2 text-red-500 hover:text-white py-2 px-4 rounded-full">
+			Cancel
+		</a>
+		<input type="submit" name="submit" value="Save" class="ml-4 PRIMARY_BUTTON bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full">
+	</div>
+	</form>
+
+</div>
+{{ template "foot" }}

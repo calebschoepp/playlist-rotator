@@ -12,7 +12,7 @@ import (
 type Templater interface {
 	TmplHome(w http.ResponseWriter, data Home) error
 	TmplLogin(w http.ResponseWriter, data Login) error
-	TmplNewPlaylist(w http.ResponseWriter, data NewPlaylist) error
+	TmplPlaylist(w http.ResponseWriter, data Playlist) error
 }
 
 // Home is the data required to template '/'
@@ -25,8 +25,10 @@ type Login struct {
 	SpotifyAuthURL string
 }
 
-// NewPlaylist is the data required to template '/new-playlist'
-type NewPlaylist struct {
+// Playlist is the data required to template '/playlist/{playlistID}'
+type Playlist struct {
+	IsNew bool
+
 	Name  string
 	Saved bool
 }
@@ -63,9 +65,9 @@ func (t *TemplateService) TmplLogin(w http.ResponseWriter, data Login) error {
 	return t.renderTemplate(w, "login", data)
 }
 
-// TmplNewPlaylist templates '/new-playlist'
-func (t *TemplateService) TmplNewPlaylist(w http.ResponseWriter, data NewPlaylist) error {
-	return t.renderTemplate(w, "new-playlist", data)
+// TmplPlaylist templates '/playlist/{playlistID}'
+func (t *TemplateService) TmplPlaylist(w http.ResponseWriter, data Playlist) error {
+	return t.renderTemplate(w, "playlist", data)
 }
 
 func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) error {
