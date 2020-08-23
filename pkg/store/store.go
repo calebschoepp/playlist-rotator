@@ -20,8 +20,8 @@ type Store interface {
 	IncrementUserBuildCount(userID uuid.UUID) error
 
 	// Playlists
-	CreatePlaylist(userID uuid.UUID, input Input, name, description string, public bool) error // TODO should this return playlist?
-	UpdatePlaylist(id uuid.UUID, name string, userID uuid.UUID) error
+	CreatePlaylist(userID uuid.UUID, input Input, name, description string, public bool, schedule Schedule) error // TODO should this return playlist?
+	UpdatePlaylistConfig(id uuid.UUID, playlist Playlist) error
 	GetPlaylist(id uuid.UUID) (*Playlist, error)
 	GetPlaylists(userID uuid.UUID) ([]Playlist, error)
 	UpdatePlaylistGoodBuild(id uuid.UUID, spotifyID string) error

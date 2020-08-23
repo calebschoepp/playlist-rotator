@@ -25,6 +25,7 @@ function addNewSourceInput() {
   Http.send();
 
   Http.onreadystatechange = (e) => {
+    // TODO make this insert the html in the right spot, above button below other inputs
     if (Http.readyState !== Http.DONE) {
       return;
     }

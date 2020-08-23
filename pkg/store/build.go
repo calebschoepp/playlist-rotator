@@ -45,7 +45,7 @@ const (
 type TrackSourceType string
 
 const (
-	LikedSongsSrc TrackSourceType = "Liked"
-	AlbumSrc                      = "Album"
-	PlaylistSrc                   = "Playlist"
+	LikedSrc    TrackSourceType = "Liked"
+	AlbumSrc                    = "Album"
+	PlaylistSrc                 = "Playlist"
 )

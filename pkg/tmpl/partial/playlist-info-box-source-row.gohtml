@@ -2,18 +2,18 @@
 <div class="py-4">
 	<div class="flex flex-row justify-start items-center">
 		<div class="w-16 h-16 bg-gray-400 rounded-lg inline-block"></div>
-		<span class="text-gray-500 text-sm pl-3">Discover Weekly</span>
+		<span class="text-gray-500 text-sm pl-3">{{ .Name }}</span>
 	</div>
 </div>
 <div class="py-4">
 	<div class="flex flex-row justify-start items-center">
-		<span class="text-2xl leading-none text-gray-900">42</span>
+		<span class="text-2xl leading-none text-gray-900">{{ .Count }}</span>
 		<span class="text-gray-500 text-sm pl-3">songs</span>
 	</div>
 </div>
 <div class="py-4">
 	<div class="flex flex-row justify items-center">
-		<span class="text-2xl leading-none text-gray-900">Randomly</span>
+		<span class="text-2xl leading-none text-gray-900">{{ .Method }}</span>
 		<span class="text-gray-500 text-sm pl-3">chosen</span>
 	</div>
 </div>

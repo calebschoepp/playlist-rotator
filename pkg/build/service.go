@@ -25,12 +25,12 @@ var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 func init() {
 	trackFetchers = map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher{
 		store.Top: map[store.TrackSourceType]trackFetcher{
-			store.PlaylistSrc:   getTopPlaylistTracks,
-			store.LikedSongsSrc: getTopLikedSongsTracks,
+			store.PlaylistSrc: getTopPlaylistTracks,
+			store.LikedSrc:    getTopLikedSongsTracks,
 		},
 		store.Random: map[store.TrackSourceType]trackFetcher{
-			store.PlaylistSrc:   getRandomPlaylistTracks,
-			store.LikedSongsSrc: getRandomLikedSongsTracks,
+			store.PlaylistSrc: getRandomPlaylistTracks,
+			store.LikedSrc:    getRandomLikedSongsTracks,
 		},
 	}
 }

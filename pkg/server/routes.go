@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -197,25 +198,156 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 		// TODO handle error
 	}
 
+	// // Get playlistID
+	vars := mux.Vars(r)
+	playlistID := vars["playlistID"]
+
 	r.ParseForm()
 
+	// TODO can I extract some logic here somehow?
+	// Iterate over all form values and build up a playlist record
+	playlist := store.Playlist{}
+	input := store.Input{}
+	trackSources := map[string]*store.TrackSource{}
 	for k, v := range r.Form {
 		fmt.Printf("%v: %v\n", k, strings.Join(v, ""))
+		if k == "name" {
+			playlist.Name = strings.Join(v, "")
+		} else if k == "description" {
+			playlist.Description = strings.Join(v, "")
+		} else if k == "access" {
+			switch strings.Join(v, "") {
+			case "public":
+				playlist.Public = true
+			case "private":
+				playlist.Public = false
+			}
+		} else if k == "schedule" {
+			switch strings.Join(v, "") {
+			case string(store.Never):
+				playlist.Schedule = store.Never
+			case string(store.Daily):
+				playlist.Schedule = store.Daily
+			case string(store.Weekly):
+				playlist.Schedule = store.Weekly
+			case string(store.BiWeekly):
+				playlist.Schedule = store.BiWeekly
+			case string(store.Monthly):
+				playlist.Schedule = store.Monthly
+			}
+		} else if strings.HasSuffix(k, "type") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			typ := strings.Join(v, "")
+			var typEnum store.TrackSourceType
+			switch typ {
+			case string(store.AlbumSrc):
+				typEnum = store.AlbumSrc
+			case string(store.LikedSrc):
+				typEnum = store.LikedSrc
+			case string(store.PlaylistSrc):
+				typEnum = store.PlaylistSrc
+			}
+			if ts, ok := trackSources[id]; ok {
+				ts.Type = typEnum
+			} else {
+				trackSources[id] = &store.TrackSource{Type: typEnum}
+			}
+		} else if strings.HasSuffix(k, "id") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			idVal := strings.Join(v, "")
+			if ts, ok := trackSources[id]; ok {
+				ts.ID = spotify.ID(idVal)
+			} else {
+				trackSources[id] = &store.TrackSource{ID: spotify.ID(idVal)}
+			}
+		} else if strings.HasSuffix(k, "count") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			count := strings.Join(v, "")
+			countVal, err := strconv.Atoi(count)
+			if err != nil {
+				// TODO handle error
+			}
+			if ts, ok := trackSources[id]; ok {
+				ts.Count = countVal
+			} else {
+				trackSources[id] = &store.TrackSource{Count: countVal}
+			}
+		} else if strings.HasSuffix(k, "method") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			method := strings.Join(v, "")
+			var methodEnum store.ExtractMethod
+			switch method {
+			case string(store.Random):
+				methodEnum = store.Random
+			case string(store.Top):
+				methodEnum = store.Top
+			}
+			if ts, ok := trackSources[id]; ok {
+				ts.Method = methodEnum
+			} else {
+				trackSources[id] = &store.TrackSource{Method: methodEnum}
+			}
+		} else if strings.HasSuffix(k, "name") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			name := strings.Join(v, "")
+			if ts, ok := trackSources[id]; ok {
+				ts.Name = name
+			} else {
+				trackSources[id] = &store.TrackSource{Name: name}
+			}
+		} else if k == "submit" {
+			// TODO should I do something about this
+			s.Log.Println("Just submit no worries for now")
+		} else {
+			// TODO log and potentially error on extraneous form input
+			s.Log.Println("Form value did not match expected format")
+		}
 	}
 
-	// TODO validate name
-	// TODO all of this
-	// name := r.FormValue("name")
-	// description := r.FormValue("description")
-	// public := false
+	// TODO validate that everything on playlist that should be filled in is
+	// Add input to playlist
+	for _, ts := range trackSources {
+		input.TrackSources = append(input.TrackSources, *ts)
+	}
+	b, err := json.Marshal(&input)
+	if err != nil {
+		// TODO handle error
+	}
+	playlist.Input = string(b)
 
-	// err := s.Store.CreatePlaylist(*userID, store.Input{}, name, description, public)
-	// if err != nil {
-	// 	s.Log.Printf("Failed to create new playlist: %v", err)
-	// 	// TODO handle error
-	// }
+	s.Log.Printf("%v", playlist)
 
-	s.Tmpl.TmplPlaylist(w, tmpl.Playlist{Name: r.FormValue("name")})
+	// Move data into store
+	if playlistID == "new" {
+		err = s.Store.CreatePlaylist(
+			*userID,
+			input,
+			playlist.Name,
+			playlist.Description,
+			playlist.Public,
+			playlist.Schedule,
+		)
+		if err != nil {
+			// TODO handle error
+			s.Log.Printf("INSERT error: %v", err)
+		}
+	} else {
+		pid, err := uuid.Parse(playlistID)
+		if err != nil {
+			// TODO handle error
+		}
+		err = s.Store.UpdatePlaylistConfig(pid, playlist)
+		if err != nil {
+			// TODO handle error
+		}
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) {
@@ -237,8 +369,8 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	source.Name = name
 	source.ID = spotify.ID(id)
 	switch typeString {
-	case string(store.LikedSongsSrc):
-		source.Type = store.LikedSongsSrc
+	case string(store.LikedSrc):
+		source.Type = store.LikedSrc
 	case string(store.AlbumSrc):
 		source.Type = store.AlbumSrc
 	case string(store.PlaylistSrc):

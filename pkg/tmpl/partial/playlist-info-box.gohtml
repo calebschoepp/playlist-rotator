@@ -11,12 +11,12 @@
 		<div class="w-9/12">
 			{{/* Name and tag */}}
 			<div class="flex flex-row justify-start items-center">
-				<h1 class="slab text-2xl text-gray-900 font-black mr-4">Scary tunes for my bedtime</h1>
+				<h1 class="slab text-2xl text-gray-900 font-black mr-4">{{ .Name }}</h1>
 				<img src="/static/built_pill.svg" alt="built">
 			</div>
 
 			{{/* description */}}
-			<p class="text-gray-500 text-lg">This is a description</p>
+			<p class="text-gray-500 text-lg">{{ .Description }}</p>
 		</div>
 
 		{{/* Song count and schedule */}}
@@ -39,7 +39,7 @@
 		<div class="pt-4">
 			<h2 class="text-lg underline text-gray-700">Method</h2>
 		</div>
-		{{ template "playlist-info-box-source-row" }}
+		{{ template "playlist-info-box-source-row" .Input }}
 	</div>
 
 
@@ -53,14 +53,13 @@
 
 		{{/* Buttons */}}
 		<div>
-			<a href="/playlist/{{ "TODO FILL THIS IN" }}" class="pr-6 TERTIARY_BUTTON text-gray-700 hover:text-green-500 py-2 px-2">
+			<a href="/playlist/{{ .ID }}" class="pr-6 TERTIARY_BUTTON text-gray-700 hover:text-green-500 py-2 px-2">
 				Edit
 			</a>
-			<a href="{{ "TODO FILL THIS IN" }}" class="SECONDARY_BUTTON bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
+			<span onClick="build({{ .ID }});" class="SECONDARY_BUTTON bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
 				Build
-			</a>
+			</span>
 		</div>
-
 	</div>
 </div>
 {{ end }}

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -62,7 +61,7 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 
 	// Add liked songs
 	pss := []tmpl.PotentialSource{}
-	pss = append(pss, tmpl.PotentialSource{Name: "Liked Songs", ID: "", Type: store.LikedSongsSrc})
+	pss = append(pss, tmpl.PotentialSource{Name: "Liked Songs", ID: "", Type: store.LikedSrc})
 
 	// Find and add playlists
 	limit := 20
@@ -72,7 +71,6 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("total: %d", playlists.Total)
 	// TODO check total to see if there is > 50 playlists, if so grab the rest
 	for _, playlist := range playlists.Playlists {
 		ps := tmpl.PotentialSource{
@@ -83,23 +81,23 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 		pss = append(pss, ps)
 	}
 
-	// Find and add albums
-	albums, err := client.CurrentUsersAlbumsOpt(&spotify.Options{
-		Limit: &limit,
-	})
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("total %d", albums.Total)
-	// TODO check total to see if there is > 50 playlists, if so grab the rest
-	for _, album := range albums.Albums {
-		ps := tmpl.PotentialSource{
-			Name: album.FullAlbum.SimpleAlbum.Name,
-			ID:   string(album.FullAlbum.SimpleAlbum.ID),
-			Type: store.AlbumSrc,
-		}
-		pss = append(pss, ps)
-	}
+	// TODO add this back
+	// // Find and add albums
+	// albums, err := client.CurrentUsersAlbumsOpt(&spotify.Options{
+	// 	Limit: &limit,
+	// })
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// // TODO check total to see if there is > 50 playlists, if so grab the rest
+	// for _, album := range albums.Albums {
+	// 	ps := tmpl.PotentialSource{
+	// 		Name: album.FullAlbum.SimpleAlbum.Name,
+	// 		ID:   string(album.FullAlbum.SimpleAlbum.ID),
+	// 		Type: store.AlbumSrc,
+	// 	}
+	// 	pss = append(pss, ps)
+	// }
 
 	return pss, nil
 }
