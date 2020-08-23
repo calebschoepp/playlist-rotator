@@ -23,13 +23,23 @@ type TrackSource struct {
 	Method ExtractMethod   `json:"method"`
 }
 
+func (t TrackSource) StringifyMethod() string {
+	switch t.Method {
+	case Randomly:
+		return string(Randomly)
+	case Latest:
+		return string(Latest)
+	}
+	return "Unknown method"
+}
+
 type ExtractMethod string
 
 const (
 	// Random songs are chosen from the source
-	Random ExtractMethod = "random"
+	Randomly ExtractMethod = "Randomly"
 	// Top songs are chosen from the source TODO change this to latest
-	Top = "top"
+	Latest = "Latest" // TODO rename this to latest
 )
 
 type Schedule string

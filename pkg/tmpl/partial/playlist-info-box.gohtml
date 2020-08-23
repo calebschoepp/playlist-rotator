@@ -39,7 +39,9 @@
 		<div class="pt-4">
 			<h2 class="text-lg underline text-gray-700">Method</h2>
 		</div>
-		{{ template "playlist-info-box-source-row" .Input }}
+		{{ range .Input.TrackSources }}
+			{{ template "playlist-info-box-source-row" . }}
+		{{ end }}
 	</div>
 
 

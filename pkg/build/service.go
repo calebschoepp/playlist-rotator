@@ -1,7 +1,6 @@
 package build
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -24,11 +23,11 @@ var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 
 func init() {
 	trackFetchers = map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher{
-		store.Top: map[store.TrackSourceType]trackFetcher{
+		store.Latest: map[store.TrackSourceType]trackFetcher{
 			store.PlaylistSrc: getTopPlaylistTracks,
 			store.LikedSrc:    getTopLikedSongsTracks,
 		},
-		store.Random: map[store.TrackSourceType]trackFetcher{
+		store.Randomly: map[store.TrackSourceType]trackFetcher{
 			store.PlaylistSrc: getRandomPlaylistTracks,
 			store.LikedSrc:    getRandomLikedSongsTracks,
 		},
@@ -54,15 +53,16 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 		return
 	}
 
-	// Build and validate input
-	var input store.Input
-	err = json.Unmarshal([]byte(playlist.Input), &input)
-	if err != nil {
-		s.logBuildError(userID, playlistID, err)
-		// TODO handle error
-		fmt.Printf("ERROR 2: %v", err)
-		return
-	}
+	// TODO not needed anymore?
+	// // Build and validate input
+	// var input store.Input
+	// err = json.Unmarshal([]byte(playlist.Input), &input)
+	// if err != nil {
+	// 	s.logBuildError(userID, playlistID, err)
+	// 	// TODO handle error
+	// 	fmt.Printf("ERROR 2: %v", err)
+	// 	return
+	// }
 
 	// Build and validate output
 	output := store.Output{
@@ -98,7 +98,7 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	}
 
 	// Build the playlist
-	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, input, output)
+	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, playlist.Input, output)
 	if err != nil {
 		s.logBuildError(userID, playlistID, err)
 		// TODO handle error
@@ -203,7 +203,7 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSour
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(trackSource.ID, &opts, "items(track(id)))")
+		trackPage, err := client.GetPlaylistTracksOpt(trackSource.ID, &opts, "items(track(id))") // TODO fields are wrong here
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {

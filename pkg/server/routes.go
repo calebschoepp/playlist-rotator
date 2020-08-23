@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -31,6 +30,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		s.Log.Printf("Error fetching playlists: %v", err)
 		// TODO handle error
 	}
+
 	tmplData.Playlists = playlists
 
 	s.Tmpl.TmplHome(w, tmplData)
@@ -166,18 +166,22 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		tmplData.Public = playlist.Public
 		tmplData.Schedule = playlist.Schedule
 
-		var input store.Input
-		err = json.Unmarshal([]byte(playlist.Input), &input)
-		if err != nil {
-			// TODO handle error
-			// Probably return generic error page
-		}
-		tmplData.Sources = input.TrackSources
+		// TODO don't need anymore
+		// var input store.Input
+		// err = json.Unmarshal([]byte(playlist.Input), &input)
+		// if err != nil {
+		// 	// TODO handle error
+		// 	// Probably return generic error page
+		// }
+		tmplData.Sources = playlist.Input.TrackSources
 	} else {
 		// New playlist so everything is empty
 		tmplData.IsNew = true
 	}
 
+	s.Log.Println(tmplData.Description)
+	s.Log.Println(tmplData.Name)
+	s.Log.Println(tmplData.Sources)
 	// Regardless we gather the potential sources
 	potentialSources, err := getPotentialSources(s.Store, s.SpotifyAuth, userID)
 	if err != nil {
@@ -207,7 +211,6 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	// TODO can I extract some logic here somehow?
 	// Iterate over all form values and build up a playlist record
 	playlist := store.Playlist{}
-	input := store.Input{}
 	trackSources := map[string]*store.TrackSource{}
 	for k, v := range r.Form {
 		fmt.Printf("%v: %v\n", k, strings.Join(v, ""))
@@ -281,10 +284,10 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 			method := strings.Join(v, "")
 			var methodEnum store.ExtractMethod
 			switch method {
-			case string(store.Random):
-				methodEnum = store.Random
-			case string(store.Top):
-				methodEnum = store.Top
+			case string(store.Randomly):
+				methodEnum = store.Randomly
+			case string(store.Latest):
+				methodEnum = store.Latest
 			}
 			if ts, ok := trackSources[id]; ok {
 				ts.Method = methodEnum
@@ -311,20 +314,23 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 
 	// TODO validate that everything on playlist that should be filled in is
 	// Add input to playlist
+	input := store.Input{}
 	for _, ts := range trackSources {
 		input.TrackSources = append(input.TrackSources, *ts)
 	}
-	b, err := json.Marshal(&input)
-	if err != nil {
-		// TODO handle error
-	}
-	playlist.Input = string(b)
+	// TODO don't need anymore
+	// b, err := json.Marshal(&input)
+	// if err != nil {
+	// 	// TODO handle error
+	// }
+	// playlist.Input = string(b)
+	playlist.Input = input
 
 	s.Log.Printf("%v", playlist)
 
 	// Move data into store
 	if playlistID == "new" {
-		err = s.Store.CreatePlaylist(
+		err := s.Store.CreatePlaylist(
 			*userID,
 			input,
 			playlist.Name,
@@ -365,7 +371,7 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 
 	source := store.TrackSource{}
 	source.Count = 0
-	source.Method = store.Random
+	source.Method = store.Latest
 	source.Name = name
 	source.ID = spotify.ID(id)
 	switch typeString {
@@ -378,4 +384,25 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	}
 
 	s.Tmpl.TmplTrackSource(w, tmpl.TrackSource{Source: source})
+}
+
+func (s *Server) playlistBuild(w http.ResponseWriter, r *http.Request) {
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		s.Log.Println("Failed to get userID from context")
+		// TODO handle error
+	}
+
+	// Get playlistID
+	vars := mux.Vars(r)
+	pid := vars["playlistID"]
+	playlistID, err := uuid.Parse(pid)
+	if err != nil {
+		// TODO handle error
+	}
+
+	s.Log.Printf("%v, %v", userID, playlistID)
+	go s.Builder.BuildPlaylist(*userID, playlistID)
+	w.WriteHeader(http.StatusAccepted)
 }

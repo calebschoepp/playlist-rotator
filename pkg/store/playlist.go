@@ -15,7 +15,8 @@ type Playlist struct {
 	ID     uuid.UUID `db:"id"`
 	UserID uuid.UUID `db:"user_id"`
 
-	Input       string   `db:"input"` // TODO this isn't great that it is a string, maybe use an unexported field for input that is always unmarshalled from before leaving a store method
+	Input       Input    // TODO this isn't great that it is a string, maybe use an unexported field for input that is always unmarshalled from before leaving a store method
+	InputString string   `db:"input"` // TODO build some marshalling functions that automatically convert back and forth here
 	Name        string   `db:"name"`
 	Description string   `db:"description"`
 	Public      bool     `db:"public"`
@@ -26,6 +27,25 @@ type Playlist struct {
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
 	LastBuiltAt *time.Time `db:"last_built_at"`
+}
+
+func (p *Playlist) MarshalInput() error {
+	b, err := json.Marshal(&p.Input)
+	if err != nil {
+		return err
+	}
+	p.InputString = string(b)
+	return nil
+}
+
+func (p *Playlist) UnmarshalInput() error {
+	var i Input
+	err := json.Unmarshal([]byte(p.InputString), &i)
+	if err != nil {
+		return err
+	}
+	p.Input = i
+	return nil
 }
 
 // CreatePlaylist inserts a new playlist into the DB
@@ -72,9 +92,14 @@ UPDATE playlists SET
 	schedule=$5
 WHERE user_id=$6;
 `
-	_, err := p.db.Exec(
+	err := playlist.MarshalInput()
+	if err != nil {
+		return err
+	}
+
+	_, err = p.db.Exec(
 		query,
-		playlist.Input,
+		playlist.InputString,
 		playlist.Name,
 		playlist.Description,
 		playlist.Public,
@@ -99,6 +124,10 @@ WHERE id=$1;
 	if err != nil {
 		return nil, err
 	}
+	err = playlist.UnmarshalInput()
+	if err != nil {
+		return nil, err
+	}
 	return &playlist, nil
 }
 
@@ -114,6 +143,14 @@ WHERE user_id=$1;
 	if err != nil {
 		return playlists, err
 	}
+
+	for i := range playlists {
+		err = playlists[i].UnmarshalInput()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return playlists, nil
 }
 

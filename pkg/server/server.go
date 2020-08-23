@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/build"
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
@@ -21,6 +22,7 @@ type Server struct {
 	SpotifyAuth *spotify.Authenticator
 	Store       store.Store
 	Tmpl        tmpl.Templater
+	Builder     build.Builder
 }
 
 // New builds a new Server struct
@@ -51,6 +53,9 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 		return nil, err
 	}
 
+	// Build builder
+	builder := build.New(store, spotifyAuth)
+
 	return &Server{
 		Log:         log,
 		Config:      config,
@@ -58,6 +63,7 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 		SpotifyAuth: &spotifyAuth,
 		Store:       store,
 		Tmpl:        tmpl,
+		Builder:     builder,
 	}, nil
 }
 
@@ -79,6 +85,7 @@ func (s *Server) SetupRoutes() {
 	s.Router.Path("/playlist/{playlistID}").Methods("GET").HandlerFunc(s.playlistPage)
 	s.Router.Path("/playlist/{playlistID}").Methods("POST").HandlerFunc(s.playlistForm)
 	s.Router.Path("/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}").Methods("GET").HandlerFunc(s.playlistTrackSourceAPI)
+	s.Router.Path("/playlist/{playlistID}/build").Methods("POST").HandlerFunc(s.playlistBuild)
 }
 
 // Run makes the Server start listening and serving on the configured addr
