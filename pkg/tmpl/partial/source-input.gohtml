@@ -1,5 +1,6 @@
 {{ define "source-input" }}
-<div class="flex flex-row justify-start items-center">
+{{ $sourceInputID := printf "ID%sTIME%s" .ID unixTime }}
+<div class="flex flex-row justify-start items-center" id="{{ $sourceInputID }}">
 	{{/* Source info */}}
 	<div class="mr-16">
 		<h4 class="text-lg text-gray-700 text-left p-2 mt-6 w-40">{{ .Name }}</h2>
@@ -27,8 +28,8 @@
 				</div>
 			</div>
 			<span class="pl-2 text-gray-700">chosen</span>
-			<div class="pl-10 group">
-				<img class="group-hover:hidden"src="/static/delete.svg" alt="delete">
+			<div class="pl-10 flex items-center justify-center">
+				<img class="w-6 h-6 hover:w-4 hover:h-4" src="/static/delete.svg" alt="delete" onClick="deleteSourceInput({{ $sourceInputID }})">
 			</div>
 		</div>
 	</div>

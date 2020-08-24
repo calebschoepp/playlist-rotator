@@ -1,9 +1,11 @@
 package tmpl
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
@@ -57,12 +59,16 @@ type TemplateService struct {
 
 // New returns a pointer to a TemplateService
 func New() (*TemplateService, error) {
+	funcMap := template.FuncMap{
+		"unixTime": func() string { return fmt.Sprintf("%v", time.Now().Unix()) },
+	}
+
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 
-	templates, err := template.ParseGlob(pwd + "/pkg/tmpl/*/*.gohtml")
+	templates, err := template.New("main").Funcs(funcMap).ParseGlob(pwd + "/pkg/tmpl/*/*.gohtml")
 	if err != nil {
 		return nil, err
 	}

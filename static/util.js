@@ -44,3 +44,9 @@ function createFragment(htmlStr) {
   }
   return frag;
 }
+
+function deleteSourceInput(id) {
+  var element = document.querySelector("#" + id);
+  element.parentNode.removeChild(element);
+  return;
+}

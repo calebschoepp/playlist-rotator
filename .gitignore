@@ -20,3 +20,6 @@ bin/*
 
 # For air hot reloader
 tmp/*
+
+# For npm pipeline
+node_modules/

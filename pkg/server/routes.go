@@ -202,7 +202,7 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 		// TODO handle error
 	}
 
-	// // Get playlistID
+	// Get playlistID
 	vars := mux.Vars(r)
 	playlistID := vars["playlistID"]
 
@@ -346,10 +346,12 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 		pid, err := uuid.Parse(playlistID)
 		if err != nil {
 			// TODO handle error
+			s.Log.Printf("ERROR HERE: %v", err)
 		}
 		err = s.Store.UpdatePlaylistConfig(pid, playlist)
 		if err != nil {
 			// TODO handle error
+			s.Log.Printf("ERROR HERE: %v", err)
 		}
 	}
 

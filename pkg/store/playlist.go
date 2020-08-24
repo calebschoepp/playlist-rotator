@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -96,6 +97,8 @@ WHERE user_id=$6;
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("INPUTSTRING: %s", playlist.InputString)
 
 	_, err = p.db.Exec(
 		query,

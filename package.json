@@ -1,0 +1,25 @@
+{
+  "name": "playlist-rotator",
+  "version": "1.0.0",
+  "description": "Automatically rotate Spotify playlists",
+  "main": "index.js",
+  "scripts": {
+    "build": "postcss css/tailwind.css -o static/tailwind.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calebschoepp/playlist-rotator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calebschoepp/playlist-rotator/issues"
+  },
+  "homepage": "https://github.com/calebschoepp/playlist-rotator#readme",
+  "devDependencies": {
+    "autoprefixer": "9.8.6",
+    "postcss-cli": "7.1.1",
+    "tailwindcss": "1.7.3"
+  }
+}
