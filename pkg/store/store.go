@@ -26,4 +26,5 @@ type Store interface {
 	GetPlaylists(userID uuid.UUID) ([]Playlist, error)
 	UpdatePlaylistGoodBuild(id uuid.UUID, spotifyID string) error
 	UpdatePlaylistBadBuild(id uuid.UUID, failureMsg string) error
+	UpdatePlaylistStartBuild(id uuid.UUID) error
 }

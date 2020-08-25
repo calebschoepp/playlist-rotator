@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +23,7 @@ type Playlist struct {
 	Schedule    Schedule `db:"schedule"`
 	SpotifyID   *string  `db:"spotify_id"`
 	FailureMsg  *string  `db:"failure_msg"`
+	Building    bool     `db:"building"`
 
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
@@ -91,14 +91,12 @@ UPDATE playlists SET
 	description=$3,
 	public=$4,
 	schedule=$5
-WHERE user_id=$6;
+WHERE id=$6;
 `
 	err := playlist.MarshalInput()
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("INPUTSTRING: %s", playlist.InputString)
 
 	_, err = p.db.Exec(
 		query,
@@ -157,13 +155,27 @@ WHERE user_id=$1;
 	return playlists, nil
 }
 
+func (p *Postgres) UpdatePlaylistStartBuild(id uuid.UUID) error {
+	query := `
+UPDATE playlists SET
+	building=TRUE
+WHERE id=$1;
+	`
+	_, err := p.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdatePlaylistGoodBuild updates a playlist entry after a successful build of the playlist
 func (p *Postgres) UpdatePlaylistGoodBuild(id uuid.UUID, spotifyID string) error {
 	query := `
 UPDATE playlists SET
 	spotify_id=$1,
 	last_built_at=$2,
-	failure_msg=NULL
+	failure_msg=NULL,
+	building=FALSE
 WHERE id=$3;
 `
 	_, err := p.db.Exec(query, spotifyID, time.Now(), id)
@@ -178,7 +190,8 @@ func (p *Postgres) UpdatePlaylistBadBuild(id uuid.UUID, failureMsg string) error
 	query := `
 UPDATE playlists SET
 	last_built_at=$1,
-	failure_msg=$2
+	failure_msg=$2,
+	building=FALSE
 WHERE id=$3;
 `
 	_, err := p.db.Exec(query, time.Now(), failureMsg, id)

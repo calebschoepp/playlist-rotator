@@ -9,3 +9,4 @@
 - Turn sources input section into a table like the info section is
 - Helper function to make spotify client from db user
 - verify that I'm properly getting all of the potential sources
+- HTTP only for auth cookie

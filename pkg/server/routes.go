@@ -31,7 +31,65 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		// TODO handle error
 	}
 
-	tmplData.Playlists = playlists
+	for _, p := range playlists {
+		totalSongs := 0
+		for _, ts := range p.Input.TrackSources {
+			totalSongs += ts.Count
+		}
+
+		var scheduleBlurb string
+		var scheduleSentence string
+		format := "Scheduled to build at %s"
+		layout := "3 PM on Monday, January 2"
+		lastBuilt := p.LastBuiltAt
+		if lastBuilt == nil {
+			t := time.Now()
+			lastBuilt = &t
+		}
+		schedule := p.Schedule
+		switch schedule {
+		case store.Never:
+			scheduleBlurb = ""
+			scheduleSentence = "You must manually build the playlist"
+		case store.Daily:
+			scheduleBlurb = "built daily"
+			t := lastBuilt.AddDate(0, 0, 1)
+			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
+		case store.Weekly:
+			scheduleBlurb = "built weekly"
+			t := lastBuilt.AddDate(0, 0, 7)
+			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
+		case store.BiWeekly:
+			scheduleBlurb = "built bi-weekly"
+			t := lastBuilt.AddDate(0, 0, 14)
+			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
+		case store.Monthly:
+			scheduleBlurb = "built monthly"
+			t := lastBuilt.AddDate(0, 1, 0)
+			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
+		}
+
+		var pillName string
+		if p.Building {
+			pillName = "building"
+		} else if p.FailureMsg != nil {
+			pillName = "failed"
+		} else if p.SpotifyID == nil {
+			pillName = "not_built_yet"
+		} else {
+			pillName = "built"
+		}
+		buildTagSrc := fmt.Sprintf("/static/%s_pill.svg", pillName)
+
+		pInfo := tmpl.PlaylistInfo{
+			Playlist:         p,
+			TotalSongs:       totalSongs,
+			BuildTagSrc:      buildTagSrc,
+			ScheduleBlurb:    scheduleBlurb,
+			ScheduleSentence: scheduleSentence,
+		}
+		tmplData.Playlists = append(tmplData.Playlists, pInfo)
+	}
 
 	s.Tmpl.TmplHome(w, tmplData)
 }
@@ -325,8 +383,6 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	// }
 	// playlist.Input = string(b)
 	playlist.Input = input
-
-	s.Log.Printf("%v", playlist)
 
 	// Move data into store
 	if playlistID == "new" {

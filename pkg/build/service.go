@@ -44,6 +44,13 @@ func New(store store.Store, auth spotify.Authenticator) *Service {
 
 // BuildPlaylist uses the configuration from playlistID to build a spotify playlist for userID
 func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
+	// Tell DB that playlist is currently being built
+	err := s.store.UpdatePlaylistStartBuild(playlistID)
+	if err != nil {
+		// TODO handle error
+		return
+	}
+
 	// Get playlist configuration
 	playlist, err := s.store.GetPlaylist(playlistID)
 	if err != nil {

@@ -12,7 +12,7 @@
 			{{/* Name and tag */}}
 			<div class="flex flex-row justify-start items-center">
 				<h1 class="slab text-2xl text-gray-900 font-black mr-4">{{ .Name }}</h1>
-				<img src="/static/built_pill.svg" alt="built">
+				<img id="build-tag-{{- .ID -}}" src="{{ .BuildTagSrc }}" alt="built">
 			</div>
 
 			{{/* description */}}
@@ -21,9 +21,9 @@
 
 		{{/* Song count and schedule */}}
 		<div class="flex flex-col justify-start items-center">
-			<h2 class="slab text-4xl text-gray-900 font-black leading-none">142</h2>
-			<h4 class="text-gray-500">songs</h4>
-			<h3 class="text-gray-700 text-lg">Built Daily</h3>
+			<h2 class="slab text-4xl text-gray-900 font-black leading-none">{{ .TotalSongs }}</h2>
+			<h3 class="text-gray-500">songs</h3>
+			<h3 class="text-gray-500">{{ .ScheduleBlurb }}</h3>
 		</div>
 	</div>
 
@@ -50,7 +50,7 @@
 		{{/* Scheduled to build */}}
 		<div class="flex flex-row items-center justify-start">
 			<img src="/static/clock.svg" alt="clock">
-			<span class="pl-2 text-base text-gray-500">Scheduled to build again at 1PM on Saturday June 1st</span>
+			<span class="pl-2 text-base text-gray-500">{{ .ScheduleSentence }}</span>
 		</div>
 
 		{{/* Buttons */}}

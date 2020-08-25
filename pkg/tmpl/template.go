@@ -20,7 +20,15 @@ type Templater interface {
 
 // Home is the data required to template '/'
 type Home struct {
-	Playlists []store.Playlist
+	Playlists []PlaylistInfo
+}
+
+type PlaylistInfo struct {
+	store.Playlist
+	TotalSongs       int
+	BuildTagSrc      string
+	ScheduleBlurb    string
+	ScheduleSentence string
 }
 
 // Login is the data required to template '/login'
