@@ -5,14 +5,14 @@
 		{{/* Name */}}
 		<div class="w-1/2">
 			<label class="input-label pt-6">Name</label>
-			<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-11/12 px-2" type="text" placeholder="My Playlist" name="name" maxlength="100" value="{{ .Name }}"/>
+			<input class="text-input h-10 w-11/12 px-2 py-1" type="text" placeholder="My Playlist" name="name" maxlength="100" value="{{ .Name }}"/>
 		</div>
 
 		{{/* Schedule */}}
 		<div class="w-1/2">
 			<p class="input-label pt-6">Schedule</p>
 			<div class="inline-block relative w-11/12">
-				<select class="block appearance-none w-full h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="schedule">
+				<select class="block w-full h-10 text-input px-4 py-2 pr-8 leading-tight" name="schedule">
 					<option {{ if eq "Never" .Schedule}} selected {{ end }}>Never</option>
 					<option {{ if eq "Daily" .Schedule}} selected {{ end }}>Daily</option>
 					<option {{ if eq "Weekly" .Schedule}} selected {{ end }}>Weekly</option>
@@ -31,7 +31,7 @@
 		{{/* Description */}}
 		<div class="w-3/4">
 			<label class="input-label pt-6">Description</label>
-			<textarea class="TEXT_AREA_INPUT w-11/12 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg px-2 py-1 " rows="3" type="text" placeholder="This is some of my favorite music." name="description" maxlength="300">{{ .Description }}</textarea>
+			<textarea class="w-11/12 text-input px-2 py-1 " rows="3" type="text" placeholder="This is some of my favorite music." name="description" maxlength="300">{{ .Description }}</textarea>
 		</div>
 
 		<div class="flex flex-row items-top justify-left w-1/4">

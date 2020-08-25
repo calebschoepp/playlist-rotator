@@ -50,4 +50,16 @@
   @apply text-gray-500 text-sm block pl-2 pb-1;
 }
 
+.text-input {
+  @apply bg-gray-300 border border-gray-400 text-gray-700 text-lg appearance-none rounded-lg;
+}
+
+.text-input:hover {
+  @apply border-gray-500;
+}
+
+.text-input:focus {
+  @apply outline-none shadow-outline;
+}
+
 @tailwind utilities;

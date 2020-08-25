@@ -11,7 +11,7 @@
 	{{/* Count */}}
 	<div class="mr-16">
 		<label class="input-label pt-6">Count</label>
-		<input class="TEXT_INPUT bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg appearance-none focus:outline-none focus:shadow-outline rounded-lg h-10 w-16 px-2" type="text" placeholder="0" name="{{- .ID -}}::count" maxlength="100" value="{{ .Count }}"/>
+		<input class="text-input h-10 w-16 px-2" type="text" placeholder="0" name="{{- .ID -}}::count" maxlength="100" value="{{ .Count }}"/>
 		<span class="pl-1 text-gray-700">songs</span>
 	</div>
 
@@ -20,7 +20,7 @@
 		<p class="input-label pt-6">Method</p>
 		<div class="flex flex-row justify-start items-center">
 			<div class="inline-block relative">
-				<select class="block appearance-none w-64 h-10 bg-gray-300 border border-gray-400 hover:border-gray-500 text-gray-700 text-lg px-4 py-2 pr-8 rounded-lg leading-tight focus:outline-none focus:shadow-outline" name="{{- .ID -}}::method">
+				<select class="block w-64 h-10 text-input px-4 py-2 pr-8 leading-tight" name="{{- .ID -}}::method">
 					<option {{ if eq "Latest" .StringifyMethod }} selected {{ end }}>Latest</option>
 					<option {{ if eq "Randomly" .StringifyMethod }} selected {{ end }}>Randomly</option>
 				</select>
