@@ -2,35 +2,34 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"regexp"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
 
-// TODO this key thing is gross
 type contextKey int
 
 const (
 	userKey contextKey = iota
 )
 
-func newRequestLoggerMiddleware(log *log.Logger) func(next http.Handler) http.Handler {
+func newRequestLoggerMiddleware(log *zap.SugaredLogger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Call the next handler in chain
 			next.ServeHTTP(w, r)
 
 			// Log the request
-			log.Printf("Served request method=%s path=%s", r.Method, r.URL.Path)
+			log.Infow("served request", "path", r.URL.Path, "method", r.Method)
 		})
 	}
 }
 
-// TODO fix bug where auth is flaky and takes multiple times because of expiry date
-func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []string) func(next http.Handler) http.Handler {
+func newSessionAuthMiddleware(store store.Store, log *zap.SugaredLogger, blacklist []string) func(next http.Handler) http.Handler {
 	// Cache the regex object of each route
 	var blacklistRegexp []*regexp.Regexp
 	for _, expr := range blacklist {
@@ -54,7 +53,8 @@ func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []st
 			// Get session cookie
 			sessionCookie, err := r.Cookie(sessionCookieName)
 			if err != nil {
-				log.Println("User not authenticated: no session cookie: redirecting to /login")
+				log.Info("user not authenticated: no session cookie")
+				log.Info("redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
@@ -62,16 +62,16 @@ func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []st
 			// Get session expiry
 			sessionExpiry, err := store.GetSessionExpiry(sessionCookie.Value)
 			if err != nil {
-				// TODO better error handling here
-				log.Printf("%v", err)
-				log.Println("User not authenticated: no matching user: redirecting to /login")
+				log.Warnw("user not authenticated: no matching user", "err", err.Error())
+				log.Info("redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
 
 			// Verify session is not expired
 			if sessionExpiry.Before(time.Now()) {
-				log.Println("User not authenticated: session expired: redirecting to /login")
+				log.Info("user not authenticated: session expired")
+				log.Info("redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}
@@ -79,8 +79,8 @@ func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []st
 			// Store userID in context
 			userID, err := store.GetUserID(sessionCookie.Value)
 			if err != nil {
-				// TODO is this the right thing to do here?
-				log.Println("Something went wrong when fetching userID")
+				log.Errorw("something failed fetching userID", "err", err.Error())
+				log.Info("redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
 			}

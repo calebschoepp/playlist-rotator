@@ -8,14 +8,15 @@ import (
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
+	"go.uber.org/zap"
 )
 
 // Templater provides methods for templating HTML web pages
 type Templater interface {
-	TmplHome(w http.ResponseWriter, data Home) error
-	TmplLogin(w http.ResponseWriter, data Login) error
-	TmplPlaylist(w http.ResponseWriter, data Playlist) error
-	TmplTrackSource(w http.ResponseWriter, data TrackSource) error
+	TmplHome(w http.ResponseWriter, data Home)
+	TmplLogin(w http.ResponseWriter, data Login)
+	TmplPlaylist(w http.ResponseWriter, data Playlist)
+	TmplTrackSource(w http.ResponseWriter, data TrackSource)
 }
 
 // Home is the data required to template '/'
@@ -66,10 +67,11 @@ type TrackSource struct {
 // TemplateService is the concrete implmentation of Templater backed by html/template
 type TemplateService struct {
 	templates *template.Template
+	log       *zap.SugaredLogger
 }
 
 // New returns a pointer to a TemplateService
-func New() (*TemplateService, error) {
+func New(log *zap.SugaredLogger) (*TemplateService, error) {
 	funcMap := template.FuncMap{
 		"unixTime": func() string { return fmt.Sprintf("%v", time.Now().Unix()) },
 	}
@@ -86,34 +88,34 @@ func New() (*TemplateService, error) {
 
 	return &TemplateService{
 		templates: templates,
+		log:       log,
 	}, nil
 }
 
 // TmplHome templates '/'
-func (t *TemplateService) TmplHome(w http.ResponseWriter, data Home) error {
-	return t.renderTemplate(w, "home", data)
+func (t *TemplateService) TmplHome(w http.ResponseWriter, data Home) {
+	t.renderTemplate(w, "home", data)
 }
 
 // TmplLogin templates '/login'
-func (t *TemplateService) TmplLogin(w http.ResponseWriter, data Login) error {
-	return t.renderTemplate(w, "login", data)
+func (t *TemplateService) TmplLogin(w http.ResponseWriter, data Login) {
+	t.renderTemplate(w, "login", data)
 }
 
 // TmplPlaylist templates '/playlist/{playlistID}'
-func (t *TemplateService) TmplPlaylist(w http.ResponseWriter, data Playlist) error {
-	return t.renderTemplate(w, "playlist", data)
+func (t *TemplateService) TmplPlaylist(w http.ResponseWriter, data Playlist) {
+	t.renderTemplate(w, "playlist", data)
 }
 
 // TmplTrackSource templates '/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}'
-func (t *TemplateService) TmplTrackSource(w http.ResponseWriter, data TrackSource) error {
-	return t.renderTemplate(w, "track-source", data)
+func (t *TemplateService) TmplTrackSource(w http.ResponseWriter, data TrackSource) {
+	t.renderTemplate(w, "track-source", data)
 }
 
-func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) error {
+func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	err := t.templates.ExecuteTemplate(w, tmpl+".gohtml", data)
 	if err != nil {
+		t.log.Errorw("failed to render template", "err", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return err
 	}
-	return nil
 }

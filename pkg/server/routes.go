@@ -20,13 +20,17 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		// TODO handle error
+		s.Log.Error("failed to get userID from context")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
 	// Build spotify client
 	user, err := s.Store.GetUserByID(*userID)
 	if err != nil {
-		// TODO handle error
+		s.Log.Errorw("failed to load user from db", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 	token := oauth2.Token{
 		AccessToken:  user.AccessToken,
@@ -41,8 +45,9 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	// Get playlists
 	playlists, err := s.Store.GetPlaylists(*userID)
 	if err != nil {
-		s.Log.Printf("Error fetching playlists: %v", err)
-		// TODO handle error
+		s.Log.Errorw("failed to load playlists from db", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 
 	for _, p := range playlists {
@@ -103,8 +108,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		if p.SpotifyID != nil {
 			spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(*p.SpotifyID), "images")
 			if err != nil || len(spotifyPlaylist.Images) == 0 {
-				// TODO handle error
-				s.Log.Printf("ERROR: %v", err)
+				s.Log.Warnw("failed to fetch cover image for playlist", "err", err.Error(), "spotifyID", *p.SpotifyID)
 			}
 			imageURL = spotifyPlaylist.Images[0].URL
 		}
@@ -118,15 +122,14 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 			case store.AlbumSrc:
 				spotifyAlbum, err := client.GetAlbum(p.Input.TrackSources[i].ID)
 				if err != nil || len(spotifyAlbum.Images) == 0 {
-					// TODO handle error
-					s.Log.Printf("ERROR: %v", err)
+					s.Log.Warnw("failed to fetch cover image for album track source", "err", err.Error(), "spotifyID", p.Input.TrackSources[i].ID)
 				}
 				srcImageURL = spotifyAlbum.Images[0].URL
 			case store.PlaylistSrc:
 				spotifyPlaylist, err := client.GetPlaylistOpt(p.Input.TrackSources[i].ID, "images")
 				if err != nil || len(spotifyPlaylist.Images) == 0 {
-					// TODO handle error
-					s.Log.Printf("ERROR: %v", err)
+					s.Log.Warnw("failed to fetch cover image for playlist track source", "err", err.Error(), "spotifyID", p.Input.TrackSources[i].ID)
+
 				}
 				srcImageURL = spotifyPlaylist.Images[0].URL
 			}
@@ -176,17 +179,18 @@ func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-// TODO improve error handling
 func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	// Get oauth2 tokens
 	stateCookie, err := r.Cookie(stateCookieName)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Log.Errorw("failed to get state cookie for oauth2", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
 	token, err := s.SpotifyAuth.Token(stateCookie.Value, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Log.Errorw("failed to build spotify auth", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -194,26 +198,28 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	sessionToken := randomString(64)
 	sessionExpiry := time.Now().Add(sessionCookieExpiry)
 	sessionCookie := http.Cookie{
-		Name:    sessionCookieName,
-		Value:   sessionToken,
-		Expires: sessionExpiry,
+		Name:     sessionCookieName,
+		Value:    sessionToken,
+		Expires:  sessionExpiry,
+		HttpOnly: true,
 	}
 
 	// Get spotify ID
 	client := s.SpotifyAuth.NewClient(token)
 	privateUser, err := client.CurrentUser()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Log.Errorw("failed to get current spotify userID", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	// TODO confirm this is the right spotify ID to be using
 	spotifyID := privateUser.User.ID
 
 	// Check if user already exists for the spotify ID
 	userExists, err := s.Store.UserExists(spotifyID)
 	if err != nil {
-		// TODO handle error
-		s.Log.Printf("Error checking if user exists: %v", err)
+		s.Log.Errorw("failed to check if user already exists in db", "err", err.Error(), "spotifyID", spotifyID)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 	if userExists {
 		// Update user with new token and session data
@@ -224,7 +230,9 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 			*token,
 		)
 		if err != nil {
-			// TODO handle error
+			s.Log.Errorw("failed to update user with new session data", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 	} else {
 		// Create a new user
@@ -235,7 +243,9 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 			*token,
 		)
 		if err != nil {
-			// TODO handle error
+			s.Log.Errorw("failed to create new user", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -248,8 +258,9 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		s.Log.Println("Failed to get userID from context")
-		// TODO handle error
+		s.Log.Error("failed to build spotify auth")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
 	// Get playlistID
@@ -263,13 +274,15 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 
 		pid, err := uuid.Parse(playlistID)
 		if err != nil {
-			// TODO handle error
-			// Probably return generic error page
+			s.Log.Errorw("failed to parse playlist UUID", "err", err.Error(), "playlistID", playlistID)
+			http.Error(w, "invalid playlistID", http.StatusInternalServerError)
+			return
 		}
 		playlist, err := s.Store.GetPlaylist(pid)
 		if err != nil {
-			// TODO handle error
-			// Probably return generic error page
+			s.Log.Errorw("failed to get playlist from db", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 
 		tmplData.Name = playlist.Name
@@ -280,7 +293,9 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		// Build spotify client
 		user, err := s.Store.GetUserByID(*userID)
 		if err != nil {
-			// TODO handle error
+			s.Log.Errorw("failed to get user from db", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 		token := oauth2.Token{
 			AccessToken:  user.AccessToken,
@@ -299,15 +314,13 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 			case store.AlbumSrc:
 				spotifyAlbum, err := client.GetAlbum(playlist.Input.TrackSources[i].ID)
 				if err != nil || len(spotifyAlbum.Images) == 0 {
-					// TODO handle error
-					s.Log.Printf("ERROR: %v", err)
+					s.Log.Warnw("failed to fetch album source cover image", "err", err.Error(), "spotifyID", playlist.Input.TrackSources[i].ID)
 				}
 				srcImageURL = spotifyAlbum.Images[0].URL
 			case store.PlaylistSrc:
 				spotifyPlaylist, err := client.GetPlaylistOpt(playlist.Input.TrackSources[i].ID, "images")
 				if err != nil || len(spotifyPlaylist.Images) == 0 {
-					// TODO handle error
-					s.Log.Printf("ERROR: %v", err)
+					s.Log.Warnw("failed to fetch playlist album source cover image", "err", err.Error(), "spotifyID", playlist.Input.TrackSources[i].ID)
 				}
 				srcImageURL = spotifyPlaylist.Images[0].URL
 			}
@@ -323,8 +336,9 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 	// Regardless we gather the potential sources
 	potentialSources, err := getPotentialSources(s.Store, s.SpotifyAuth, userID)
 	if err != nil {
-		// TODO handle error
-		// Probably return generic error page
+		s.Log.Errorw("failed to get potential track sources", "err", err.Error(), "userID", userID)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 	tmplData.PotentialSources = potentialSources
 
@@ -335,8 +349,9 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		s.Log.Println("Failed to get userID from context")
-		// TODO handle error
+		s.Log.Error("failed to get userID from context")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
 	// Get playlistID
@@ -407,7 +422,9 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 			count := strings.Join(v, "")
 			countVal, err := strconv.Atoi(count)
 			if err != nil {
-				// TODO handle error
+				s.Log.Errorw("failed to parse count into integer", "err", err.Error())
+				http.Error(w, "count must be an integer", http.StatusInternalServerError)
+				return
 			}
 			if ts, ok := trackSources[id]; ok {
 				ts.Count = countVal
@@ -440,11 +457,9 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 				trackSources[id] = &store.TrackSource{Name: name}
 			}
 		} else if k == "submit" {
-			// TODO should I do something about this
-			s.Log.Println("Just submit no worries for now")
+			// Do nothing in this case
 		} else {
-			// TODO log and potentially error on extraneous form input
-			s.Log.Println("Form value did not match expected format")
+			s.Log.Warnw("extraneous form input", "key", k, "value", strings.Join(v, ""))
 		}
 	}
 
@@ -454,12 +469,6 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	for _, ts := range trackSources {
 		input.TrackSources = append(input.TrackSources, *ts)
 	}
-	// TODO don't need anymore
-	// b, err := json.Marshal(&input)
-	// if err != nil {
-	// 	// TODO handle error
-	// }
-	// playlist.Input = string(b)
 	playlist.Input = input
 
 	// Move data into store
@@ -473,26 +482,28 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 			playlist.Schedule,
 		)
 		if err != nil {
-			// TODO handle error
-			s.Log.Printf("INSERT error: %v", err)
+			s.Log.Errorw("failed to insert playlist into db", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 	} else {
 		pid, err := uuid.Parse(playlistID)
 		if err != nil {
-			// TODO handle error
-			s.Log.Printf("ERROR HERE: %v", err)
+			s.Log.Errorw("failed to parse playlistID as UUID", "err", err.Error(), "playlistID", playlistID)
+			http.Error(w, "invalid playlistID", http.StatusInternalServerError)
+			return
 		}
 		err = s.Store.UpdatePlaylistConfig(pid, playlist)
 		if err != nil {
-			// TODO handle error
-			s.Log.Printf("ERROR HERE: %v", err)
+			s.Log.Errorw("failed to update playlist in db", "err", err.Error(), "playlistID", pid)
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
 		}
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// TODO handle albums
 func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) {
 	// Get ids
 	// TODO validate IDs
@@ -503,19 +514,26 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 
 	name, err := url.QueryUnescape(encodedName)
 	if err != nil {
-		// TODO handle error
+		s.Log.Errorw("name is improperly url encoded", "err", err.Error(), "encodedName", encodedName)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		// TODO handle error
+		s.Log.Error("failed to get userID from context")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
+	// TODO extract this into helper method
 	// Build spotify client
 	user, err := s.Store.GetUserByID(*userID)
 	if err != nil {
-		// TODO handle error
+		s.Log.Errorw("failed to get user from db", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 	token := oauth2.Token{
 		AccessToken:  user.AccessToken,
@@ -547,15 +565,13 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	case store.AlbumSrc:
 		spotifyAlbum, err := client.GetAlbum(source.ID)
 		if err != nil || len(spotifyAlbum.Images) == 0 {
-			// TODO handle error
-			s.Log.Printf("ERROR: %v", err)
+			s.Log.Warnw("failed to fetch album cover image", "err", err.Error(), "spotifyID", source.ID)
 		}
 		srcImageURL = spotifyAlbum.Images[0].URL
 	case store.PlaylistSrc:
 		spotifyPlaylist, err := client.GetPlaylistOpt(source.ID, "images")
 		if err != nil || len(spotifyPlaylist.Images) == 0 {
-			// TODO handle error
-			s.Log.Printf("ERROR: %v", err)
+			s.Log.Warnw("failed to fetch playlist cover image", "err", err.Error(), "spotifyID", source.ID)
 		}
 		srcImageURL = spotifyPlaylist.Images[0].URL
 	}
@@ -568,8 +584,9 @@ func (s *Server) playlistBuild(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		s.Log.Println("Failed to get userID from context")
-		// TODO handle error
+		s.Log.Error("failed to get userID from context")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
 	// Get playlistID
@@ -577,10 +594,12 @@ func (s *Server) playlistBuild(w http.ResponseWriter, r *http.Request) {
 	pid := vars["playlistID"]
 	playlistID, err := uuid.Parse(pid)
 	if err != nil {
-		// TODO handle error
+		s.Log.Errorw("failed to parse playlist as UUID", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 
-	s.Log.Printf("%v, %v", userID, playlistID)
+	s.Log.Info("triggering background go routine to build playlist")
 	go s.Builder.BuildPlaylist(*userID, playlistID)
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -589,8 +608,9 @@ func (s *Server) playlistDelete(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
-		s.Log.Println("Failed to get userID from context")
-		// TODO handle error
+		s.Log.Error("failed to get userID from context")
+		http.Error(w, "failure authenticating", http.StatusForbidden)
+		return
 	}
 
 	// Get playlistID
@@ -598,10 +618,12 @@ func (s *Server) playlistDelete(w http.ResponseWriter, r *http.Request) {
 	pid := vars["playlistID"]
 	playlistID, err := uuid.Parse(pid)
 	if err != nil {
-		// TODO handle error
+		s.Log.Errorw("failed to parse playlist as UUID", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
 	}
 
-	s.Log.Printf("%v, %v", userID, playlistID)
+	s.Log.Info("triggering background go routine to delete playlist")
 	go s.Builder.DeletePlaylist(*userID, playlistID)
 	w.WriteHeader(http.StatusAccepted)
 }

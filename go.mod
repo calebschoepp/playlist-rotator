@@ -10,6 +10,7 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/spf13/cobra v1.0.0
 	github.com/zmb3/spotify v0.0.0-20200814173021-9bec46940cc0
+	go.uber.org/zap v1.15.0
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 )

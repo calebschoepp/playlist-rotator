@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/build"
@@ -12,11 +11,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify"
+	"go.uber.org/zap"
 )
 
 // Server congregates all of the services required to listen and serve HTTP requests
 type Server struct {
-	Log         *log.Logger
+	Log         *zap.SugaredLogger
 	Config      *config.Config
 	Router      *mux.Router
 	SpotifyAuth *spotify.Authenticator
@@ -26,7 +26,7 @@ type Server struct {
 }
 
 // New builds a new Server struct
-func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
+func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
 	// Build spotifyAuth
 	// TODO proabably a more idiomatic way to build redirectURL
 	var redirectURL string
@@ -49,7 +49,7 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	store := store.New(db)
 
 	// Build TmplService
-	tmpl, err := tmpl.New()
+	tmpl, err := tmpl.New(log)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +92,6 @@ func (s *Server) SetupRoutes() {
 
 // Run makes the Server start listening and serving on the configured addr
 func (s *Server) Run() {
-	s.Log.Printf("Listening on port %d", s.Config.Port)
+	s.Log.Infof("listening on port %d", s.Config.Port)
 	s.Log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.Config.Port), s.Router))
 }

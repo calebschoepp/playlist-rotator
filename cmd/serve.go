@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var serveCmd = &cobra.Command{
@@ -27,6 +28,8 @@ var serveCmd = &cobra.Command{
 		}
 
 		// Setup log
+		logger, _ := zap.NewDevelopment()
+		sugarLogger := logger.Sugar()
 		// TODO switch to zap
 		log := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
 
@@ -34,7 +37,7 @@ var serveCmd = &cobra.Command{
 		router := mux.NewRouter()
 
 		// Setup server
-		server, err := server.New(log, conf, db, router)
+		server, err := server.New(sugarLogger, conf, db, router)
 		if err != nil {
 			log.Fatalf("cmd: failed to build server: %v", err)
 		}
