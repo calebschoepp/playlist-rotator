@@ -70,7 +70,7 @@ func newSessionAuthMiddleware(store store.Store, log *log.Logger, blacklist []st
 			}
 
 			// Verify session is not expired
-			if time.Now().Sub(*sessionExpiry) > 0 {
+			if sessionExpiry.Before(time.Now()) {
 				log.Println("User not authenticated: session expired: redirecting to /login")
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return

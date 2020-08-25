@@ -24,6 +24,7 @@ type Playlist struct {
 	SpotifyID   *string  `db:"spotify_id"`
 	FailureMsg  *string  `db:"failure_msg"`
 	Building    bool     `db:"building"`
+	Current     bool     `db:"current"`
 
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   time.Time  `db:"updated_at"`
@@ -90,7 +91,8 @@ UPDATE playlists SET
 	name=$2,
 	description=$3,
 	public=$4,
-	schedule=$5
+	schedule=$5,
+	current=FALSE
 WHERE id=$6;
 `
 	err := playlist.MarshalInput()
@@ -175,7 +177,8 @@ UPDATE playlists SET
 	spotify_id=$1,
 	last_built_at=$2,
 	failure_msg=NULL,
-	building=FALSE
+	building=FALSE,
+	current=TRUE
 WHERE id=$3;
 `
 	_, err := p.db.Exec(query, spotifyID, time.Now(), id)

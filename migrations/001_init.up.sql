@@ -29,6 +29,7 @@ CREATE TABLE playlists (
   spotify_id  TEXT,
   failure_msg TEXT,
   building BOOLEAN NOT NULL DEFAULT FALSE,
+  current BOOLEAN NOT NULL DEFAULT FALSE,
 
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),

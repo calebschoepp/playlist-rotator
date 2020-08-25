@@ -74,10 +74,10 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 			pillName = "building"
 		} else if p.FailureMsg != nil {
 			pillName = "failed"
-		} else if p.SpotifyID == nil {
-			pillName = "not_built_yet"
-		} else {
+		} else if p.Current {
 			pillName = "built"
+		} else {
+			pillName = "not_built_yet"
 		}
 		buildTagSrc := fmt.Sprintf("/static/%s_pill.svg", pillName)
 
