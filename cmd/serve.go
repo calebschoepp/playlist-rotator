@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"log"
-	"os"
-
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/server"
 	"github.com/gorilla/mux"
@@ -17,21 +14,22 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Spin up the playlist-rotator HTTP server",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Setup config
-		conf := config.NewConfig()
-
-		// Setup DB
-		var db *sqlx.DB
-		db, err := sqlx.Open("postgres", conf.DatabaseURL)
-		if err != nil {
-			log.Fatalf("cmd: failed to setup db: %v", err)
-		}
-
 		// Setup log
 		logger, _ := zap.NewDevelopment()
 		sugarLogger := logger.Sugar()
-		// TODO switch to zap
-		log := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+
+		// Setup config
+		conf, err := config.NewConfig()
+		if err != nil {
+			sugarLogger.Fatalf("cmd: failed to build server: %v", err)
+		}
+
+		// Setup DB
+		var db *sqlx.DB
+		db, err = sqlx.Open("postgres", conf.DatabaseURL)
+		if err != nil {
+			sugarLogger.Fatalf("cmd: failed to setup db: %v", err)
+		}
 
 		// Setup router
 		router := mux.NewRouter()
@@ -39,7 +37,7 @@ var serveCmd = &cobra.Command{
 		// Setup server
 		server, err := server.New(sugarLogger, conf, db, router)
 		if err != nil {
-			log.Fatalf("cmd: failed to build server: %v", err)
+			sugarLogger.Fatalf("cmd: failed to build server: %v", err)
 		}
 		server.SetupRoutes()
 

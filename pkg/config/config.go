@@ -5,8 +5,7 @@ import (
 	"strconv"
 )
 
-// TODO move this into its own package?
-
+// Config holds the settings for a Server
 type Config struct {
 	ClientID     string
 	ClientSecret string
@@ -16,7 +15,8 @@ type Config struct {
 	DatabaseURL  string
 }
 
-func NewConfig() *Config {
+// NewConfig returns a Config struct with sane defaults and env variable overrides
+func NewConfig() (*Config, error) {
 	config := Config{
 		ClientID:     "",
 		ClientSecret: "",
@@ -39,12 +39,13 @@ func NewConfig() *Config {
 		config.Host = host
 	}
 	if port, present := os.LookupEnv("PORT"); present {
-		// TODO handle this error
-		config.Port, _ = strconv.Atoi(port)
+		var err error
+		config.Port, err = strconv.Atoi(port)
+		return nil, err
 	}
 	if databaseURL, present := os.LookupEnv("DATABASE_URL"); present {
 		config.DatabaseURL = databaseURL
 	}
 
-	return &config
+	return &config, nil
 }
