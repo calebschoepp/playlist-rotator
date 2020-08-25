@@ -10,11 +10,11 @@
 			{{ if eq . "/logout" }}
 			<a href="/help"><img class="inline pr-6" src="/static/help.svg" alt="?"></a>
 			{{ end }}
-			<a href="/about" class="pr-6 TERTIARY_BUTTON text-gray-700 hover:text-green-500 py-2 px-2">
+			<a href="/about" class="pr-6 btn btn-tertiary-green">
 				About
 			</a>
 			<div>
-				<a href="{{ . }}" class="SECONDARY_BUTTON bg-white hover:bg-green-500 border-green-500 border-2 text-green-500 hover:text-white py-2 px-4 rounded-full">
+				<a href="{{ . }}" class="btn btn-secondary-green">
 					{{ if eq . "/logout" }}
 					Logout
 					{{ else }}

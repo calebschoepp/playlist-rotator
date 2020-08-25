@@ -2,4 +2,48 @@
 
 @tailwind components;
 
+.btn {
+  @apply rounded-full px-4 py-2;
+}
+
+.btn-primary {
+  @apply bg-green-500 text-white;
+}
+
+.btn-primary:hover {
+  @apply bg-green-600;
+}
+
+.btn-secondary-green {
+  @apply bg-white border-green-500 border-2 text-green-500;
+}
+
+.btn-secondary-green:hover {
+  @apply bg-green-500 text-white;
+}
+
+.btn-secondary-red {
+  @apply bg-white border-red-500 border-2 text-red-500;
+}
+
+.btn-secondary-red:hover {
+  @apply bg-red-500 text-white;
+}
+
+.btn-tertiary-green {
+  @apply text-gray-700;
+}
+
+.btn-tertiary-green:hover {
+  @apply text-green-500;
+}
+
+.btn-tertiary-red {
+  @apply text-gray-700;
+}
+
+.btn-tertiary-red:hover {
+  @apply text-red-500;
+}
+
 @tailwind utilities;
