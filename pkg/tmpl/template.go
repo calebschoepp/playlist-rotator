@@ -29,6 +29,7 @@ type PlaylistInfo struct {
 	BuildTagSrc      string
 	ScheduleBlurb    string
 	ScheduleSentence string
+	ImageURL         string
 }
 
 // Login is the data required to template '/login'
@@ -50,9 +51,10 @@ type Playlist struct {
 }
 
 type PotentialSource struct {
-	Name string
-	ID   string
-	Type store.TrackSourceType
+	Name     string
+	ID       string
+	Type     store.TrackSourceType
+	ImageURL string
 }
 
 // TrackSource is the data required to template '/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}'

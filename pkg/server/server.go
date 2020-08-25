@@ -38,6 +38,7 @@ func New(log *log.Logger, config *config.Config, db *sqlx.DB, router *mux.Router
 	// TODO make sure I use the correct and minimal scopes
 	scopes := []string{
 		spotify.ScopeUserReadPrivate,
+		spotify.ScopePlaylistReadPrivate,
 		spotify.ScopePlaylistModifyPrivate,
 		spotify.ScopeUserLibraryRead,
 	}

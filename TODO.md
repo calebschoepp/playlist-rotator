@@ -1,12 +1,10 @@
 - Add full fledged UI to create/read/update/delete/build playlists
-- Combine userservice and playlistservice into a single store package
-- Add a test command to cobra to test out playlist builder
-- Add cadence to DB schema
 - Write unit/integration tests
 - Make the illustrations more relevant
-- Error page
+- Error pages
 - 404 page
 - Turn sources input section into a table like the info section is
 - Helper function to make spotify client from db user
-- verify that I'm properly getting all of the potential sources
 - HTTP only for auth cookie
+- Show playlist/album pictures
+- Edit playlist pictures

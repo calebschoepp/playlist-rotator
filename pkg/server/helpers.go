@@ -64,7 +64,7 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 	pss = append(pss, tmpl.PotentialSource{Name: "Liked Songs", ID: "", Type: store.LikedSrc})
 
 	// Find and add playlists
-	limit := 20
+	limit := 50
 	playlists, err := client.CurrentUsersPlaylistsOpt(&spotify.Options{
 		Limit: &limit,
 	})
@@ -81,23 +81,22 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 		pss = append(pss, ps)
 	}
 
-	// TODO add this back
-	// // Find and add albums
-	// albums, err := client.CurrentUsersAlbumsOpt(&spotify.Options{
-	// 	Limit: &limit,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// // TODO check total to see if there is > 50 playlists, if so grab the rest
-	// for _, album := range albums.Albums {
-	// 	ps := tmpl.PotentialSource{
-	// 		Name: album.FullAlbum.SimpleAlbum.Name,
-	// 		ID:   string(album.FullAlbum.SimpleAlbum.ID),
-	// 		Type: store.AlbumSrc,
-	// 	}
-	// 	pss = append(pss, ps)
-	// }
+	// Find and add albums
+	albums, err := client.CurrentUsersAlbumsOpt(&spotify.Options{
+		Limit: &limit,
+	})
+	if err != nil {
+		return nil, err
+	}
+	// TODO check total to see if there is > 50 albums, if so grab the rest
+	for _, album := range albums.Albums {
+		ps := tmpl.PotentialSource{
+			Name: album.FullAlbum.SimpleAlbum.Name,
+			ID:   string(album.FullAlbum.SimpleAlbum.ID),
+			Type: store.AlbumSrc,
+		}
+		pss = append(pss, ps)
+	}
 
 	return pss, nil
 }

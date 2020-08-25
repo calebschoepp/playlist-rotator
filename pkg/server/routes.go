@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -21,6 +22,19 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	if userID == nil {
 		// TODO handle error
 	}
+
+	// Build spotify client
+	user, err := s.Store.GetUserByID(*userID)
+	if err != nil {
+		// TODO handle error
+	}
+	token := oauth2.Token{
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
+		TokenType:    user.TokenType,
+		Expiry:       user.TokenExpiry,
+	}
+	client := s.SpotifyAuth.NewClient(&token)
 
 	tmplData := tmpl.Home{}
 
@@ -32,11 +46,13 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, p := range playlists {
+		// Total song count
 		totalSongs := 0
 		for _, ts := range p.Input.TrackSources {
 			totalSongs += ts.Count
 		}
 
+		// Scheduling messages
 		var scheduleBlurb string
 		var scheduleSentence string
 		format := "Scheduled to build at %s"
@@ -69,6 +85,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
 		}
 
+		// Build status
 		var pillName string
 		if p.Building {
 			pillName = "building"
@@ -81,12 +98,48 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		}
 		buildTagSrc := fmt.Sprintf("/static/%s_pill.svg", pillName)
 
+		// Playlist cover image
+		imageURL := "/static/missing_cover_image.svg"
+		if p.SpotifyID != nil {
+			spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(*p.SpotifyID), "images")
+			if err != nil || len(spotifyPlaylist.Images) == 0 {
+				// TODO handle error
+				s.Log.Printf("ERROR: %v", err)
+			}
+			imageURL = spotifyPlaylist.Images[0].URL
+		}
+
+		// Source cover images
+		for i := range p.Input.TrackSources {
+			srcImageURL := "/static/missing_cover_image.svg"
+			switch p.Input.TrackSources[i].Type {
+			case store.LikedSrc:
+				srcImageURL = "/static/liked_songs_cover.svg"
+			case store.AlbumSrc:
+				spotifyAlbum, err := client.GetAlbum(p.Input.TrackSources[i].ID)
+				if err != nil || len(spotifyAlbum.Images) == 0 {
+					// TODO handle error
+					s.Log.Printf("ERROR: %v", err)
+				}
+				srcImageURL = spotifyAlbum.Images[0].URL
+			case store.PlaylistSrc:
+				spotifyPlaylist, err := client.GetPlaylistOpt(p.Input.TrackSources[i].ID, "images")
+				if err != nil || len(spotifyPlaylist.Images) == 0 {
+					// TODO handle error
+					s.Log.Printf("ERROR: %v", err)
+				}
+				srcImageURL = spotifyPlaylist.Images[0].URL
+			}
+			p.Input.TrackSources[i].ImageURL = srcImageURL
+		}
+
 		pInfo := tmpl.PlaylistInfo{
 			Playlist:         p,
 			TotalSongs:       totalSongs,
 			BuildTagSrc:      buildTagSrc,
 			ScheduleBlurb:    scheduleBlurb,
 			ScheduleSentence: scheduleSentence,
+			ImageURL:         imageURL,
 		}
 		tmplData.Playlists = append(tmplData.Playlists, pInfo)
 	}
@@ -210,12 +263,12 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 
 		pid, err := uuid.Parse(playlistID)
 		if err != nil {
-			// TODO handl error
+			// TODO handle error
 			// Probably return generic error page
 		}
 		playlist, err := s.Store.GetPlaylist(pid)
 		if err != nil {
-			// TODO handl error
+			// TODO handle error
 			// Probably return generic error page
 		}
 
@@ -224,22 +277,49 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		tmplData.Public = playlist.Public
 		tmplData.Schedule = playlist.Schedule
 
-		// TODO don't need anymore
-		// var input store.Input
-		// err = json.Unmarshal([]byte(playlist.Input), &input)
-		// if err != nil {
-		// 	// TODO handle error
-		// 	// Probably return generic error page
-		// }
+		// Build spotify client
+		user, err := s.Store.GetUserByID(*userID)
+		if err != nil {
+			// TODO handle error
+		}
+		token := oauth2.Token{
+			AccessToken:  user.AccessToken,
+			RefreshToken: user.RefreshToken,
+			TokenType:    user.TokenType,
+			Expiry:       user.TokenExpiry,
+		}
+		client := s.SpotifyAuth.NewClient(&token)
+
+		// Source cover images
+		for i := range playlist.Input.TrackSources {
+			srcImageURL := "/static/missing_cover_image.svg"
+			switch playlist.Input.TrackSources[i].Type {
+			case store.LikedSrc:
+				srcImageURL = "/static/liked_songs_cover.svg"
+			case store.AlbumSrc:
+				spotifyAlbum, err := client.GetAlbum(playlist.Input.TrackSources[i].ID)
+				if err != nil || len(spotifyAlbum.Images) == 0 {
+					// TODO handle error
+					s.Log.Printf("ERROR: %v", err)
+				}
+				srcImageURL = spotifyAlbum.Images[0].URL
+			case store.PlaylistSrc:
+				spotifyPlaylist, err := client.GetPlaylistOpt(playlist.Input.TrackSources[i].ID, "images")
+				if err != nil || len(spotifyPlaylist.Images) == 0 {
+					// TODO handle error
+					s.Log.Printf("ERROR: %v", err)
+				}
+				srcImageURL = spotifyPlaylist.Images[0].URL
+			}
+			playlist.Input.TrackSources[i].ImageURL = srcImageURL
+		}
+
 		tmplData.Sources = playlist.Input.TrackSources
 	} else {
 		// New playlist so everything is empty
 		tmplData.IsNew = true
 	}
 
-	s.Log.Println(tmplData.Description)
-	s.Log.Println(tmplData.Name)
-	s.Log.Println(tmplData.Sources)
 	// Regardless we gather the potential sources
 	potentialSources, err := getPotentialSources(s.Store, s.SpotifyAuth, userID)
 	if err != nil {
@@ -247,7 +327,6 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		// Probably return generic error page
 	}
 	tmplData.PotentialSources = potentialSources
-	s.Log.Println(potentialSources)
 
 	s.Tmpl.TmplPlaylist(w, tmplData)
 }
@@ -271,7 +350,6 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	playlist := store.Playlist{}
 	trackSources := map[string]*store.TrackSource{}
 	for k, v := range r.Form {
-		fmt.Printf("%v: %v\n", k, strings.Join(v, ""))
 		if k == "name" {
 			playlist.Name = strings.Join(v, "")
 		} else if k == "description" {
@@ -414,6 +492,7 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// TODO handle albums
 func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) {
 	// Get ids
 	// TODO validate IDs
@@ -426,6 +505,25 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		// TODO handle error
 	}
+
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		// TODO handle error
+	}
+
+	// Build spotify client
+	user, err := s.Store.GetUserByID(*userID)
+	if err != nil {
+		// TODO handle error
+	}
+	token := oauth2.Token{
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
+		TokenType:    user.TokenType,
+		Expiry:       user.TokenExpiry,
+	}
+	client := s.SpotifyAuth.NewClient(&token)
 
 	source := store.TrackSource{}
 	source.Count = 0
@@ -440,6 +538,28 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	case string(store.PlaylistSrc):
 		source.Type = store.PlaylistSrc
 	}
+
+	// Get track source cover image
+	srcImageURL := "/static/missing_cover_image.svg"
+	switch source.Type {
+	case store.LikedSrc:
+		srcImageURL = "/static/liked_songs_cover.svg"
+	case store.AlbumSrc:
+		spotifyAlbum, err := client.GetAlbum(source.ID)
+		if err != nil || len(spotifyAlbum.Images) == 0 {
+			// TODO handle error
+			s.Log.Printf("ERROR: %v", err)
+		}
+		srcImageURL = spotifyAlbum.Images[0].URL
+	case store.PlaylistSrc:
+		spotifyPlaylist, err := client.GetPlaylistOpt(source.ID, "images")
+		if err != nil || len(spotifyPlaylist.Images) == 0 {
+			// TODO handle error
+			s.Log.Printf("ERROR: %v", err)
+		}
+		srcImageURL = spotifyPlaylist.Images[0].URL
+	}
+	source.ImageURL = srcImageURL
 
 	s.Tmpl.TmplTrackSource(w, tmpl.TrackSource{Source: source})
 }

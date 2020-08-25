@@ -20,6 +20,7 @@ function addNewSourceInput() {
   url = url + "/source/type/" + type;
   url = url + "/name/" + name;
   url = url + "/id/" + id;
+  console.log(url);
   const Http = new XMLHttpRequest();
   Http.open("GET", url);
   Http.send();

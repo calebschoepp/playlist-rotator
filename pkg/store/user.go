@@ -18,7 +18,7 @@ type User struct {
 	SessionToken  string    `db:"session_token"`
 	SessionExpiry time.Time `db:"session_expiry"`
 
-	AccessToken  string    `db:"access_token"`
+	AccessToken  string    `db:"access_token"` // TODO add a Token field and marshalling/unmarshalling methods
 	RefreshToken string    `db:"refresh_token"`
 	TokenType    string    `db:"token_type"`
 	TokenExpiry  time.Time `db:"token_expiry"`

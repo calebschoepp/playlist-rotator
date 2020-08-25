@@ -16,11 +16,12 @@ type Input struct {
 
 // TrackSource represents a single source of tracks for a generated Spotify playlist
 type TrackSource struct {
-	Name   string          `json:"name"`
-	ID     spotify.ID      `json:"playlistID"`
-	Type   TrackSourceType `json:"type"`
-	Count  int             `json:"count"`
-	Method ExtractMethod   `json:"method"`
+	Name     string          `json:"name"`
+	ID       spotify.ID      `json:"id"`
+	Type     TrackSourceType `json:"type"`
+	Count    int             `json:"count"`
+	Method   ExtractMethod   `json:"method"`
+	ImageURL string          // Not serialized and stored in DB, only used to display in UI
 }
 
 func (t TrackSource) StringifyMethod() string {
