@@ -29,7 +29,7 @@ func newRequestLoggerMiddleware(log *zap.SugaredLogger) func(next http.Handler) 
 	}
 }
 
-func newSessionAuthMiddleware(store store.Store, log *zap.SugaredLogger, blacklist []string) func(next http.Handler) http.Handler {
+func newSessionAuthMiddleware(store store.Store, log *zap.SugaredLogger, blacklist []string, sessionCookieName string) func(next http.Handler) http.Handler {
 	// Cache the regex object of each route
 	var blacklistRegexp []*regexp.Regexp
 	for _, expr := range blacklist {

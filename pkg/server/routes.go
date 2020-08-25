@@ -155,9 +155,9 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	// in cookie for security purposes
 	state := randomString(32)
 	cookie := http.Cookie{
-		Name:    stateCookieName,
+		Name:    s.Config.StateCookieName,
 		Value:   state,
-		Expires: time.Now().Add(stateCookieExpiry),
+		Expires: time.Now().Add(s.Config.StateCookieExpiry),
 	}
 	http.SetCookie(w, &cookie)
 
@@ -170,7 +170,7 @@ func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
 	// Delete session cookie to logout
 	expire := time.Now().Add(-7 * 24 * time.Hour)
 	cookie := http.Cookie{
-		Name:    sessionCookieName,
+		Name:    s.Config.SessionCookieName,
 		Value:   "",
 		MaxAge:  -1,
 		Expires: expire,
@@ -181,7 +181,7 @@ func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	// Get oauth2 tokens
-	stateCookie, err := r.Cookie(stateCookieName)
+	stateCookie, err := r.Cookie(s.Config.StateCookieName)
 	if err != nil {
 		s.Log.Errorw("failed to get state cookie for oauth2", "err", err.Error())
 		http.Error(w, "server error", http.StatusInternalServerError)
@@ -196,9 +196,9 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 
 	// Generate new session token with expiry
 	sessionToken := randomString(64)
-	sessionExpiry := time.Now().Add(sessionCookieExpiry)
+	sessionExpiry := time.Now().Add(s.Config.SessionCookieExpiry)
 	sessionCookie := http.Cookie{
-		Name:     sessionCookieName,
+		Name:     s.Config.SessionCookieName,
 		Value:    sessionToken,
 		Expires:  sessionExpiry,
 		HttpOnly: true,

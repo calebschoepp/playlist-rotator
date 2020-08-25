@@ -72,7 +72,7 @@ func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux
 func (s *Server) SetupRoutes() {
 	// Build middleware
 	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
-	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`})
+	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`}, s.Config.SessionCookieName)
 
 	// Serve static files
 	s.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))

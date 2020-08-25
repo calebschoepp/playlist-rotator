@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"math/rand"
-	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/zmb3/spotify"
@@ -18,12 +17,6 @@ type ctxKey int
 const (
 	userIDCtxKey ctxKey = iota
 )
-
-// TODO move these to config?
-const stateCookieName = "oauthState"
-const stateCookieExpiry = 30 * time.Minute
-const sessionCookieName = "playlistRotatorSession"
-const sessionCookieExpiry = 30 * time.Minute // TODO fine tune this
 
 // TODO use crypto/rand?
 func randomString(n int) string {
