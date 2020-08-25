@@ -28,7 +28,6 @@ type Server struct {
 // New builds a new Server struct
 func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
 	// Build spotifyAuth
-	// TODO proabably a more idiomatic way to build redirectURL
 	var redirectURL string
 	if config.Host == "localhost" {
 		redirectURL = fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port)

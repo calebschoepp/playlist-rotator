@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// TODO split into two embedded interfaces
+// TODO split into two embedded interfaces and generally improve this type
 // 1) Playlist configuration
 // 2) Spotify build information
 // Playlist is the configuration used to build a new Spotify playlist
@@ -15,8 +15,8 @@ type Playlist struct {
 	ID     uuid.UUID `db:"id"`
 	UserID uuid.UUID `db:"user_id"`
 
-	Input       Input    // TODO this isn't great that it is a string, maybe use an unexported field for input that is always unmarshalled from before leaving a store method
-	InputString string   `db:"input"` // TODO build some marshalling functions that automatically convert back and forth here
+	Input       Input
+	InputString string   `db:"input"`
 	Name        string   `db:"name"`
 	Description string   `db:"description"`
 	Public      bool     `db:"public"`

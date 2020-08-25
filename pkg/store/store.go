@@ -15,12 +15,12 @@ type Store interface {
 	GetUserID(sessionToken string) (*uuid.UUID, error)
 	UserExists(spotifyID string) (bool, error)
 	GetSessionExpiry(sessionToken string) (*time.Time, error)
-	CreateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error // TODO should this return the user
+	CreateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
 	UpdateUser(spotifyID, sessionToken string, sessionExpiry time.Time, token oauth2.Token) error
 	IncrementUserBuildCount(userID uuid.UUID) error
 
 	// Playlists
-	CreatePlaylist(userID uuid.UUID, input Input, name, description string, public bool, schedule Schedule) error // TODO should this return playlist?
+	CreatePlaylist(userID uuid.UUID, input Input, name, description string, public bool, schedule Schedule) error
 	UpdatePlaylistConfig(id uuid.UUID, playlist Playlist) error
 	GetPlaylist(id uuid.UUID) (*Playlist, error)
 	GetPlaylists(userID uuid.UUID) ([]Playlist, error)

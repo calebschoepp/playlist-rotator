@@ -153,7 +153,12 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	// State should be randomly generated and passed along with Oauth request
 	// in cookie for security purposes
-	state := randomString(32)
+	state, err := generateRandomString(32)
+	if err != nil {
+		s.Log.Error("failed to generate random string for state")
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
 	cookie := http.Cookie{
 		Name:    s.Config.StateCookieName,
 		Value:   state,
@@ -195,7 +200,12 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate new session token with expiry
-	sessionToken := randomString(64)
+	sessionToken, err := generateRandomString(64)
+	if err != nil {
+		s.Log.Error("failed to generate random string for session token")
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
 	sessionExpiry := time.Now().Add(s.Config.SessionCookieExpiry)
 	sessionCookie := http.Cookie{
 		Name:     s.Config.SessionCookieName,

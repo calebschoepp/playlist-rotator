@@ -2,14 +2,14 @@ package server
 
 import (
 	"context"
-	"math/rand"
-
-	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
-	"github.com/zmb3/spotify"
-	"golang.org/x/oauth2"
+	"crypto/rand"
+	"encoding/base64"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
+	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/google/uuid"
+	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 )
 
 type ctxKey int
@@ -18,15 +18,26 @@ const (
 	userIDCtxKey ctxKey = iota
 )
 
-// TODO use crypto/rand?
-func randomString(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-	s := make([]rune, n)
-	for i := range s {
-		s[i] = letters[rand.Intn(len(letters))]
+// GenerateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random
+// number generator fails to function correctly, in which
+// case the caller should not continue.
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// Note that err == nil only if we read len(b) bytes.
+	if err != nil {
+		return nil, err
 	}
-	return string(s)
+
+	return b, nil
+}
+
+// GenerateRandomString returns a URL-safe, base64 encoded
+// securely generated random string.
+func generateRandomString(s int) (string, error) {
+	b, err := generateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
 }
 
 func getUserID(ctx context.Context) *uuid.UUID {
@@ -37,7 +48,6 @@ func getUserID(ctx context.Context) *uuid.UUID {
 	return userID
 }
 
-// TODO IMPORTANT verify that I'm properly getting all of the potential sources
 func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uuid.UUID) ([]tmpl.PotentialSource, error) {
 	// Build spotify client
 	user, err := s.GetUserByID(*userID)
