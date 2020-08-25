@@ -50,6 +50,7 @@ type Playlist struct {
 	PotentialSources []PotentialSource
 }
 
+// PotentialSource is the data for a playlists potential source of tracks
 type PotentialSource struct {
 	Name     string
 	ID       string
