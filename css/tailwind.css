@@ -46,4 +46,8 @@
   @apply text-red-500;
 }
 
+.input-label {
+  @apply text-gray-500 text-sm block pl-2 pb-1;
+}
+
 @tailwind utilities;
