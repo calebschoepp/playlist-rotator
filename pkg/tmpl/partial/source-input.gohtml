@@ -1,5 +1,5 @@
 {{ define "source-input" }}
-{{ $sourceInputID := printf "ID%sTIME%s" .ID unixTime }}
+{{ $sourceInputID := printf "SourceInputID%sTIME%s" .ID unixTime }}
 <div class="flex flex-row justify-start items-center" id="{{ $sourceInputID }}">
 	{{/* Source info */}}
 	<div class="mr-16">

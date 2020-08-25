@@ -24,12 +24,14 @@ var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 func init() {
 	trackFetchers = map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher{
 		store.Latest: map[store.TrackSourceType]trackFetcher{
+			store.AlbumSrc:    getTopAlbumTracks,
+			store.LikedSrc:    getTopLikedTracks,
 			store.PlaylistSrc: getTopPlaylistTracks,
-			store.LikedSrc:    getTopLikedSongsTracks,
 		},
 		store.Randomly: map[store.TrackSourceType]trackFetcher{
+			store.AlbumSrc:    getRandomAlbumTracks,
+			store.LikedSrc:    getRandomLikedTracks,
 			store.PlaylistSrc: getRandomPlaylistTracks,
-			store.LikedSrc:    getRandomLikedSongsTracks,
 		},
 	}
 }
@@ -130,6 +132,53 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	}
 }
 
+func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
+	// Get playlist configuration
+	playlist, err := s.store.GetPlaylist(playlistID)
+	if err != nil {
+		s.logDeleteError(userID, playlistID, err)
+		// TODO handle error (jump to function to write failure info to db)
+		fmt.Printf("ERROR 1: %v", err)
+		return
+	}
+
+	// Build spotify client
+	user, err := s.store.GetUserByID(userID)
+	if err != nil {
+		s.logDeleteError(userID, playlistID, err)
+		// TODO handle error
+		fmt.Printf("ERROR 3: %v", err)
+		return
+	}
+	token := oauth2.Token{
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
+		TokenType:    user.TokenType,
+		Expiry:       user.TokenExpiry,
+	}
+	client := s.auth.NewClient(&token)
+
+	// Unfollow spotify playlist
+	if playlist.SpotifyID != nil {
+		err = client.UnfollowPlaylist(spotify.ID(user.SpotifyID), spotify.ID(*playlist.SpotifyID))
+		if err != nil {
+			// TODO handle this case
+			// Do nothing for now
+			s.logDeleteError(userID, playlistID, err)
+			fmt.Printf("Failed to unfollow playlist: %v", err)
+			return
+		}
+	}
+
+	// Delete playlist configuration
+	err = s.store.DeletePlaylist(playlistID)
+	if err != nil {
+		// TODO handle error
+		s.logDeleteError(userID, playlistID, err)
+		return
+	}
+}
+
 func (s *Service) logBuildError(userID, playlistID uuid.UUID, err error) {
 	err = s.store.UpdatePlaylistBadBuild(playlistID, err.Error())
 	if err != nil {
@@ -141,6 +190,13 @@ func (s *Service) logBuildError(userID, playlistID uuid.UUID, err error) {
 		// TODO handle error
 		// What do I do here, call out to metrics?
 		fmt.Printf("SOMETHING HAS GONE SUPER EXTRA WRONG")
+	}
+}
+
+func (s *Service) logDeleteError(userID, playlistID uuid.UUID, err error) {
+	err = s.store.UpdatePlaylistBadDelete(playlistID, err.Error())
+	if err != nil {
+		fmt.Printf("SOMETHING HAS GONE VERY WRONG: %v", err)
 	}
 }
 
@@ -192,6 +248,46 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 	return &playlistID, nil
 }
 
+func getTopAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	return nil, errors.New("not implemented")
+}
+
+func getTopLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	count := 0
+	offset := 0
+	var limit int
+
+	for {
+		if trackSource.Count-count <= 0 {
+			break
+		} else if trackSource.Count-count < 50 {
+			limit = trackSource.Count - count
+		} else {
+			limit = 50
+		}
+		opts := spotify.Options{
+			Limit:  &limit,
+			Offset: &offset,
+		}
+
+		trackPage, err := client.CurrentUsersTracksOpt(&opts)
+		if err != nil {
+			return nil, err
+		} else if len(trackPage.Tracks) != limit {
+			// Not enough songs. Treat as error for now TODO don't treat as error
+			return nil, fmt.Errorf("expected %d songs in Liked Songs but did not find that many", trackSource.Count)
+		}
+
+		count += limit
+		offset += limit
+
+		for _, track := range trackPage.Tracks {
+			tracks = append(tracks, track.ID)
+		}
+	}
+	return tracks, nil
+}
+
 func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
@@ -228,46 +324,14 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSour
 	return tracks, nil
 }
 
-func getTopLikedSongsTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	count := 0
-	offset := 0
-	var limit int
-
-	for {
-		if trackSource.Count-count <= 0 {
-			break
-		} else if trackSource.Count-count < 50 {
-			limit = trackSource.Count - count
-		} else {
-			limit = 50
-		}
-		opts := spotify.Options{
-			Limit:  &limit,
-			Offset: &offset,
-		}
-
-		trackPage, err := client.CurrentUsersTracksOpt(&opts)
-		if err != nil {
-			return nil, err
-		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in Liked Songs but did not find that many", trackSource.Count)
-		}
-
-		count += limit
-		offset += limit
-
-		for _, track := range trackPage.Tracks {
-			tracks = append(tracks, track.ID)
-		}
-	}
-	return tracks, nil
-}
-
-func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getRandomAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }
 
-func getRandomLikedSongsTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getRandomLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	return nil, errors.New("not implemented")
+}
+
+func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	return nil, errors.New("not implemented")
 }

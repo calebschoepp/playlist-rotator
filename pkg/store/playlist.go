@@ -203,3 +203,29 @@ WHERE id=$3;
 	}
 	return nil
 }
+
+// DeletePlaylist deletes the playlist entry matching the given id
+func (p *Postgres) DeletePlaylist(id uuid.UUID) error {
+	query := `
+DELETE FROM playlists
+WHERE id=$1;
+`
+	_, err := p.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Postgres) UpdatePlaylistBadDelete(id uuid.UUID, failureMsg string) error {
+	query := `
+UPDATE playlists SET
+	failure_msg=$1,
+WHERE id=$2;
+`
+	_, err := p.db.Exec(query, failureMsg, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

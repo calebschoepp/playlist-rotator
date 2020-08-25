@@ -584,3 +584,24 @@ func (s *Server) playlistBuild(w http.ResponseWriter, r *http.Request) {
 	go s.Builder.BuildPlaylist(*userID, playlistID)
 	w.WriteHeader(http.StatusAccepted)
 }
+
+func (s *Server) playlistDelete(w http.ResponseWriter, r *http.Request) {
+	// Get userID
+	userID := getUserID(r.Context())
+	if userID == nil {
+		s.Log.Println("Failed to get userID from context")
+		// TODO handle error
+	}
+
+	// Get playlistID
+	vars := mux.Vars(r)
+	pid := vars["playlistID"]
+	playlistID, err := uuid.Parse(pid)
+	if err != nil {
+		// TODO handle error
+	}
+
+	s.Log.Printf("%v, %v", userID, playlistID)
+	go s.Builder.DeletePlaylist(*userID, playlistID)
+	w.WriteHeader(http.StatusAccepted)
+}

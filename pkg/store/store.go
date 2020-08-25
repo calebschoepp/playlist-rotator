@@ -27,4 +27,6 @@ type Store interface {
 	UpdatePlaylistGoodBuild(id uuid.UUID, spotifyID string) error
 	UpdatePlaylistBadBuild(id uuid.UUID, failureMsg string) error
 	UpdatePlaylistStartBuild(id uuid.UUID) error
+	DeletePlaylist(id uuid.UUID) error
+	UpdatePlaylistBadDelete(id uuid.UUID, failureMsg string) error
 }
