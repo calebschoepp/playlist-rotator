@@ -54,7 +54,7 @@ func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux
 	}
 
 	// Build builder
-	builder := build.New(store, spotifyAuth)
+	builder := build.New(store, spotifyAuth, log)
 
 	return &Server{
 		Log:         log,

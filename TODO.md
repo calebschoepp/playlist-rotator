@@ -3,3 +3,4 @@
 - 404 page
 - Turn sources input section into a table like the info section is
 - Helper function to make spotify client from db user
+- Write proxy library for spotify

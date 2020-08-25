@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/zmb3/spotify"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
@@ -15,6 +16,7 @@ import (
 type Service struct {
 	store store.Store
 	auth  spotify.Authenticator
+	log   *zap.SugaredLogger
 }
 
 type trackFetcher func(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error)
@@ -22,6 +24,7 @@ type trackFetcher func(client *spotify.Client, tracks []spotify.ID, trackSource 
 var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 
 func init() {
+	// Prebuild map of functions to fetch tracks
 	trackFetchers = map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher{
 		store.Latest: map[store.TrackSourceType]trackFetcher{
 			store.AlbumSrc:    getTopAlbumTracks,
@@ -37,10 +40,11 @@ func init() {
 }
 
 // New returns a pointer to a new BuildService
-func New(store store.Store, auth spotify.Authenticator) *Service {
+func New(store store.Store, auth spotify.Authenticator, log *zap.SugaredLogger) *Service {
 	return &Service{
 		store: store,
 		auth:  auth,
+		log:   log,
 	}
 }
 
@@ -49,7 +53,8 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	// Tell DB that playlist is currently being built
 	err := s.store.UpdatePlaylistStartBuild(playlistID)
 	if err != nil {
-		// TODO handle error
+		// This shouldn't go wrong but if it does we want to just return b/c db was not changed
+		s.log.Errorw("failed to update playlist into building state", "err", err.Error())
 		return
 	}
 
@@ -57,21 +62,8 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	playlist, err := s.store.GetPlaylist(playlistID)
 	if err != nil {
 		s.logBuildError(userID, playlistID, err)
-		// TODO handle error (jump to function to write failure info to db)
-		fmt.Printf("ERROR 1: %v", err)
 		return
 	}
-
-	// TODO not needed anymore?
-	// // Build and validate input
-	// var input store.Input
-	// err = json.Unmarshal([]byte(playlist.Input), &input)
-	// if err != nil {
-	// 	s.logBuildError(userID, playlistID, err)
-	// 	// TODO handle error
-	// 	fmt.Printf("ERROR 2: %v", err)
-	// 	return
-	// }
 
 	// Build and validate output
 	output := store.Output{
@@ -84,8 +76,6 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	user, err := s.store.GetUserByID(userID)
 	if err != nil {
 		s.logBuildError(userID, playlistID, err)
-		// TODO handle error
-		fmt.Printf("ERROR 3: %v", err)
 		return
 	}
 	token := oauth2.Token{
@@ -100,9 +90,8 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	if playlist.SpotifyID != nil {
 		err = client.UnfollowPlaylist(spotify.ID(user.SpotifyID), spotify.ID(*playlist.SpotifyID))
 		if err != nil {
-			// TODO handle this case
-			// Do nothing for now
-			fmt.Printf("Failed to unfollow playlist: %v", err)
+			s.logBuildError(userID, playlistID, err)
+			return
 		}
 	}
 
@@ -110,8 +99,6 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	spotifyPlaylistID, err := buildPlaylist(&client, user.SpotifyID, playlist.Input, output)
 	if err != nil {
 		s.logBuildError(userID, playlistID, err)
-		// TODO handle error
-		fmt.Printf("ERROR 4: %v", err)
 		return
 	}
 
@@ -119,26 +106,22 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 	err = s.store.UpdatePlaylistGoodBuild(playlistID, string(*spotifyPlaylistID))
 	if err != nil {
 		s.logBuildError(userID, playlistID, err)
-		// TODO handle error
-		fmt.Printf("ERROR 5: %v", err)
 		return
 	}
 
 	err = s.store.IncrementUserBuildCount(userID)
 	if err != nil {
-		// TODO handle error
-		// What do I do here, call out to metrics?
-		fmt.Printf("SOMETHING HAS GONE SUPER EXTRA WRONG")
+		// This really shouldn't go wrong but if it does all we can do is log it
+		s.log.Errorw("failed to increment build count", "err", err.Error(), "userID", userID)
 	}
 }
 
+// DeletePlaylist deletes both the actual spotify playlist and the configuration in the db
 func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
 	// Get playlist configuration
 	playlist, err := s.store.GetPlaylist(playlistID)
 	if err != nil {
 		s.logDeleteError(userID, playlistID, err)
-		// TODO handle error (jump to function to write failure info to db)
-		fmt.Printf("ERROR 1: %v", err)
 		return
 	}
 
@@ -146,8 +129,6 @@ func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
 	user, err := s.store.GetUserByID(userID)
 	if err != nil {
 		s.logDeleteError(userID, playlistID, err)
-		// TODO handle error
-		fmt.Printf("ERROR 3: %v", err)
 		return
 	}
 	token := oauth2.Token{
@@ -162,10 +143,7 @@ func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
 	if playlist.SpotifyID != nil {
 		err = client.UnfollowPlaylist(spotify.ID(user.SpotifyID), spotify.ID(*playlist.SpotifyID))
 		if err != nil {
-			// TODO handle this case
-			// Do nothing for now
 			s.logDeleteError(userID, playlistID, err)
-			fmt.Printf("Failed to unfollow playlist: %v", err)
 			return
 		}
 	}
@@ -173,30 +151,31 @@ func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
 	// Delete playlist configuration
 	err = s.store.DeletePlaylist(playlistID)
 	if err != nil {
-		// TODO handle error
 		s.logDeleteError(userID, playlistID, err)
 		return
 	}
 }
 
-func (s *Service) logBuildError(userID, playlistID uuid.UUID, err error) {
-	err = s.store.UpdatePlaylistBadBuild(playlistID, err.Error())
+func (s *Service) logBuildError(userID, playlistID uuid.UUID, errIn error) {
+	s.log.Errorw("failure while building playlist", "err", errIn.Error())
+	err := s.store.UpdatePlaylistBadBuild(playlistID, errIn.Error())
 	if err != nil {
-		fmt.Printf("SOMETHING HAS GONE VERY WRONG: %v", err)
+		// This really shouldn't happen, but all we can do is log it
+		s.log.Errorw("failed to update playlist config to failure state", "err", err.Error())
 	}
 
 	err = s.store.IncrementUserBuildCount(userID)
 	if err != nil {
-		// TODO handle error
-		// What do I do here, call out to metrics?
-		fmt.Printf("SOMETHING HAS GONE SUPER EXTRA WRONG")
+		// This really shouldn't happen, but all we can do is log it
+		s.log.Errorw("failed to increment build count", "err", err.Error())
 	}
 }
 
-func (s *Service) logDeleteError(userID, playlistID uuid.UUID, err error) {
-	err = s.store.UpdatePlaylistBadDelete(playlistID, err.Error())
+func (s *Service) logDeleteError(userID, playlistID uuid.UUID, errIn error) {
+	s.log.Errorw("failure while deleting playlist", "err", errIn.Error())
+	err := s.store.UpdatePlaylistBadDelete(playlistID, errIn.Error())
 	if err != nil {
-		fmt.Printf("SOMETHING HAS GONE VERY WRONG: %v", err)
+		s.log.Errorw("failed to update playlist config to failure state", "err", err.Error())
 	}
 }
 
@@ -239,7 +218,6 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 		} else {
 			stop = start + 100
 		}
-		// TODO confirm I don't need to keep using snapshot ID here
 		_, err := client.AddTracksToPlaylist(playlistID, tracks[start:stop]...)
 		if err != nil {
 			return nil, err
@@ -249,6 +227,7 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 }
 
 func getTopAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
@@ -325,13 +304,16 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSour
 }
 
 func getRandomAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
 func getRandomLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
 func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+	// TODO implement
 	return nil, errors.New("not implemented")
 }
