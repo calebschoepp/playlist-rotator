@@ -1,7 +1,5 @@
 package store
 
-import "github.com/zmb3/spotify"
-
 // Output configures the user facing result of a newly built Spotify playlist
 type Output struct {
 	Name        string
@@ -17,7 +15,7 @@ type Input struct {
 // TrackSource represents a single source of tracks for a generated Spotify playlist
 type TrackSource struct {
 	Name     string          `json:"name"`
-	ID       spotify.ID      `json:"id"` // TODO this should be a string
+	ID       string          `json:"id"` // TODO this should be a string
 	Type     TrackSourceType `json:"type"`
 	Count    int             `json:"count"`
 	Method   ExtractMethod   `json:"method"`

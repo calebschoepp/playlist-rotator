@@ -5,11 +5,11 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/motify"
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/google/uuid"
-	"github.com/zmb3/spotify"
-	"golang.org/x/oauth2"
+	zs "github.com/zmb3/spotify"
 )
 
 type ctxKey int
@@ -48,19 +48,13 @@ func getUserID(ctx context.Context) *uuid.UUID {
 	return userID
 }
 
-func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uuid.UUID) ([]tmpl.PotentialSource, error) {
+func getPotentialSources(s store.Store, spotify *motify.Spotify, userID *uuid.UUID) ([]tmpl.PotentialSource, error) {
 	// Build spotify client
 	user, err := s.GetUserByID(*userID)
 	if err != nil {
 		return nil, err
 	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := auth.NewClient(&token)
+	client := spotify.NewClient(&user.Token)
 
 	// Add liked songs
 	pss := []tmpl.PotentialSource{}
@@ -68,7 +62,7 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 
 	// Find and add playlists
 	limit := 50
-	playlists, err := client.CurrentUsersPlaylistsOpt(&spotify.Options{
+	playlists, err := client.CurrentUsersPlaylistsOpt(&zs.Options{
 		Limit: &limit,
 	})
 	if err != nil {
@@ -85,7 +79,7 @@ func getPotentialSources(s store.Store, auth *spotify.Authenticator, userID *uui
 	}
 
 	// Find and add albums
-	albums, err := client.CurrentUsersAlbumsOpt(&spotify.Options{
+	albums, err := client.CurrentUsersAlbumsOpt(&zs.Options{
 		Limit: &limit,
 	})
 	if err != nil {

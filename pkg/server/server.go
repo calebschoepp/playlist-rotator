@@ -6,43 +6,35 @@ import (
 
 	"github.com/calebschoepp/playlist-rotator/pkg/build"
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
+	"github.com/calebschoepp/playlist-rotator/pkg/motify"
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 	"github.com/calebschoepp/playlist-rotator/pkg/tmpl"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	"github.com/zmb3/spotify"
 	"go.uber.org/zap"
 )
 
 // Server congregates all of the services required to listen and serve HTTP requests
 type Server struct {
-	Log         *zap.SugaredLogger
-	Config      *config.Config
-	Router      *mux.Router
-	SpotifyAuth *spotify.Authenticator
-	Store       store.Store
-	Tmpl        tmpl.Templater
-	Builder     build.Builder
+	Log     *zap.SugaredLogger
+	Config  *config.Config
+	Router  *mux.Router
+	Spotify *motify.Spotify
+	Store   store.Store
+	Tmpl    tmpl.Templater
+	Builder build.Builder
 }
 
 // New builds a new Server struct
 func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
-	// Build spotifyAuth
+	// Build spotify
 	var redirectURL string
 	if config.Host == "localhost" {
 		redirectURL = fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port)
 	} else {
 		redirectURL = fmt.Sprintf("%s%s/callback", config.Protocol, config.Host)
 	}
-	// TODO make sure I use the correct and minimal scopes
-	scopes := []string{
-		spotify.ScopeUserReadPrivate,
-		spotify.ScopePlaylistReadPrivate,
-		spotify.ScopePlaylistModifyPrivate,
-		spotify.ScopeUserLibraryRead,
-	}
-	spotifyAuth := spotify.NewAuthenticator(redirectURL, scopes...)
-	spotifyAuth.SetAuthInfo(config.ClientID, config.ClientSecret)
+	spotify := motify.New(redirectURL, config.ClientID, config.ClientSecret)
 
 	// Build store
 	store := store.New(db)
@@ -54,16 +46,16 @@ func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux
 	}
 
 	// Build builder
-	builder := build.New(store, spotifyAuth, log)
+	builder := build.New(store, spotify, log)
 
 	return &Server{
-		Log:         log,
-		Config:      config,
-		Router:      router,
-		SpotifyAuth: &spotifyAuth,
-		Store:       store,
-		Tmpl:        tmpl,
-		Builder:     builder,
+		Log:     log,
+		Config:  config,
+		Router:  router,
+		Spotify: spotify,
+		Store:   store,
+		Tmpl:    tmpl,
+		Builder: builder,
 	}, nil
 }
 

@@ -7,19 +7,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/zmb3/spotify"
 	"go.uber.org/zap"
-	"golang.org/x/oauth2"
 
+	"github.com/calebschoepp/playlist-rotator/pkg/motify"
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
 
 // Service manages building the actual spotify playlists
 type Service struct {
-	store store.Store
-	auth  spotify.Authenticator
-	log   *zap.SugaredLogger
+	store   store.Store
+	spotify *motify.Spotify
+	log     *zap.SugaredLogger
 }
 
-type trackFetcher func(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error)
+type trackFetcher func(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error)
 
 var trackFetchers map[store.ExtractMethod]map[store.TrackSourceType]trackFetcher
 
@@ -40,11 +40,11 @@ func init() {
 }
 
 // New returns a pointer to a new BuildService
-func New(store store.Store, auth spotify.Authenticator, log *zap.SugaredLogger) *Service {
+func New(store store.Store, spotify *motify.Spotify, log *zap.SugaredLogger) *Service {
 	return &Service{
-		store: store,
-		auth:  auth,
-		log:   log,
+		store:   store,
+		spotify: spotify,
+		log:     log,
 	}
 }
 
@@ -78,13 +78,7 @@ func (s *Service) BuildPlaylist(userID, playlistID uuid.UUID) {
 		s.logBuildError(userID, playlistID, err)
 		return
 	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := s.auth.NewClient(&token)
+	client := s.spotify.NewClient(&user.Token)
 
 	// Unfollow a possibly pre-existing spotify playlist
 	if playlist.SpotifyID != nil {
@@ -131,13 +125,7 @@ func (s *Service) DeletePlaylist(userID, playlistID uuid.UUID) {
 		s.logDeleteError(userID, playlistID, err)
 		return
 	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := s.auth.NewClient(&token)
+	client := s.spotify.NewClient(&user.Token)
 
 	// Unfollow spotify playlist
 	if playlist.SpotifyID != nil {
@@ -179,7 +167,7 @@ func (s *Service) logDeleteError(userID, playlistID uuid.UUID, errIn error) {
 	}
 }
 
-func buildPlaylist(client *spotify.Client, userID string, input store.Input, output store.Output) (*spotify.ID, error) {
+func buildPlaylist(client *motify.Client, userID string, input store.Input, output store.Output) (*spotify.ID, error) {
 	var tracks []spotify.ID
 	var err error
 
@@ -205,7 +193,7 @@ func buildPlaylist(client *spotify.Client, userID string, input store.Input, out
 	return playlistID, nil
 }
 
-func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks []spotify.ID) (*spotify.ID, error) {
+func addTracksToPlaylist(client *motify.Client, playlistID spotify.ID, tracks []spotify.ID) (*spotify.ID, error) {
 	start := 0
 	stop := 0
 	for {
@@ -226,12 +214,12 @@ func addTracksToPlaylist(client *spotify.Client, playlistID spotify.ID, tracks [
 	return &playlistID, nil
 }
 
-func getTopAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
-func getTopLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
@@ -267,7 +255,7 @@ func getTopLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource 
 	return tracks, nil
 }
 
-func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	count := 0
 	offset := 0
 	var limit int
@@ -285,7 +273,7 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSour
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(trackSource.ID, &opts, "items(track(id))") // TODO fields are wrong here
+		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))") // TODO fields are wrong here
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
@@ -303,17 +291,17 @@ func getTopPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSour
 	return tracks, nil
 }
 
-func getRandomAlbumTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
-func getRandomLikedTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	// TODO implement
 	return nil, errors.New("not implemented")
 }
 
-func getRandomPlaylistTracks(client *spotify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
+func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
 	// TODO implement
 	return nil, errors.New("not implemented")
 }

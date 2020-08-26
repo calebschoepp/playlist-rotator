@@ -18,13 +18,32 @@ type User struct {
 	SessionToken  string    `db:"session_token"`
 	SessionExpiry time.Time `db:"session_expiry"`
 
-	AccessToken  string    `db:"access_token"` // TODO add a Token field and marshalling/unmarshalling methods
+	Token        oauth2.Token
+	AccessToken  string    `db:"access_token"`
 	RefreshToken string    `db:"refresh_token"`
 	TokenType    string    `db:"token_type"`
 	TokenExpiry  time.Time `db:"token_expiry"`
 
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+}
+
+// MarshalToken unpacks the Token field into the token db mapping fields
+func (u *User) MarshalToken() {
+	u.AccessToken = u.Token.AccessToken
+	u.RefreshToken = u.Token.RefreshToken
+	u.TokenType = u.Token.TokenType
+	u.TokenExpiry = u.Token.Expiry
+}
+
+// UnmarshalToken packs the token db mapping fields into the Token field
+func (u *User) UnmarshalToken() {
+	u.Token = oauth2.Token{
+		AccessToken:  u.AccessToken,
+		RefreshToken: u.RefreshToken,
+		TokenType:    u.TokenType,
+		Expiry:       u.TokenExpiry,
+	}
 }
 
 // GetUserByID returns a User matching the given id
@@ -39,9 +58,11 @@ WHERE id=$1;
 	if err != nil {
 		return nil, err
 	}
+	user.UnmarshalToken()
 	return &user, nil
 }
 
+// GetUserBySpotifyID returns a User matching the given spotifyID
 func (p *Postgres) GetUserBySpotifyID(spotifyID string) (*User, error) {
 	return nil, errors.New("not implemented")
 }
@@ -78,6 +99,7 @@ SELECT exists (
 	return exists, nil
 }
 
+// GetSessionExpiry returns the expiry time of a sessionToken
 func (p *Postgres) GetSessionExpiry(sessionToken string) (*time.Time, error) {
 	query := `
 SELECT session_expiry

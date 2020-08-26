@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/zmb3/spotify"
-	"golang.org/x/oauth2"
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
@@ -32,13 +31,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := s.SpotifyAuth.NewClient(&token)
+	client := s.Spotify.NewClient(&user.Token)
 
 	tmplData := tmpl.Home{}
 
@@ -120,13 +113,13 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 			case store.LikedSrc:
 				srcImageURL = "/static/liked_songs_cover.svg"
 			case store.AlbumSrc:
-				spotifyAlbum, err := client.GetAlbum(p.Input.TrackSources[i].ID)
+				spotifyAlbum, err := client.GetAlbum(spotify.ID(p.Input.TrackSources[i].ID))
 				if err != nil || len(spotifyAlbum.Images) == 0 {
 					s.Log.Warnw("failed to fetch cover image for album track source", "err", err.Error(), "spotifyID", p.Input.TrackSources[i].ID)
 				}
 				srcImageURL = spotifyAlbum.Images[0].URL
 			case store.PlaylistSrc:
-				spotifyPlaylist, err := client.GetPlaylistOpt(p.Input.TrackSources[i].ID, "images")
+				spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(p.Input.TrackSources[i].ID), "images")
 				if err != nil || len(spotifyPlaylist.Images) == 0 {
 					s.Log.Warnw("failed to fetch cover image for playlist track source", "err", err.Error(), "spotifyID", p.Input.TrackSources[i].ID)
 
@@ -166,7 +159,7 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	spotifyAuthURL := s.SpotifyAuth.AuthURL(state)
+	spotifyAuthURL := s.Spotify.AuthURL(state)
 
 	s.Tmpl.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
 }
@@ -192,7 +185,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	token, err := s.SpotifyAuth.Token(stateCookie.Value, r)
+	token, err := s.Spotify.Token(stateCookie.Value, r)
 	if err != nil {
 		s.Log.Errorw("failed to build spotify auth", "err", err.Error())
 		http.Error(w, "server error", http.StatusInternalServerError)
@@ -215,7 +208,7 @@ func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get spotify ID
-	client := s.SpotifyAuth.NewClient(token)
+	client := s.Spotify.NewClient(token)
 	privateUser, err := client.CurrentUser()
 	if err != nil {
 		s.Log.Errorw("failed to get current spotify userID", "err", err.Error())
@@ -307,13 +300,7 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return
 		}
-		token := oauth2.Token{
-			AccessToken:  user.AccessToken,
-			RefreshToken: user.RefreshToken,
-			TokenType:    user.TokenType,
-			Expiry:       user.TokenExpiry,
-		}
-		client := s.SpotifyAuth.NewClient(&token)
+		client := s.Spotify.NewClient(&user.Token)
 
 		// Source cover images
 		for i := range playlist.Input.TrackSources {
@@ -322,13 +309,13 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 			case store.LikedSrc:
 				srcImageURL = "/static/liked_songs_cover.svg"
 			case store.AlbumSrc:
-				spotifyAlbum, err := client.GetAlbum(playlist.Input.TrackSources[i].ID)
+				spotifyAlbum, err := client.GetAlbum(spotify.ID(playlist.Input.TrackSources[i].ID))
 				if err != nil || len(spotifyAlbum.Images) == 0 {
 					s.Log.Warnw("failed to fetch album source cover image", "err", err.Error(), "spotifyID", playlist.Input.TrackSources[i].ID)
 				}
 				srcImageURL = spotifyAlbum.Images[0].URL
 			case store.PlaylistSrc:
-				spotifyPlaylist, err := client.GetPlaylistOpt(playlist.Input.TrackSources[i].ID, "images")
+				spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(playlist.Input.TrackSources[i].ID), "images")
 				if err != nil || len(spotifyPlaylist.Images) == 0 {
 					s.Log.Warnw("failed to fetch playlist album source cover image", "err", err.Error(), "spotifyID", playlist.Input.TrackSources[i].ID)
 				}
@@ -344,7 +331,7 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Regardless we gather the potential sources
-	potentialSources, err := getPotentialSources(s.Store, s.SpotifyAuth, userID)
+	potentialSources, err := getPotentialSources(s.Store, s.Spotify, userID)
 	if err != nil {
 		s.Log.Errorw("failed to get potential track sources", "err", err.Error(), "userID", userID)
 		http.Error(w, "server error", http.StatusInternalServerError)
@@ -422,9 +409,9 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 			id := parts[0]
 			idVal := strings.Join(v, "")
 			if ts, ok := trackSources[id]; ok {
-				ts.ID = spotify.ID(idVal)
+				ts.ID = idVal
 			} else {
-				trackSources[id] = &store.TrackSource{ID: spotify.ID(idVal)}
+				trackSources[id] = &store.TrackSource{ID: idVal}
 			}
 		} else if strings.HasSuffix(k, "count") {
 			parts := strings.Split(k, "::")
@@ -537,7 +524,6 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// TODO extract this into helper method
 	// Build spotify client
 	user, err := s.Store.GetUserByID(*userID)
 	if err != nil {
@@ -545,19 +531,13 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	token := oauth2.Token{
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
-		TokenType:    user.TokenType,
-		Expiry:       user.TokenExpiry,
-	}
-	client := s.SpotifyAuth.NewClient(&token)
+	client := s.Spotify.NewClient(&user.Token)
 
 	source := store.TrackSource{}
 	source.Count = 0
 	source.Method = store.Latest
 	source.Name = name
-	source.ID = spotify.ID(id)
+	source.ID = id
 	switch typeString {
 	case string(store.LikedSrc):
 		source.Type = store.LikedSrc
@@ -573,13 +553,13 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	case store.LikedSrc:
 		srcImageURL = "/static/liked_songs_cover.svg"
 	case store.AlbumSrc:
-		spotifyAlbum, err := client.GetAlbum(source.ID)
+		spotifyAlbum, err := client.GetAlbum(spotify.ID(source.ID))
 		if err != nil || len(spotifyAlbum.Images) == 0 {
 			s.Log.Warnw("failed to fetch album cover image", "err", err.Error(), "spotifyID", source.ID)
 		}
 		srcImageURL = spotifyAlbum.Images[0].URL
 	case store.PlaylistSrc:
-		spotifyPlaylist, err := client.GetPlaylistOpt(source.ID, "images")
+		spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(source.ID), "images")
 		if err != nil || len(spotifyPlaylist.Images) == 0 {
 			s.Log.Warnw("failed to fetch playlist cover image", "err", err.Error(), "spotifyID", source.ID)
 		}
