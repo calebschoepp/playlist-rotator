@@ -2,4 +2,4 @@
 Automatically rotate Spotify playlists
 
 # Static Assets
-Come from undraw.co
+Come from humaaans.com and zondicons

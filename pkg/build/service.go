@@ -1,8 +1,10 @@
 package build
 
 import (
-	"errors"
 	"fmt"
+	"math/rand"
+	"sort"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/zmb3/spotify"
@@ -215,15 +217,14 @@ func addTracksToPlaylist(client *motify.Client, playlistID spotify.ID, tracks []
 }
 
 func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	count := 0
 	offset := 0
 	var limit int
 
 	for {
-		if trackSource.Count-count <= 0 {
+		if trackSource.Count-offset <= 0 {
 			break
-		} else if trackSource.Count-count < 50 {
-			limit = trackSource.Count - count
+		} else if trackSource.Count-offset < 50 {
+			limit = trackSource.Count - offset
 		} else {
 			limit = 50
 		}
@@ -240,7 +241,6 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
-		count += limit
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
@@ -251,15 +251,14 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 }
 
 func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	count := 0
 	offset := 0
 	var limit int
 
 	for {
-		if trackSource.Count-count <= 0 {
+		if trackSource.Count-offset <= 0 {
 			break
-		} else if trackSource.Count-count < 50 {
-			limit = trackSource.Count - count
+		} else if trackSource.Count-offset < 50 {
+			limit = trackSource.Count - offset
 		} else {
 			limit = 50
 		}
@@ -276,7 +275,6 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
-		count += limit
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
@@ -287,15 +285,14 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 }
 
 func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	count := 0
 	offset := 0
 	var limit int
 
 	for {
-		if trackSource.Count-count <= 0 {
+		if trackSource.Count-offset <= 0 {
 			break
-		} else if trackSource.Count-count < 50 {
-			limit = trackSource.Count - count
+		} else if trackSource.Count-offset < 50 {
+			limit = trackSource.Count - offset
 		} else {
 			limit = 50
 		}
@@ -312,7 +309,6 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
-		count += limit
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
@@ -323,16 +319,204 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 }
 
 func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	// TODO implement
-	return nil, errors.New("not implemented")
+	// Find the total number of album tracks
+	offset := 0
+	limit := 1
+	opts := spotify.Options{
+		Limit:  &limit,
+		Offset: &offset,
+	}
+	trackPage, err := client.GetAlbumTracksOpt(spotify.ID(trackSource.ID), &opts)
+	if err != nil {
+		return nil, err
+	}
+	totalTracks := trackPage.Total
+	if totalTracks < trackSource.Count {
+		// Not enough songs. Treat as error for now TODO don't treat as error
+		return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, totalTracks)
+	}
+
+	// Generate a set of random tracks to pull
+	idx := 0
+	randomOffsets := generateRandomOffsets(trackSource.Count, totalTracks)
+
+	// Iterate over all tracks in album and pull the random ones
+	for {
+		if totalTracks-offset <= 0 {
+			break
+		} else if totalTracks-offset < 50 {
+			limit = totalTracks - offset
+		} else {
+			limit = 50
+		}
+		opts := spotify.Options{
+			Limit:  &limit,
+			Offset: &offset,
+		}
+
+		trackPage, err := client.GetAlbumTracksOpt(spotify.ID(trackSource.ID), &opts)
+		if err != nil {
+			return nil, err
+		} else if len(trackPage.Tracks) != limit {
+			// Not enough songs. Treat as error for now TODO don't treat as error
+			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
+		}
+
+		finishEarly := false
+		for i, track := range trackPage.Tracks {
+			if idx >= len(randomOffsets) {
+				finishEarly = true
+				break
+			} else if randomOffsets[idx] == offset+i {
+				idx++
+				tracks = append(tracks, track.ID)
+			}
+		}
+
+		offset += limit
+
+		if finishEarly {
+			break
+		}
+	}
+	return tracks, nil
 }
 
 func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	// TODO implement
-	return nil, errors.New("not implemented")
+	// Find the total number of liked song tracks
+	offset := 0
+	limit := 1
+	opts := spotify.Options{
+		Limit:  &limit,
+		Offset: &offset,
+	}
+	trackPage, err := client.CurrentUsersTracksOpt(&opts)
+	if err != nil {
+		return nil, err
+	}
+	totalTracks := trackPage.Total
+	fmt.Println(totalTracks)
+	if totalTracks < trackSource.Count {
+		// Not enough songs. Treat as error for now TODO don't treat as error
+		return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, totalTracks)
+	}
+
+	// Generate a set of random tracks to pull
+	idx := 0
+	randomOffsets := generateRandomOffsets(trackSource.Count, totalTracks)
+	fmt.Println(randomOffsets)
+
+	// Iterate over all tracks in liked songs and pull the random ones
+	for {
+		if totalTracks-offset <= 0 {
+			break
+		} else if totalTracks-offset < 50 {
+			limit = totalTracks - offset
+		} else {
+			limit = 50
+		}
+		opts := spotify.Options{
+			Limit:  &limit,
+			Offset: &offset,
+		}
+
+		trackPage, err := client.CurrentUsersTracksOpt(&opts)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		} else if len(trackPage.Tracks) != limit {
+			// Not enough songs. Treat as error for now TODO don't treat as error
+			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
+		}
+
+		finishEarly := false
+		for i, track := range trackPage.Tracks {
+			if idx >= len(randomOffsets) {
+				finishEarly = true
+				break
+			} else if randomOffsets[idx] == offset+i {
+				idx++
+				tracks = append(tracks, track.ID)
+			}
+		}
+
+		offset += limit
+
+		if finishEarly {
+			break
+		}
+	}
+	return tracks, nil
 }
 
 func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	// TODO implement
-	return nil, errors.New("not implemented")
+	// Find the total number of playlist tracks
+	offset := 0
+	limit := 1
+	opts := spotify.Options{
+		Limit:  &limit,
+		Offset: &offset,
+	}
+	trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "total")
+	if err != nil {
+		return nil, err
+	}
+	totalTracks := trackPage.Total
+	if totalTracks < trackSource.Count {
+		// Not enough songs. Treat as error for now TODO don't treat as error
+		return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, totalTracks)
+	}
+
+	// Generate a set of random tracks to pull
+	idx := 0
+	randomOffsets := generateRandomOffsets(trackSource.Count, totalTracks)
+
+	// Iterate over all tracks in playlist and pull the random ones
+	for {
+		if totalTracks-offset <= 0 {
+			break
+		} else if totalTracks-offset < 50 {
+			limit = totalTracks - offset
+		} else {
+			limit = 50
+		}
+		opts := spotify.Options{
+			Limit:  &limit,
+			Offset: &offset,
+		}
+
+		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))")
+		if err != nil {
+			return nil, err
+		} else if len(trackPage.Tracks) != limit {
+			// Not enough songs. Treat as error for now TODO don't treat as error
+			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
+		}
+
+		finishEarly := false
+		for i, track := range trackPage.Tracks {
+			if idx >= len(randomOffsets) {
+				finishEarly = true
+				break
+			} else if randomOffsets[idx] == offset+i {
+				idx++
+				tracks = append(tracks, track.Track.ID)
+			}
+		}
+
+		offset += limit
+
+		if finishEarly {
+			break
+		}
+	}
+	return tracks, nil
+}
+
+func generateRandomOffsets(n, N int) []int {
+	rand.Seed(time.Now().UnixNano())
+	p := rand.Perm(N)
+	out := p[:n]
+	sort.Ints(out)
+	return out
 }
