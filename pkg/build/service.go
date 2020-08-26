@@ -215,8 +215,39 @@ func addTracksToPlaylist(client *motify.Client, playlistID spotify.ID, tracks []
 }
 
 func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
-	// TODO implement
-	return nil, errors.New("not implemented")
+	count := 0
+	offset := 0
+	var limit int
+
+	for {
+		if trackSource.Count-count <= 0 {
+			break
+		} else if trackSource.Count-count < 50 {
+			limit = trackSource.Count - count
+		} else {
+			limit = 50
+		}
+		opts := spotify.Options{
+			Limit:  &limit,
+			Offset: &offset,
+		}
+
+		trackPage, err := client.GetAlbumTracksOpt(spotify.ID(trackSource.ID), &opts)
+		if err != nil {
+			return nil, err
+		} else if len(trackPage.Tracks) != limit {
+			// Not enough songs. Treat as error for now TODO don't treat as error
+			return nil, fmt.Errorf("expected %d songs in album but did not find that many", trackSource.Count)
+		}
+
+		count += limit
+		offset += limit
+
+		for _, track := range trackPage.Tracks {
+			tracks = append(tracks, track.ID)
+		}
+	}
+	return tracks, nil
 }
 
 func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource store.TrackSource) ([]spotify.ID, error) {
@@ -273,7 +304,7 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))") // TODO fields are wrong here
+		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))")
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {

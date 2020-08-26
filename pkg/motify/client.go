@@ -1,6 +1,9 @@
 package motify
 
-import zs "github.com/zmb3/spotify"
+import (
+	"github.com/zmb3/spotify"
+	zs "github.com/zmb3/spotify"
+)
 
 // Client handles accessing the Spotify APIs
 type Client struct {
@@ -41,6 +44,10 @@ func (c *Client) CurrentUsersTracksOpt(opt *zs.Options) (*zs.SavedTrackPage, err
 
 func (c *Client) GetAlbum(id zs.ID) (*zs.FullAlbum, error) {
 	return c.zsc.GetAlbum(id)
+}
+
+func (c *Client) GetAlbumTracksOpt(id zs.ID, opt *zs.Options) (*spotify.SimpleTrackPage, error) {
+	return c.zsc.GetAlbumTracksOpt(id, *opt.Limit, *opt.Offset)
 }
 
 func (c *Client) GetPlaylistOpt(playlistID zs.ID, fields string) (*zs.FullPlaylist, error) {
