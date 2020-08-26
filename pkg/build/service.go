@@ -237,7 +237,7 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in album but did not find that many", trackSource.Count)
+			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		count += limit
@@ -273,7 +273,7 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in Liked Songs but did not find that many", trackSource.Count)
+			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		count += limit
@@ -309,7 +309,7 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs. Treat as error for now TODO don't treat as error
-			return nil, fmt.Errorf("expected %d songs in playlist but did not find that many", trackSource.Count)
+			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		count += limit

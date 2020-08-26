@@ -1,7 +1,10 @@
 function buildPlaylist(playlistID) {
-  var tagElem = document.querySelector("#build-tag-" + playlistID);
-  console.log(tagElem);
-  tagElem.setAttribute("src", "/static/building_pill.svg");
+  var buildTag = document.querySelector("#build-tag-" + playlistID);
+  buildTag.setAttribute("src", "/static/building_pill.svg");
+
+  var refresh = document.querySelector("#refresh-" + playlistID);
+  refresh.classList.remove("hidden");
+  refresh.classList.add("block");
 
   var url = window.location.protocol + "//" + window.location.host;
   url = url + "/playlist/" + playlistID + "/build";

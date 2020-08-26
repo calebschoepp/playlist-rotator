@@ -13,7 +13,12 @@
 			{{/* Name and tag */}}
 			<div class="flex flex-row justify-start items-center">
 				<h1 class="slab text-2xl text-gray-900 font-black mr-4">{{ .Name }}</h1>
-				<img id="build-tag-{{- .ID -}}" src="{{ .BuildTagSrc }}" alt="built">
+				<img id="build-tag-{{- .ID -}}" src="{{ .BuildTagSrc }}" alt="built" class="mr-4">
+				{{ if eq .BuildTagSrc "/static/building_pill.svg" }}
+				<img id="refresh-{{- .ID -}}" src="/static/refresh.svg" onClick="location.reload();">
+				{{ else }}
+				<img id="refresh-{{- .ID -}}" class="hidden transform hover:scale-125" src="/static/refresh.svg" onClick="location.reload();">
+				{{ end }}
 			</div>
 
 			{{/* description */}}
