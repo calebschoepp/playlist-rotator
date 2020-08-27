@@ -6,4 +6,5 @@ import "github.com/google/uuid"
 type Builder interface {
 	BuildPlaylist(userID, playlistID uuid.UUID)
 	DeletePlaylist(userID, playlistID uuid.UUID)
+	BuildScheduledPlaylists()
 }
