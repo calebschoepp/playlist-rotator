@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Config holds the settings for a Server
+// Config holds the settings used by the serve and build commands
 type Config struct {
 	ClientID            string
 	ClientSecret        string
