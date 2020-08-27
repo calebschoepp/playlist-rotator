@@ -624,6 +624,7 @@ video {
   padding-right: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .btn-primary {

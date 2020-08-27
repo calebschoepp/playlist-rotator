@@ -10,3 +10,17 @@
 # Questions
 - Should build occur as soon as a scheduled playlist has been built?
 - What should the behaviour be for counts that are too large for a playlist?
+
+# Name ideas
+- Splaylist
+- Audiopop
+- Habitune
+- Acoustible
+- SoundRoutine
+- MixRoutine
+
+# Name front-runners
+- MixMakr.com
+- MixMaker.app
+- MixRoutine.com
+- Acoustible.com
