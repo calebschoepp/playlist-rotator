@@ -15,7 +15,7 @@ type Input struct {
 // TrackSource represents a single source of tracks for a generated Spotify playlist
 type TrackSource struct {
 	Name     string          `json:"name"`
-	ID       string          `json:"id"` // TODO this should be a string
+	ID       string          `json:"id"`
 	Type     TrackSourceType `json:"type"`
 	Count    int             `json:"count"`
 	Method   ExtractMethod   `json:"method"`
