@@ -13,6 +13,7 @@
 - More clear help text throughout
 - Handle ? and about buttons
 - Pop-up tutorial?
+- Minimize tailwind css
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built?

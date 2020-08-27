@@ -6,7 +6,7 @@ local: build
 build: static/tailwind.css
 	go build -o bin/playlist-rotator .
 
-static/tailwind.css: tailwind.config.js postcss.config.js css/tailwind.css css/tailwind.css
+static/tailwind.css: tailwind.config.js postcss.config.js css/tailwind.css
 	npm run build
 
 .PHONY: local-db-shell
