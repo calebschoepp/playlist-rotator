@@ -24,6 +24,7 @@ type Store interface {
 	UpdatePlaylistConfig(id uuid.UUID, playlist Playlist) error
 	GetPlaylist(id uuid.UUID) (*Playlist, error)
 	GetPlaylists(userID uuid.UUID) ([]Playlist, error)
+	GetAllPlaylists() ([]Playlist, error)
 	UpdatePlaylistGoodBuild(id uuid.UUID, spotifyID string) error
 	UpdatePlaylistBadBuild(id uuid.UUID, failureMsg string) error
 	UpdatePlaylistStartBuild(id uuid.UUID) error

@@ -6,6 +6,7 @@
 - (Medium effort; Low return) Block mobile usage
 - (Medium effort; Low return) Make the illustrations more relevant/improve landing page
 - (Medium effort; Medium return) Do useability testing on whole process through and add better explanations
+- (Low effort; Medium return) Rework concept of home, login, and dashboard pages
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built?

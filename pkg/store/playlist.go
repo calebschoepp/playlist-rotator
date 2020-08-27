@@ -10,6 +10,7 @@ import (
 // TODO split into two embedded interfaces and generally improve this type
 // 1) Playlist configuration
 // 2) Spotify build information
+
 // Playlist is the configuration used to build a new Spotify playlist
 type Playlist struct {
 	ID     uuid.UUID `db:"id"`
@@ -31,6 +32,7 @@ type Playlist struct {
 	LastBuiltAt *time.Time `db:"last_built_at"`
 }
 
+// MarshalInput packs a input object into a JSON string
 func (p *Playlist) MarshalInput() error {
 	b, err := json.Marshal(&p.Input)
 	if err != nil {
@@ -40,6 +42,7 @@ func (p *Playlist) MarshalInput() error {
 	return nil
 }
 
+// UnmarshalInput unpacks a JSON string into an input object
 func (p *Playlist) UnmarshalInput() error {
 	var i Input
 	err := json.Unmarshal([]byte(p.InputString), &i)
@@ -157,6 +160,29 @@ WHERE user_id=$1;
 	return playlists, nil
 }
 
+// GetAllPlaylists returns all stored playlists
+func (p *Postgres) GetAllPlaylists() ([]Playlist, error) {
+	playlists := []Playlist{}
+	query := `
+SELECT *
+FROM playlists;
+`
+	err := p.db.Select(&playlists, query)
+	if err != nil {
+		return playlists, err
+	}
+
+	for i := range playlists {
+		err = playlists[i].UnmarshalInput()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return playlists, nil
+}
+
+// UpdatePlaylistStartBuild sets a playlists building boolean to true
 func (p *Postgres) UpdatePlaylistStartBuild(id uuid.UUID) error {
 	query := `
 UPDATE playlists SET
@@ -188,7 +214,7 @@ WHERE id=$3;
 	return nil
 }
 
-// UpdatePlaylistBadBuild updates a playlist entry after a failed build of the playlist
+// UpdatePlaylistBadBuild updates a playlist entry after a failed build of a playlist
 func (p *Postgres) UpdatePlaylistBadBuild(id uuid.UUID, failureMsg string) error {
 	query := `
 UPDATE playlists SET
@@ -217,6 +243,7 @@ WHERE id=$1;
 	return nil
 }
 
+// UpdatePlaylistBadDelete updates a playlist entry after a failed delete of a playlist
 func (p *Postgres) UpdatePlaylistBadDelete(id uuid.UUID, failureMsg string) error {
 	query := `
 UPDATE playlists SET

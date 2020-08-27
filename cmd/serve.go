@@ -10,6 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
+func init() {
+	rootCmd.AddCommand(serveCmd)
+}
+
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Spin up the playlist-rotator HTTP server",
@@ -44,8 +48,4 @@ var serveCmd = &cobra.Command{
 		// Start serving requests
 		server.Run()
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(serveCmd)
 }

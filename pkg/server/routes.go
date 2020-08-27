@@ -56,9 +56,11 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		format := "Scheduled to build at %s"
 		layout := "3 PM on Monday, January 2"
 		lastBuilt := p.LastBuiltAt
+		overrideSentence := false
 		if lastBuilt == nil {
 			t := time.Now()
 			lastBuilt = &t
+			overrideSentence = true
 		}
 		schedule := p.Schedule
 		switch schedule {
@@ -81,6 +83,10 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 			scheduleBlurb = "built monthly"
 			t := lastBuilt.AddDate(0, 1, 0)
 			scheduleSentence = fmt.Sprintf(format, t.Format(layout))
+		}
+
+		if overrideSentence {
+			scheduleSentence = "You need to manually build the playlist once before it will build automatically."
 		}
 
 		// Build status

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"sync"
+	"time"
+
 	"github.com/calebschoepp/playlist-rotator/pkg/build"
 	"github.com/calebschoepp/playlist-rotator/pkg/config"
 	"github.com/calebschoepp/playlist-rotator/pkg/motify"
@@ -13,9 +16,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func init() {
+	rootCmd.AddCommand(buildCmd)
+}
+
 var buildCmd = &cobra.Command{
 	Use:   "build",
-	Short: "Build any scheduled playlists with matured deadlines",
+	Short: "Build any scheduled playlists with deadlines that have passed",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Setup log
 		logger, _ := zap.NewDevelopment()
@@ -26,8 +33,6 @@ var buildCmd = &cobra.Command{
 		if err != nil {
 			sugarLogger.Fatalw("failed to build config", "err", err)
 		}
-
-		sugarLogger.Infof("config %v", conf)
 
 		// Setup DB
 		var db *sqlx.DB
@@ -49,10 +54,86 @@ var buildCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(buildCmd)
-}
+// TODO this probably deserves to be a method on build service so it is more testable
+func buildScheduledPlaylists(log *zap.SugaredLogger, s store.Store, bs build.Builder) {
+	log.Info("starting build job")
 
-func buildScheduledPlaylists(log *zap.SugaredLogger, store store.Store, bs build.Builder) {
-	log.Info("Here we are")
+	var wg sync.WaitGroup
+
+	// Get playlists
+	playlists, err := s.GetAllPlaylists()
+	if err != nil {
+		// This probably won't happen but if it does something is seriously wrong
+		// Not much we can do here expcept log it and wait until the next time the job runs
+		log.Errorw("failed to get all playlists from store", "err", err.Error())
+		return
+	}
+
+	built := 0
+	neverScheduled := 0
+	neverManuallyBuilt := 0
+	notDeadline := 0
+
+	// For every playlist if the deadline has passed build it
+	for i, p := range playlists {
+		// Don't build playlists that are never scheduled
+		if p.Schedule == store.Never {
+			log.Infow("skip building playist that is never scheduled", "idx", i, "playlistID", p.ID)
+			neverScheduled++
+			continue
+		}
+
+		// Don't build playlists that haven't been built manually at least once
+		if p.LastBuiltAt == nil {
+			log.Infow("skip building playist that has never been manually built", "idx", i, "playlistID", p.ID)
+			neverManuallyBuilt++
+			continue
+		}
+
+		// Don't build playlists whose deadlines haven't passed yet
+		deadline := *p.LastBuiltAt
+		switch p.Schedule {
+		case store.Never:
+			// Shouldn't reach here
+		case store.Daily:
+			deadline = deadline.AddDate(0, 0, 1)
+		case store.Weekly:
+			deadline = deadline.AddDate(0, 0, 7)
+		case store.BiWeekly:
+			deadline = deadline.AddDate(0, 0, 14)
+		case store.Monthly:
+			deadline = deadline.AddDate(0, 1, 0)
+		}
+		if time.Now().Before(deadline) {
+			log.Infow("skip building playist whose deadline hasn't passed", "idx", i, "playlistID", p.ID)
+			notDeadline++
+			continue
+		}
+
+		// By this point we know we want to build the playlist
+		log.Infow("building playlist", "idx", i, "playlistID", p.ID)
+		built++
+		wg.Add(1)
+		go func(playlist store.Playlist) {
+			defer wg.Done()
+			bs.BuildPlaylist(playlist.UserID, playlist.ID)
+		}(p)
+	}
+
+	wg.Wait()
+
+	// Print out summary
+	log.Infow(
+		"Build summary",
+		"total",
+		len(playlists),
+		"built",
+		built,
+		"neverScheduled",
+		neverScheduled,
+		"neverManuallyBuilt",
+		neverManuallyBuilt,
+		"notDeadline",
+		notDeadline,
+	)
 }
