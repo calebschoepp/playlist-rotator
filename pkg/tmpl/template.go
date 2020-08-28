@@ -14,17 +14,24 @@ import (
 // Templater provides methods for templating HTML web pages
 type Templater interface {
 	TmplHome(w http.ResponseWriter, data Home)
-	TmplLogin(w http.ResponseWriter, data Login)
+	TmplDashboard(w http.ResponseWriter, data Dashboard)
 	TmplPlaylist(w http.ResponseWriter, data Playlist)
 	TmplTrackSource(w http.ResponseWriter, data TrackSource)
 	TmplMobile(w http.ResponseWriter)
+	TmplHelp(w http.ResponseWriter)
 }
 
-// Home is the data required to template '/'
+// Home is the data required to template '/' and `/login`
 type Home struct {
+	SpotifyAuthURL string
+}
+
+// Dashboard is the data required to template `/dashboard`
+type Dashboard struct {
 	Playlists []PlaylistInfo
 }
 
+// PlaylistInfo is a playlist wrapped with extra metadata
 type PlaylistInfo struct {
 	store.Playlist
 	TotalSongs       int
@@ -32,11 +39,6 @@ type PlaylistInfo struct {
 	ScheduleBlurb    string
 	ScheduleSentence string
 	ImageURL         string
-}
-
-// Login is the data required to template '/login'
-type Login struct {
-	SpotifyAuthURL string
 }
 
 // Playlist is the data required to template '/playlist/{playlistID}'
@@ -98,9 +100,9 @@ func (t *TemplateService) TmplHome(w http.ResponseWriter, data Home) {
 	t.renderTemplate(w, "home", data)
 }
 
-// TmplLogin templates '/login'
-func (t *TemplateService) TmplLogin(w http.ResponseWriter, data Login) {
-	t.renderTemplate(w, "login", data)
+// TmplDashboard templates '/'
+func (t *TemplateService) TmplDashboard(w http.ResponseWriter, data Dashboard) {
+	t.renderTemplate(w, "dashboard", data)
 }
 
 // TmplPlaylist templates '/playlist/{playlistID}'
@@ -116,6 +118,11 @@ func (t *TemplateService) TmplTrackSource(w http.ResponseWriter, data TrackSourc
 // TmplMobile templates `/mobile`
 func (t *TemplateService) TmplMobile(w http.ResponseWriter) {
 	t.renderTemplate(w, "mobile", nil)
+}
+
+// TmplHelp templates `/help`
+func (t *TemplateService) TmplHelp(w http.ResponseWriter) {
+	t.renderTemplate(w, "help", nil)
 }
 
 func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {

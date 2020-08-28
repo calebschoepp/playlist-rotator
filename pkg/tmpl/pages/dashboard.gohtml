@@ -1,0 +1,8 @@
+{{ template "head" "Dashboard" }}
+{{ template "header" "/logout" }}
+{{ if eq (len .Playlists) 0 }}
+    {{ template "dashboard-empty" }}
+{{ else }}
+    {{ template "dashboard-used" . }}
+{{ end }}
+{{ template "foot" }}

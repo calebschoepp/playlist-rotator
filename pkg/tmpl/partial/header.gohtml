@@ -4,15 +4,12 @@
 <div class="ACCENT h-1 w-full bg-green-500"></div>
 	<div class="flex items-center justify-between px-6 h-full">
 		<div>
-			<a href="/"><img src="/static/logo.svg"></a>
+			<a href="/dashboard"><img src="/static/logo.svg"></a>
 		</div>
 		<div class="flex flex-row items-center justify-right">
 			{{ if eq . "/logout" }}
 			<a href="/help"><img class="inline pr-6" src="/static/help.svg" alt="?"></a>
 			{{ end }}
-			<a href="/about" class="pr-6 btn btn-tertiary-green">
-				About
-			</a>
 			<div>
 				<a href="{{ . }}" class="btn btn-secondary-green">
 					{{ if eq . "/logout" }}

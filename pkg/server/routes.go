@@ -16,6 +16,120 @@ import (
 )
 
 func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
+	// State should be randomly generated and passed along with Oauth request
+	// in cookie for security purposes
+	state, err := generateRandomString(32)
+	if err != nil {
+		s.Log.Error("failed to generate random string for state")
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	cookie := http.Cookie{
+		Name:    s.Config.StateCookieName,
+		Value:   state,
+		Expires: time.Now().Add(s.Config.StateCookieExpiry),
+	}
+	http.SetCookie(w, &cookie)
+
+	spotifyAuthURL := s.Spotify.AuthURL(state)
+
+	s.Tmpl.TmplHome(w, tmpl.Home{SpotifyAuthURL: spotifyAuthURL})
+}
+
+func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
+	// Delete session cookie to logout
+	expire := time.Now().Add(-7 * 24 * time.Hour)
+	cookie := http.Cookie{
+		Name:    s.Config.SessionCookieName,
+		Value:   "",
+		MaxAge:  -1,
+		Expires: expire,
+	}
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
+	// Get oauth2 tokens
+	stateCookie, err := r.Cookie(s.Config.StateCookieName)
+	if err != nil {
+		s.Log.Errorw("failed to get state cookie for oauth2", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	token, err := s.Spotify.Token(stateCookie.Value, r)
+	if err != nil {
+		s.Log.Errorw("failed to build spotify auth", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Generate new session token with expiry
+	sessionToken, err := generateRandomString(64)
+	if err != nil {
+		s.Log.Error("failed to generate random string for session token")
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	sessionExpiry := time.Now().Add(s.Config.SessionCookieExpiry)
+	sessionCookie := http.Cookie{
+		Name:     s.Config.SessionCookieName,
+		Value:    sessionToken,
+		Expires:  sessionExpiry,
+		HttpOnly: true,
+	}
+
+	// Get spotify ID
+	client := s.Spotify.NewClient(token)
+	privateUser, err := client.CurrentUser()
+	if err != nil {
+		s.Log.Errorw("failed to get current spotify userID", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	spotifyID := privateUser.User.ID
+
+	// Check if user already exists for the spotify ID
+	userExists, err := s.Store.UserExists(spotifyID)
+	if err != nil {
+		s.Log.Errorw("failed to check if user already exists in db", "err", err.Error(), "spotifyID", spotifyID)
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	if userExists {
+		// Update user with new token and session data
+		err = s.Store.UpdateUser(
+			spotifyID,
+			sessionToken,
+			sessionExpiry,
+			*token,
+		)
+		if err != nil {
+			s.Log.Errorw("failed to update user with new session data", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// Create a new user
+		err = s.Store.CreateUser(
+			spotifyID,
+			sessionToken,
+			sessionExpiry,
+			*token,
+		)
+		if err != nil {
+			s.Log.Errorw("failed to create new user", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Set session cookie and redirect to home
+	http.SetCookie(w, &sessionCookie)
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 	// Get userID
 	userID := getUserID(r.Context())
 	if userID == nil {
@@ -33,7 +147,7 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 	}
 	client := s.Spotify.NewClient(&user.Token)
 
-	tmplData := tmpl.Home{}
+	tmplData := tmpl.Dashboard{}
 
 	// Get playlists
 	playlists, err := s.Store.GetPlaylists(*userID)
@@ -146,121 +260,11 @@ func (s *Server) homePage(w http.ResponseWriter, r *http.Request) {
 		tmplData.Playlists = append(tmplData.Playlists, pInfo)
 	}
 
-	s.Tmpl.TmplHome(w, tmplData)
+	s.Tmpl.TmplDashboard(w, tmplData)
 }
 
-func (s *Server) loginPage(w http.ResponseWriter, r *http.Request) {
-	// State should be randomly generated and passed along with Oauth request
-	// in cookie for security purposes
-	state, err := generateRandomString(32)
-	if err != nil {
-		s.Log.Error("failed to generate random string for state")
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	cookie := http.Cookie{
-		Name:    s.Config.StateCookieName,
-		Value:   state,
-		Expires: time.Now().Add(s.Config.StateCookieExpiry),
-	}
-	http.SetCookie(w, &cookie)
-
-	spotifyAuthURL := s.Spotify.AuthURL(state)
-
-	s.Tmpl.TmplLogin(w, tmpl.Login{SpotifyAuthURL: spotifyAuthURL})
-}
-
-func (s *Server) logoutPage(w http.ResponseWriter, r *http.Request) {
-	// Delete session cookie to logout
-	expire := time.Now().Add(-7 * 24 * time.Hour)
-	cookie := http.Cookie{
-		Name:    s.Config.SessionCookieName,
-		Value:   "",
-		MaxAge:  -1,
-		Expires: expire,
-	}
-	http.SetCookie(w, &cookie)
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
-}
-
-func (s *Server) callbackPage(w http.ResponseWriter, r *http.Request) {
-	// Get oauth2 tokens
-	stateCookie, err := r.Cookie(s.Config.StateCookieName)
-	if err != nil {
-		s.Log.Errorw("failed to get state cookie for oauth2", "err", err.Error())
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	token, err := s.Spotify.Token(stateCookie.Value, r)
-	if err != nil {
-		s.Log.Errorw("failed to build spotify auth", "err", err.Error())
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	// Generate new session token with expiry
-	sessionToken, err := generateRandomString(64)
-	if err != nil {
-		s.Log.Error("failed to generate random string for session token")
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	sessionExpiry := time.Now().Add(s.Config.SessionCookieExpiry)
-	sessionCookie := http.Cookie{
-		Name:     s.Config.SessionCookieName,
-		Value:    sessionToken,
-		Expires:  sessionExpiry,
-		HttpOnly: true,
-	}
-
-	// Get spotify ID
-	client := s.Spotify.NewClient(token)
-	privateUser, err := client.CurrentUser()
-	if err != nil {
-		s.Log.Errorw("failed to get current spotify userID", "err", err.Error())
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	spotifyID := privateUser.User.ID
-
-	// Check if user already exists for the spotify ID
-	userExists, err := s.Store.UserExists(spotifyID)
-	if err != nil {
-		s.Log.Errorw("failed to check if user already exists in db", "err", err.Error(), "spotifyID", spotifyID)
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-	if userExists {
-		// Update user with new token and session data
-		err = s.Store.UpdateUser(
-			spotifyID,
-			sessionToken,
-			sessionExpiry,
-			*token,
-		)
-		if err != nil {
-			s.Log.Errorw("failed to update user with new session data", "err", err.Error())
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		// Create a new user
-		err = s.Store.CreateUser(
-			spotifyID,
-			sessionToken,
-			sessionExpiry,
-			*token,
-		)
-		if err != nil {
-			s.Log.Errorw("failed to create new user", "err", err.Error())
-			http.Error(w, "server error", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	// Set session cookie and redirect to home
-	http.SetCookie(w, &sessionCookie)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+func (s *Server) helpPage(w http.ResponseWriter, r *http.Request) {
+	s.Tmpl.TmplHelp(w)
 }
 
 func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
@@ -504,7 +508,7 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) {

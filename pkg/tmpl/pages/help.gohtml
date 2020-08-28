@@ -1,0 +1,23 @@
+{{ template "head" "Help" }}
+{{ template "header" "/logout" }}
+<div class="bg-gray-200 h-full">
+	<main class="container mx-auto min-h-full flex items-stretch justify-center">
+		<div class="flex flex-col justify-center items-center">
+			{{/* Illustration */}}
+			<div>
+                <img src="/static/questions_illustration.svg" alt="People talking" class="mx-auto">
+			</div>
+		
+			{{/* CTA */}}
+			<div class="w-3/5">
+				<h3 class="text-xl text-center text-gray-700 py-8">Having trouble with something? Shoot us an email.</h3>
+				<div class="text-center">
+					<a href="mailto:caleb.schoepp@gmail.com?subject=Support for Playlist Rotator" class="btn btn-primary">
+						Email Us
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+</div>
+{{ template "foot" }}
