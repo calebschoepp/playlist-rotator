@@ -1,19 +1,23 @@
 {{ define "home-empty" }}
 {{/* Vertical flex box around illustration and CTA */}}
-<div class="flex flex-col justify-center items-center">
-	{{/* Illustration */}}
-	<div>
-		<img src="/static/home_illustration.svg" alt="People talking" class="mx-auto">
-	</div>
-
-	{{/* CTA */}}
-	<div class="w-3/5">
-		<h3 class="text-xl text-center text-gray-700 pb-8">You don’t have any playlists yet. Click below to get started and make your first one.</h3>
-		<div class="text-center">
-			<a href="/playlist/new" class="btn btn-primary">
-				Get Started
-			</a>
+<div class="bg-gray-200 h-full">
+	<main class="container mx-auto min-h-full flex items-stretch justify-center">
+		<div class="flex flex-col justify-center items-center">
+			{{/* Illustration */}}
+			<div>
+				<img src="/static/void.svg" alt="People talking" class="mx-auto">
+			</div>
+		
+			{{/* CTA */}}
+			<div class="w-3/5">
+				<h3 class="text-xl text-center text-gray-700 py-8">You don’t have any playlists yet. Click below to get started and make your first one.</h3>
+				<div class="text-center">
+					<a href="/playlist/new" class="btn btn-primary">
+						Get Started
+					</a>
+				</div>
+			</div>
 		</div>
-	</div>
+	</main>
 </div>
 {{ end }}

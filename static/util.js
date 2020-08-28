@@ -51,3 +51,16 @@ function deleteSourceInput(id) {
   element.parentNode.removeChild(element);
   return;
 }
+
+function toggleFAQ(id) {
+  var answer = document.querySelector("#" + id + " div.answer");
+  console.log(answer);
+  answer.classList.toggle("hidden");
+
+  var chevron = document.querySelector("#" + id + " img.chevron");
+  if (chevron.src.endsWith("/static/chevron_up.svg")) {
+    chevron.src = "/static/chevron_down.svg";
+  } else {
+    chevron.src = "/static/chevron_up.svg";
+  }
+}

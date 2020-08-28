@@ -1,46 +1,50 @@
 {{ template "head" "New Playlist" }}
 {{ template "header" "/logout" }}
-<div class="w-full">
-	<h2 class="text-4xl font-black slab text-gray-700 my-4">
-	{{ if .IsNew }}
-	Building New Playlist
-	{{ else }}
-	Editing Playlist {{ .Name }}
-	{{ end }}
-	</h2>
+<div class="bg-gray-200 h-full">
+	<main class="container mx-auto min-h-full flex items-stretch justify-center">
+		<div class="w-full">
+			<h2 class="text-4xl font-black text-gray-700 my-4">
+			{{ if .IsNew }}
+			Building New Playlist
+			{{ else }}
+			Editing Playlist {{ .Name }}
+			{{ end }}
+			</h2>
 
-	<form method="POST" action="#">
-	{{/* Vertical flexbox for all the playlists */}}
-	<div class="flex flex-col justify-left items-center">
-		{{/* Details edit modal */}}
-		{{ template "start-edit-modal" "Details" }}
-		<div class="text-gray-700 text-lg">
-			<p class="mb-4">Set the Name, Description, and Access for the Spotify playlist that is going to be built.</p>
-			<p class="mb-4">The Schedule is how often we’ll rebuild your playlist with new tracks.</p>
+			<form method="POST" action="#">
+			{{/* Vertical flexbox for all the playlists */}}
+			<div class="flex flex-col justify-left items-center">
+				{{/* Details edit modal */}}
+				{{ template "start-edit-modal" "Details" }}
+				<div class="text-gray-700 text-lg">
+					<p class="mb-4">Set the Name, Description, and Access for the Spotify playlist that is going to be built.</p>
+					<p class="mb-4">The Schedule is how often we’ll rebuild your playlist with new tracks.</p>
+				</div>
+				{{ template "start-edit-modal-input" }}
+				{{ template "details-inputs" . }}
+				{{ template "end-edit-modal" }}
+
+				{{/* Sources edit modal */}}
+				{{ template "start-edit-modal" "Sources" }}
+				<div class="text-gray-700 text-lg">
+					<p class="mb-4">Add new sources to build your playlist from. You can use your Liked Songs, Albums, and followed Playlists as sources.</p>
+					<p class="mb-4">Count is the number of songs pulled from a source and Method is how the are selected.</p>
+				</div>
+				{{ template "start-edit-modal-input" }}
+				{{ template "sources-inputs" . }}
+				{{ template "end-edit-modal" }}
+			</div>
+
+			{{/* Save and cancel buttons */}}
+			<div class="text-right mb-6">
+				<a href="/" class="btn btn-secondary-red">
+					Cancel
+				</a>
+				<input type="submit" name="submit" value="Save" class="ml-4 btn btn-primary">
+			</div>
+			</form>
+
 		</div>
-		{{ template "start-edit-modal-input" }}
-		{{ template "details-inputs" . }}
-		{{ template "end-edit-modal" }}
-
-		{{/* Sources edit modal */}}
-		{{ template "start-edit-modal" "Sources" }}
-		<div class="text-gray-700 text-lg">
-			<p class="mb-4">Add new sources to build your playlist from. You can use your Liked Songs, Albums, and followed Playlists as sources.</p>
-			<p class="mb-4">Count is the number of songs pulled from a source and Method is how the are selected.</p>
-		</div>
-		{{ template "start-edit-modal-input" }}
-		{{ template "sources-inputs" . }}
-		{{ template "end-edit-modal" }}
-	</div>
-
-	{{/* Save and cancel buttons */}}
-	<div class="text-right mb-6">
-		<a href="/" class="btn btn-secondary-red">
-			Cancel
-		</a>
-		<input type="submit" name="submit" value="Save" class="ml-4 btn btn-primary">
-	</div>
-	</form>
-
+	</main>
 </div>
 {{ template "foot" }}

@@ -1,14 +1,18 @@
 {{ define "home-used" }}
-<div class="flex flex-col items-stretch justify-start w-full pb-10">
-	{{ range .Playlists }}
-		{{ template "playlist-info-box" . }}
-	{{ end }}
-</div>
+<div class="bg-gray-200 h-full">
+	<main class="container mx-auto min-h-full flex items-stretch justify-center">
+		<div class="flex flex-col items-stretch justify-start w-full pb-10">
+			{{ range .Playlists }}
+				{{ template "playlist-info-box" . }}
+			{{ end }}
+		</div>
 
-{{/* New playlist button */}}
-<div class="fixed bottom-0 right-0 px-16 py-10">
-	<a href="/playlist/new" class="btn btn-primary">
-		New Playlist
-	</a>
+		{{/* New playlist button */}}
+		<div class="fixed bottom-0 right-0 px-16 py-10">
+			<a href="/playlist/new" class="btn btn-primary">
+				New Playlist
+			</a>
+		</div>
+	</main>
 </div>
 {{ end }}
