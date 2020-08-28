@@ -17,6 +17,7 @@ type Templater interface {
 	TmplLogin(w http.ResponseWriter, data Login)
 	TmplPlaylist(w http.ResponseWriter, data Playlist)
 	TmplTrackSource(w http.ResponseWriter, data TrackSource)
+	TmplMobile(w http.ResponseWriter)
 }
 
 // Home is the data required to template '/'
@@ -110,6 +111,11 @@ func (t *TemplateService) TmplPlaylist(w http.ResponseWriter, data Playlist) {
 // TmplTrackSource templates '/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}'
 func (t *TemplateService) TmplTrackSource(w http.ResponseWriter, data TrackSource) {
 	t.renderTemplate(w, "track-source", data)
+}
+
+// TmplMobile templates `/mobile`
+func (t *TemplateService) TmplMobile(w http.ResponseWriter) {
+	t.renderTemplate(w, "mobile", nil)
 }
 
 func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {

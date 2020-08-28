@@ -63,13 +63,14 @@ func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux
 func (s *Server) SetupRoutes() {
 	// Build middleware
 	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
-	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`}, s.Config.SessionCookieName)
+	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/login`, `^\/callback`, `^\/static\/.*`, `^\/mobile`}, s.Config.SessionCookieName)
+	mobileBlockerMiddleware := newMobileBlockerMiddleware(s.Log)
 
 	// Serve static files
 	s.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
 
 	// Serve routes
-	s.Router.Use(loggingMiddleware, authMiddleware)
+	s.Router.Use(loggingMiddleware, authMiddleware, mobileBlockerMiddleware)
 	s.Router.Path("/").Methods("GET").HandlerFunc(s.homePage)
 	s.Router.Path("/login").Methods("GET").HandlerFunc(s.loginPage)
 	s.Router.Path("/logout").Methods("GET").HandlerFunc(s.logoutPage)
@@ -79,6 +80,7 @@ func (s *Server) SetupRoutes() {
 	s.Router.Path("/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}").Methods("GET").HandlerFunc(s.playlistTrackSourceAPI)
 	s.Router.Path("/playlist/{playlistID}/build").Methods("POST").HandlerFunc(s.playlistBuild)
 	s.Router.Path("/playlist/{playlistID}/delete").Methods("DELETE").HandlerFunc(s.playlistDelete)
+	s.Router.Path("/mobile").Methods("GET").HandlerFunc(s.mobilePage)
 }
 
 // Run makes the Server start listening and serving on the configured addr

@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/zap"
 
+	mobiledetect "github.com/Shaked/gomobiledetect"
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
 )
 
@@ -88,6 +89,24 @@ func newSessionAuthMiddleware(store store.Store, log *zap.SugaredLogger, blackli
 
 			// Call the next handler in chain
 			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func newMobileBlockerMiddleware(log *zap.SugaredLogger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			detect := mobiledetect.NewMobileDetect(r, nil)
+
+			if r.URL.Path != "/mobile" && (detect.IsMobile() || detect.IsTablet()) {
+				log.Info("Detected client is on mobile device and redirecting")
+				http.Redirect(w, r, "/mobile", http.StatusSeeOther)
+				return
+			}
+
+			// Call the next handler in chain
+			next.ServeHTTP(w, r)
+
 		})
 	}
 }

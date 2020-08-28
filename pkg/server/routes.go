@@ -623,3 +623,7 @@ func (s *Server) playlistDelete(w http.ResponseWriter, r *http.Request) {
 	go s.Builder.DeletePlaylist(*userID, playlistID)
 	w.WriteHeader(http.StatusAccepted)
 }
+
+func (s *Server) mobilePage(w http.ResponseWriter, r *http.Request) {
+	s.Tmpl.TmplMobile(w)
+}

@@ -3,8 +3,10 @@ module github.com/calebschoepp/playlist-rotator
 go 1.13
 
 require (
+	github.com/Shaked/gomobiledetect v0.0.0-20171211181707-25f014f66568
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/google/uuid v1.1.1
+	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.8.0

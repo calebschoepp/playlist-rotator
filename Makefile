@@ -21,3 +21,5 @@ heroku-db-shell:
 .PHONY: run-build-cmd
 run-build-cmd:
 	env $$(grep -v '^#' .env | xargs) go run . build
+
+# TODO figure out this whole asset pipeline thing
