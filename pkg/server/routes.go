@@ -180,7 +180,7 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 		switch schedule {
 		case store.Never:
 			scheduleBlurb = ""
-			scheduleSentence = "You must manually build the playlist"
+			scheduleSentence = "Click the build button to generate the playlist."
 		case store.Daily:
 			scheduleBlurb = "built daily"
 			t := lastBuilt.AddDate(0, 0, 1)
@@ -200,7 +200,7 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if overrideSentence {
-			scheduleSentence = "You need to manually build the playlist once before it will build automatically."
+			scheduleSentence = "You need to click the build button once before it will build automatically."
 		}
 
 		// Build status

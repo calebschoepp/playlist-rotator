@@ -8,30 +8,21 @@
 - [ ] Google analytics
 - [x] Less shit landing page
 - [ ] More clear help text throughout
-- [ ] Handle ? and about buttons
+- [x] Handle ? and about buttons
 - [ ] Pop-up tutorial?
-- [ ] Minimize tailwind css
+- [ ] Minimize tailwind css / dev/prod build-pipeline/makefile system
 - [x] Handle mobile case
 - [ ] Form validation
+- [x] Name and logo
+- [ ] HTTPS
+- [ ] Better copy on front page
 
 # Long-term goals
 - Mobile styling
 - Table styling for playlist stuff
+- GIF on landing page demonstrating how application works
+- Make the logo's 'a' and 'p' in 'Mixtape' a cassete
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
 - What should the behaviour be for counts that are too large for a playlist?
-
-# Name ideas
-- Splaylist
-- Audiopop
-- Habitune
-- Acoustible
-- SoundRoutine
-- MixRoutine
-
-# Name front-runners
-- MixMakr.com
-- MixMaker.app
-- MixRoutine.com
-- Acoustible.com

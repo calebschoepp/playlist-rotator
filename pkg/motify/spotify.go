@@ -8,6 +8,7 @@ import (
 )
 
 // TODO add some metrics to this that count the number of api calls
+// TODO make this stuff an interface so that it is more testable
 
 // Spotify authenticates and builds clients
 type Spotify struct {
