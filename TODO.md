@@ -17,6 +17,7 @@
 - [ ] HTTPS
 - [ ] Better copy on front page
 - [ ] Grey background all the way on dashboard page
+- [ ] Mobile styling for home page
 
 # Long-term goals
 - Mobile styling
@@ -28,3 +29,4 @@
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
 - What should the behaviour be for counts that are too large for a playlist?
+- Should I bump contrast on landing page waves

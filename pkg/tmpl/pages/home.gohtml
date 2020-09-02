@@ -4,18 +4,18 @@
 {{/* TODO add some cool wavy div backgrounds */}}
 <div class="bg-white h-full">
     <main class="min-h-full flex items-stretch justify-center">
-        <div class="w-full mt-32 flex flex-col justify-start items-center">
+        <div class="w-full mt-24 flex flex-col justify-start items-center">
             {{/* Hero */}}
-            <div class="container mx-auto flex flex-row justify-between items-center mb-32">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-24">
                 {{/* Copy */}}
                 <div class="w-4/12">
                     <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Manage Spotify Playlists with Ease</h1>
-                    <h2 class="text-xl text-gray-700 pb-8">Automatically remix any Spotify music into the types of playlists you want.</h2>
+                    <h2 class="text-xl text-gray-700 pb-8">Automate away the tedious process of building Spotify playlists by hand.</h2>
                     <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                         Login With Spotify
                     </a>
-                    <a href="#faq" class="btn btn-secondary-green">
-                        Learn More
+                    <a href="#use-case" class="btn btn-secondary-green">
+                        Use Cases
                     </a>
                 </div>
                 {{/* Illustration */}}
@@ -24,19 +24,20 @@
 
             {{/* UI Illustration */}}
             <img src="/static/wave_1.svg" class="w-full">
-            <div class="bg-green-100 w-full flex flex-row justify-center items-center">
+            <div class="bg-green-100 w-full flex flex-col justify-center items-center">
+                <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">How's It Work</h1>
                 <img src="/static/ui_demo.png" alt="ui demo">
             </div>
-            <img src="/static/wave_2.svg" class="w-full mb-32">
+            <img id="use-case" src="/static/wave_2.svg" class="w-full mb-24">
 
             {{/* Use case 1 */}}
-            <div class="container mx-auto flex flex-row justify-between items-center mb-32">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-24">
                 {{/* Illustration */}}
                 <img class="w-1/2" src="/static/date_picker.svg" alt="date picker">
                 {{/* Copy */}}
                 <div class="w-4/12">
-                    <h1 class="w-64 font-black leading-tight text-5xl text-gray-900 pb-8">Set It and Forget It</h1>
-                    <h2 class="text-xl text-gray-700 pb-8">It’s easy to configure a new playlist and schedule it to build without any intervention.</h2>
+                    <h1 class="w-10/12 font-black leading-tight text-5xl text-gray-900 pb-8">Free up Space on Your Phone</h1>
+                    <h2 class="text-xl text-gray-700 pb-8">Got too many songs downloaded on your phone? Build a new playlist once a week that randomly picks 100 of your Liked Songs and download that.</h2>
                 </div>
             </div>
 
@@ -46,28 +47,27 @@
                 <div class="container mx-auto flex flex-row justify-between items-center">
                     {{/* Copy */}}
                     <div class="w-4/12">
-                        <h1 class="w-10/12 font-black leading-tight text-5xl text-gray-900 pb-8">Music the Way You Want It</h1>
-                        <h2 class="text-xl text-gray-700 pb-8">Add music to your playlists from anywhere. Albums, playlists, even your liked songs. You choose how many and even how they’re picked.    </h2>
+                        <h1 class="w-11/12 font-black leading-tight text-5xl text-gray-900 pb-8">Keep up with the Latest Music</h1>
+                        <h2 class="text-xl text-gray-700 pb-8">Want to listen to the latest Rap? Build a new playlist daily that pulls the latest music from all the top Rap playlists.</h2>
                     </div>
                     {{/* Illustration */}}
                     <img class="w-1/2" src="/static/change_playlists.svg" alt="change playlists">
                 </div>
             </div>
-            <img src="/static/wave_4.svg" class="w-full mb-32">
+            <img src="/static/wave_4.svg" class="w-full mb-24">
 
             {{/* FAQ */}}
-            <h1 id="faq" class="font-black leading-tight text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
-            <div class="w-2/3 flex flex-col justify-start items-stretch mb-32">
+            <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
+            <div class="w-2/3 flex flex-col justify-start items-stretch mb-24">
                 {{/* FAQ item 1 */}}
                 <div id="faq-1">
                     <hr class="border-gray-400 mb-4">
                     <div class="flex flew-row justify-between items-center mb-4" onClick="toggleFAQ('faq-1');">
-                        <h3 class="text-xl text-gray-900">How's it work?</h3>
+                        <h3 class="text-xl text-gray-900">How is this different from making a playlist on Spotify?</h3>
                         <img src="/static/chevron_down.svg" alt="chevron down" class="chevron">
                     </div>
                     <div class="answer hidden text-xl text-gray-700">
-                        <p class="mb-4">Once you've signed in with Spotify you can make a new playlist. First, you'll need give the playlist a name and description and decide if you want it to be public. Second, decide how often the playlist should be scheduled to build. Third, you need to enter any number of sources for the playlist i.e. albums, playlists, liked songs. For each you must choose how many songs to take and how they'll be chosen. Once you've done all this you can save the playlist.</p>
-                        <p class="mb-4">In the dashboard build the playlist. This will build it in Spotify and schedule it to build in the future.</p>
+                        <p class="mb-4">When you make a new playlist in Spotify it is a slow and manual ordeal — MixtapeManager automates the process. Being able to build a playlist at the push of a button unlocks all sorts of opportunities.</p>
                     </div>
                 </div>
 
@@ -75,11 +75,11 @@
                 <div id="faq-2">
                     <hr class="border-gray-400 mb-4">
                     <div class="flex flew-row justify-between items-center mb-4" onClick="toggleFAQ('faq-2');">
-                        <h3 class="text-xl text-gray-900">Do you have access to my Spotify account?</h3>
+                        <h3 class="text-xl text-gray-900">Does this have access to my Spotify account?</h3>
                         <img src="/static/chevron_down.svg" alt="chevron down" class="chevron">
                     </div>
                     <div class="answer hidden text-xl text-gray-700">
-                        <p class="mb-4">Yes, access to your Spotify account is being required. That being said MixtapeManager only requests the minimum permissions required to do it's job. It also does not modify your pre-existing playlists or liked songs.</p>
+                        <p class="mb-4">Yes, access to your Spotify account is required. That being said MixtapeManager only requests the minimum permissions required to do it's job. It also does not modify your pre-existing playlists or liked songs.</p>
                     </div>
                 </div>
 
@@ -111,7 +111,7 @@
             {{/* Final CTA */}}
             <img src="/static/wave_5.svg" class="w-full">
             <div class="w-full bg-green-100">
-                <div class="container mx-auto flex flex-row items-center justify-center pb-16">
+                <div class="container mx-auto flex flex-col items-center justify-center pb-16">
                     <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
                     <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                         Login With Spotify
