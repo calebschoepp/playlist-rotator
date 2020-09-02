@@ -5,11 +5,11 @@
 <div class="bg-white h-full">
     <main class="container mx-auto min-h-full flex items-stretch justify-center">
         <div class="w-full my-32 flex flex-col justify-start items-center">
-            {{/* First row */}}
+            {{/* Hero */}}
             <div class="flex flex-row justify-between items-center mb-32">
                 {{/* Copy */}}
                 <div class="w-4/12">
-                    <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Take Control of Your Playlists</h1>
+                    <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Manage Spotify Playlists with Ease</h1>
                     <h2 class="text-xl text-gray-700 pb-8">Automatically remix any Spotify music into the types of playlists you want.</h2>
                     <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                         Login With Spotify
@@ -22,7 +22,10 @@
                 <img class="w-1/2" src="/static/listen_by_tree.svg" alt="listen by tree">
             </div>
 
-            {{/* Second row */}}
+            {{/* UI Illustration */}}
+            <img class="mb-32" src="/static/ui_demo.png" alt="ui demo">
+
+            {{/* Use case 1 */}}
             <div class="flex flex-row justify-between items-center mb-32">
                 {{/* Illustration */}}
                 <img class="w-1/2" src="/static/date_picker.svg" alt="date picker">
@@ -33,7 +36,7 @@
                 </div>
             </div>
 
-            {{/* Third row */}}
+            {{/* Use case 2 */}}
             <div class="flex flex-row justify-between items-center mb-32">
                 {{/* Copy */}}
                 <div class="w-4/12">
@@ -44,7 +47,7 @@
                 <img class="w-1/2" src="/static/change_playlists.svg" alt="change playlists">
             </div>
 
-            {{/* Fourth row */}}
+            {{/* FAQ */}}
             <h1 id="faq" class="font-black leading-tight text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
             <div class="w-2/3 flex flex-col justify-start items-stretch mb-32">
                 {{/* FAQ item 1 */}}
@@ -97,7 +100,7 @@
                 </div>
             </div>
 
-            {{/* Fifth row */}}
+            {{/* Final CTA */}}
             <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
             <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                 Login With Spotify

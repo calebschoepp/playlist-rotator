@@ -16,12 +16,14 @@
 - [x] Name and logo
 - [ ] HTTPS
 - [ ] Better copy on front page
+- [ ] Grey background all the way on dashboard page
 
 # Long-term goals
 - Mobile styling
 - Table styling for playlist stuff
 - GIF on landing page demonstrating how application works
 - Make the logo's 'a' and 'p' in 'Mixtape' a cassete
+- Make sure name MixtapeManager is used everywhere
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
