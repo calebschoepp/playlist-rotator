@@ -1,12 +1,12 @@
-{{ template "head" "Playlist Rotator" }}
+{{ template "head" "Mixtape Manager" }}
 {{ template "header" .SpotifyAuthURL }}
 {{/* Flex box around copy on left and illustration on right */}}
 {{/* TODO add some cool wavy div backgrounds */}}
 <div class="bg-white h-full">
-    <main class="container mx-auto min-h-full flex items-stretch justify-center">
-        <div class="w-full my-32 flex flex-col justify-start items-center">
+    <main class="min-h-full flex items-stretch justify-center">
+        <div class="w-full mt-32 flex flex-col justify-start items-center">
             {{/* Hero */}}
-            <div class="flex flex-row justify-between items-center mb-32">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-32">
                 {{/* Copy */}}
                 <div class="w-4/12">
                     <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Manage Spotify Playlists with Ease</h1>
@@ -23,10 +23,14 @@
             </div>
 
             {{/* UI Illustration */}}
-            <img class="mb-32" src="/static/ui_demo.png" alt="ui demo">
+            <img src="/static/wave_1.svg" class="w-full">
+            <div class="bg-green-100 w-full flex flex-row justify-center items-center">
+                <img src="/static/ui_demo.png" alt="ui demo">
+            </div>
+            <img src="/static/wave_2.svg" class="w-full mb-32">
 
             {{/* Use case 1 */}}
-            <div class="flex flex-row justify-between items-center mb-32">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-32">
                 {{/* Illustration */}}
                 <img class="w-1/2" src="/static/date_picker.svg" alt="date picker">
                 {{/* Copy */}}
@@ -37,15 +41,19 @@
             </div>
 
             {{/* Use case 2 */}}
-            <div class="flex flex-row justify-between items-center mb-32">
-                {{/* Copy */}}
-                <div class="w-4/12">
-                    <h1 class="w-10/12 font-black leading-tight text-5xl text-gray-900 pb-8">Music the Way You Want It</h1>
-                    <h2 class="text-xl text-gray-700 pb-8">Add music to your playlists from anywhere. Albums, playlists, even your liked songs. You choose how many and even how they’re picked.    </h2>
+            <img src="/static/wave_3.svg" class="w-full">
+            <div class="bg-green-100 w-full">
+                <div class="container mx-auto flex flex-row justify-between items-center">
+                    {{/* Copy */}}
+                    <div class="w-4/12">
+                        <h1 class="w-10/12 font-black leading-tight text-5xl text-gray-900 pb-8">Music the Way You Want It</h1>
+                        <h2 class="text-xl text-gray-700 pb-8">Add music to your playlists from anywhere. Albums, playlists, even your liked songs. You choose how many and even how they’re picked.    </h2>
+                    </div>
+                    {{/* Illustration */}}
+                    <img class="w-1/2" src="/static/change_playlists.svg" alt="change playlists">
                 </div>
-                {{/* Illustration */}}
-                <img class="w-1/2" src="/static/change_playlists.svg" alt="change playlists">
             </div>
+            <img src="/static/wave_4.svg" class="w-full mb-32">
 
             {{/* FAQ */}}
             <h1 id="faq" class="font-black leading-tight text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
@@ -101,10 +109,15 @@
             </div>
 
             {{/* Final CTA */}}
-            <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
-            <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
-                Login With Spotify
-            </a>
+            <img src="/static/wave_5.svg" class="w-full">
+            <div class="w-full bg-green-100">
+                <div class="container mx-auto flex flex-row items-center justify-center pb-16">
+                    <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
+                    <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
+                        Login With Spotify
+                    </a>
+                </div>
+            </div>
     </main>
 </div>
 {{ template "foot" }}
