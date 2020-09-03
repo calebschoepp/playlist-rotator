@@ -25,6 +25,7 @@
 - GIF on landing page demonstrating how application works
 - Make the logo's 'a' and 'p' in 'Mixtape' a cassete
 - Make sure name MixtapeManager is used everywhere
+- Lock out the heroku subdomain - it is a security risk
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required

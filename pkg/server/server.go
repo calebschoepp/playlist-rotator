@@ -28,13 +28,7 @@ type Server struct {
 // New builds a new Server struct
 func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux.Router) (*Server, error) {
 	// Build spotify
-	var redirectURL string
-	if config.Host == "localhost" {
-		redirectURL = fmt.Sprintf("%s%s:%d/callback", config.Protocol, config.Host, config.Port)
-	} else {
-		redirectURL = fmt.Sprintf("%s%s/callback", config.Protocol, config.Host)
-	}
-	spotify := motify.New(redirectURL, config.ClientID, config.ClientSecret)
+	spotify := motify.New(config.OauthRedirectURL, config.ClientID, config.ClientSecret)
 
 	// Build store
 	store := store.New(db)

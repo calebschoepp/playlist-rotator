@@ -10,14 +10,13 @@ import (
 type Config struct {
 	ClientID            string
 	ClientSecret        string
-	Protocol            string
-	Host                string
 	Port                int
 	DatabaseURL         string
 	StateCookieName     string
 	StateCookieExpiry   time.Duration
 	SessionCookieName   string
 	SessionCookieExpiry time.Duration
+	OauthRedirectURL    string
 }
 
 // New returns a Config struct with sane defaults and env variable overrides
@@ -25,14 +24,13 @@ func New() (*Config, error) {
 	config := Config{
 		ClientID:            "",
 		ClientSecret:        "",
-		Protocol:            "http://",
-		Host:                "localhost",
 		Port:                8080,
 		DatabaseURL:         "",
 		StateCookieName:     "oauthState",
 		StateCookieExpiry:   30 * time.Minute,
 		SessionCookieName:   "session",
 		SessionCookieExpiry: 60 * time.Minute,
+		OauthRedirectURL:    "",
 	}
 
 	if clientID, present := os.LookupEnv("CLIENT_ID"); present {
@@ -40,12 +38,6 @@ func New() (*Config, error) {
 	}
 	if clientSecret, present := os.LookupEnv("CLIENT_SECRET"); present {
 		config.ClientSecret = clientSecret
-	}
-	if protocol, present := os.LookupEnv("PROTOCOL"); present {
-		config.Protocol = protocol
-	}
-	if host, present := os.LookupEnv("HOST"); present {
-		config.Host = host
 	}
 	if port, present := os.LookupEnv("PORT"); present {
 		var err error
@@ -76,6 +68,9 @@ func New() (*Config, error) {
 			return nil, err
 		}
 		config.SessionCookieExpiry = sessionCookieExpiry
+	}
+	if oauthRedirectURL, present := os.LookupEnv("OAUTH_REDIRECT_URL"); present {
+		config.OauthRedirectURL = oauthRedirectURL
 	}
 
 	return &config, nil
