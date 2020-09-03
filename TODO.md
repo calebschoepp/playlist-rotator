@@ -16,11 +16,11 @@
 - [x] Name and logo
 - [x] HTTPS (This is a nightmare)
 - [x] Better copy on front page
-- [ ] Grey background all the way on dashboard page
+- [x] Grey background all the way on dashboard page
 - [ ] Mobile styling for home page
 
 # Long-term goals
-- Mobile styling
+- Mobile styling for rest of website
 - Table styling for playlist stuff
 - GIF on landing page demonstrating how application works
 - Make the logo's 'a' and 'p' in 'Mixtape' a cassete
