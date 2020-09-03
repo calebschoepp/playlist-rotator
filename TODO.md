@@ -14,8 +14,8 @@
 - [x] Handle mobile case
 - [ ] Form validation
 - [x] Name and logo
-- [ ] HTTPS
-- [ ] Better copy on front page
+- [x] HTTPS (This is a nightmare)
+- [x] Better copy on front page
 - [ ] Grey background all the way on dashboard page
 - [ ] Mobile styling for home page
 
@@ -29,4 +29,4 @@
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
 - What should the behaviour be for counts that are too large for a playlist?
-- Should I bump contrast on landing page waves
+- Should I bump contrast on landing page waves -> No
