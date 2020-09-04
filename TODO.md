@@ -6,7 +6,7 @@
 - [ ] Make process of configuring and building a playlist more clear
 - [ ] Minimize tailwind css / dev/prod build-pipeline/makefile system
 - [x] Handle mobile case
-- [ ] Form validation
+- [x] Form validation
 - [x] Name and logo
 - [x] HTTPS (This is a nightmare)
 - [x] Better copy on front page

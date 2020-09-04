@@ -169,7 +169,7 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 		layout := "3 PM on Monday, January 2"
 		lastBuilt := p.LastBuiltAt
 		overrideSentence := false
-		if lastBuilt == nil {
+		if lastBuilt == nil && p.Schedule != store.Never {
 			t := time.Now()
 			lastBuilt = &t
 			overrideSentence = true
