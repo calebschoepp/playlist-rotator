@@ -93,14 +93,30 @@ func newSessionAuthMiddleware(store store.Store, log *zap.SugaredLogger, blackli
 	}
 }
 
-func newMobileBlockerMiddleware(log *zap.SugaredLogger) func(next http.Handler) http.Handler {
+func newMobileBlockerMiddleware(log *zap.SugaredLogger, blacklist []string) func(next http.Handler) http.Handler {
+	// Cache the regex object of each route
+	var blacklistRegexp []*regexp.Regexp
+	for _, expr := range blacklist {
+		regexp, err := regexp.Compile(expr)
+		if err != nil {
+			panic("Invalid regex expression for path blacklist")
+		}
+		blacklistRegexp = append(blacklistRegexp, regexp)
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Ignore blacklisted paths
+			for _, regexp := range blacklistRegexp {
+				if regexp.MatchString(r.URL.Path) {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
 			detect := mobiledetect.NewMobileDetect(r, nil)
 
-			if r.URL.Path == "/" || r.URL.Path == "/login" {
-				// Do nothing and let this through
-			} else if r.URL.Path != "/mobile" && (detect.IsMobile() || detect.IsTablet()) {
+			if r.URL.Path != "/mobile" && (detect.IsMobile() || detect.IsTablet()) {
 				log.Info("Detected client is on mobile device and redirecting")
 				http.Redirect(w, r, "/mobile", http.StatusSeeOther)
 				return

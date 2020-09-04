@@ -58,7 +58,7 @@ func (s *Server) SetupRoutes() {
 	// Build middleware
 	loggingMiddleware := newRequestLoggerMiddleware(s.Log)
 	authMiddleware := newSessionAuthMiddleware(s.Store, s.Log, []string{`^\/$`, `^\/login`, `^\/callback`, `^\/static\/.*`, `^\/mobile`}, s.Config.SessionCookieName)
-	mobileBlockerMiddleware := newMobileBlockerMiddleware(s.Log)
+	mobileBlockerMiddleware := newMobileBlockerMiddleware(s.Log, []string{`^\/$`, `^\/login`, `^\/static\/.*`})
 
 	// Serve static files
 	s.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
