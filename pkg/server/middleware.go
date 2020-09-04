@@ -98,7 +98,9 @@ func newMobileBlockerMiddleware(log *zap.SugaredLogger) func(next http.Handler) 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			detect := mobiledetect.NewMobileDetect(r, nil)
 
-			if r.URL.Path != "/mobile" && (detect.IsMobile() || detect.IsTablet()) {
+			if r.URL.Path == "/" || r.URL.Path == "/login" {
+				// Do nothing and let this through
+			} else if r.URL.Path != "/mobile" && (detect.IsMobile() || detect.IsTablet()) {
 				log.Info("Detected client is on mobile device and redirecting")
 				http.Redirect(w, r, "/mobile", http.StatusSeeOther)
 				return

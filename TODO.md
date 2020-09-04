@@ -24,6 +24,8 @@
 - 404 not found bug when adding a new source (e.g. lofi hip hop beats to study to)
 - Add a special page for 404s
 - Track sources and build errors should be their own rows in Postgres
+- Figure out the freaking asset pipeline
+- Setup some CI/CD and stop pushing to master like a savage
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
