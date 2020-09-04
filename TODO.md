@@ -11,7 +11,8 @@
 - [x] HTTPS (This is a nightmare)
 - [x] Better copy on front page
 - [x] Grey background all the way on dashboard page
-- [ ] Mobile styling for home page
+- [x] Mobile styling for home page
+- [ ] Don't error on trying to pull too many songs from a list
 
 # Long-term goals
 - Mobile styling for rest of website
