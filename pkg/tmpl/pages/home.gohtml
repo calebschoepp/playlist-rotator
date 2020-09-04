@@ -1,12 +1,11 @@
 {{ template "head" "Mixtape Manager" }}
 {{ template "header" .SpotifyAuthURL }}
 {{/* Flex box around copy on left and illustration on right */}}
-{{/* TODO add some cool wavy div backgrounds */}}
 <div class="bg-white">
-    <main class="min-h-full flex items-stretch justify-center">
+    <main class="min-h-full flex flex-row items-stretch justify-center">
         <div class="w-full mt-24 flex flex-col justify-start items-center">
             {{/* Hero */}}
-            <div class="container mx-auto flex flex-row justify-between items-center mb-24">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-24 px-4 xl:px-0">
                 {{/* Copy */}}
                 <div class="w-4/12">
                     <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Manage Spotify Playlists with Ease</h1>
@@ -14,7 +13,7 @@
                     <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                         Login With Spotify
                     </a>
-                    <a href="#use-case" class="btn btn-secondary-green">
+                    <a href="#use-case" class="btn btn-secondary-green lg:inline inline-block my-6">
                         Use Cases
                     </a>
                 </div>
@@ -24,14 +23,14 @@
 
             {{/* UI Illustration */}}
             <img src="/static/wave_1.svg" class="w-full">
-            <div class="bg-green-100 w-full flex flex-col justify-center items-center">
+            <div class="bg-green-100 w-full flex flex-col justify-center items-center px-4 xl:px-0">
                 <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">How's It Work</h1>
                 <img src="/static/ui_demo.png" alt="ui demo">
             </div>
             <img id="use-case" src="/static/wave_2.svg" class="w-full mb-24">
 
             {{/* Use case 1 */}}
-            <div class="container mx-auto flex flex-row justify-between items-center mb-24">
+            <div class="container mx-auto flex flex-row justify-between items-center mb-24 px-4 xl:px-0">
                 {{/* Illustration */}}
                 <img class="w-1/2" src="/static/date_picker.svg" alt="date picker">
                 {{/* Copy */}}
@@ -43,7 +42,7 @@
 
             {{/* Use case 2 */}}
             <img src="/static/wave_3.svg" class="w-full">
-            <div class="bg-green-100 w-full">
+            <div class="bg-green-100 w-full px-4 xl:px-0">
                 <div class="container mx-auto flex flex-row justify-between items-center">
                     {{/* Copy */}}
                     <div class="w-4/12">
@@ -58,7 +57,7 @@
 
             {{/* FAQ */}}
             <h1 class="font-black leading-tight text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
-            <div class="w-2/3 flex flex-col justify-start items-stretch mb-24">
+            <div class="w-2/3 flex flex-col justify-start items-stretch mb-24 px-4 xl:px-0">
                 {{/* FAQ item 1 */}}
                 <div id="faq-1">
                     <hr class="border-gray-400 mb-4">
