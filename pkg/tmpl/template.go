@@ -52,16 +52,9 @@ type Playlist struct {
 	Schedule       store.Schedule
 	Public         bool
 
-	Sources          []ExtraTrackSource
+	Sources          []TrackSource
 	SourcesErr       string
 	PotentialSources []PotentialSource
-}
-
-// ExtraTrackSource is a trackSource with extra metadata for templating
-type ExtraTrackSource struct {
-	store.TrackSource
-	CountString string
-	CountErr    string
 }
 
 // PotentialSource is the data for a playlists potential source of tracks
@@ -74,7 +67,9 @@ type PotentialSource struct {
 
 // TrackSource is the data required to template '/playlist/{playlistID}/source/type/{type}/name/{name}/id/{id}'
 type TrackSource struct {
-	Source store.TrackSource
+	store.TrackSource
+	CountString string
+	CountErr    string
 }
 
 // TemplateService is the concrete implmentation of Templater backed by html/template

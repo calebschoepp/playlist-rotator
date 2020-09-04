@@ -25,7 +25,7 @@ type playlistForm struct {
 	schedule     store.Schedule
 	description  string
 	public       bool
-	trackSources map[string]*tmpl.ExtraTrackSource
+	trackSources map[string]*tmpl.TrackSource
 }
 
 const (
@@ -114,7 +114,8 @@ func getPotentialSources(s store.Store, spotify *motify.Spotify, userID *uuid.UU
 
 func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, error) {
 	var data playlistForm
-	data.trackSources = make(map[string]*tmpl.ExtraTrackSource)
+	duplicate := false
+	data.trackSources = make(map[string]*tmpl.TrackSource)
 	for k, v := range values {
 		if k == "name" {
 			data.name = strings.Join(v, "")
@@ -147,7 +148,10 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 		} else if strings.HasSuffix(k, "type") {
 			parts := strings.Split(k, "::")
 			id := parts[0]
-			typ := strings.Join(v, "")
+			if len(v) > 1 {
+				duplicate = true
+			}
+			typ := v[0]
 			var typEnum store.TrackSourceType
 			switch typ {
 			case string(store.AlbumSrc):
@@ -162,30 +166,39 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 			if ts, ok := data.trackSources[id]; ok {
 				ts.Type = typEnum
 			} else {
-				data.trackSources[id] = &tmpl.ExtraTrackSource{TrackSource: store.TrackSource{Type: typEnum}}
+				data.trackSources[id] = &tmpl.TrackSource{TrackSource: store.TrackSource{Type: typEnum}}
 			}
 		} else if strings.HasSuffix(k, "id") {
 			parts := strings.Split(k, "::")
 			id := parts[0]
-			idVal := strings.Join(v, "")
+			if len(v) > 1 {
+				duplicate = true
+			}
+			idVal := v[0]
 			if ts, ok := data.trackSources[id]; ok {
 				ts.ID = idVal
 			} else {
-				data.trackSources[id] = &tmpl.ExtraTrackSource{TrackSource: store.TrackSource{ID: idVal}}
+				data.trackSources[id] = &tmpl.TrackSource{TrackSource: store.TrackSource{ID: idVal}}
 			}
 		} else if strings.HasSuffix(k, "count") {
 			parts := strings.Split(k, "::")
 			id := parts[0]
-			count := strings.Join(v, "")
+			if len(v) > 1 {
+				duplicate = true
+			}
+			count := v[0]
 			if ts, ok := data.trackSources[id]; ok {
 				ts.CountString = count
 			} else {
-				data.trackSources[id] = &tmpl.ExtraTrackSource{CountString: count}
+				data.trackSources[id] = &tmpl.TrackSource{CountString: count}
 			}
 		} else if strings.HasSuffix(k, "method") {
 			parts := strings.Split(k, "::")
 			id := parts[0]
-			method := strings.Join(v, "")
+			if len(v) > 1 {
+				duplicate = true
+			}
+			method := v[0]
 			var methodEnum store.ExtractMethod
 			switch method {
 			case string(store.Randomly):
@@ -198,16 +211,31 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 			if ts, ok := data.trackSources[id]; ok {
 				ts.Method = methodEnum
 			} else {
-				data.trackSources[id] = &tmpl.ExtraTrackSource{TrackSource: store.TrackSource{Method: methodEnum}}
+				data.trackSources[id] = &tmpl.TrackSource{TrackSource: store.TrackSource{Method: methodEnum}}
 			}
 		} else if strings.HasSuffix(k, "name") {
 			parts := strings.Split(k, "::")
 			id := parts[0]
-			name := strings.Join(v, "")
+			if len(v) > 1 {
+				duplicate = true
+			}
+			name := v[0]
 			if ts, ok := data.trackSources[id]; ok {
 				ts.Name = name
 			} else {
-				data.trackSources[id] = &tmpl.ExtraTrackSource{TrackSource: store.TrackSource{Name: name}}
+				data.trackSources[id] = &tmpl.TrackSource{TrackSource: store.TrackSource{Name: name}}
+			}
+		} else if strings.HasSuffix(k, "imageURL") {
+			parts := strings.Split(k, "::")
+			id := parts[0]
+			if len(v) > 1 {
+				duplicate = true
+			}
+			imageURL := v[0]
+			if ts, ok := data.trackSources[id]; ok {
+				ts.ImageURL = imageURL
+			} else {
+				data.trackSources[id] = &tmpl.TrackSource{TrackSource: store.TrackSource{ImageURL: imageURL}}
 			}
 		} else if k == "submit" {
 			// Do nothing in this case
@@ -220,6 +248,11 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 	// Validate all of the data parsed from the form
 	invalid := false
 	var tmplData tmpl.Playlist
+
+	if duplicate {
+		invalid = true
+		tmplData.SourcesErr = "Cannot have two of the same source."
+	}
 
 	if len(data.name) == 0 {
 		invalid = true
@@ -276,6 +309,10 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 			invalid = true
 			return nil, nil, errors.New("empty name on source")
 		}
+		if len(fts.ImageURL) == 0 {
+			invalid = true
+			return nil, nil, errors.New("empty imageURL on source")
+		}
 	}
 
 	if invalid {
@@ -285,7 +322,7 @@ func parsePlaylistForm(values url.Values) (*store.Playlist, *tmpl.Playlist, erro
 		tmplData.Public = data.public
 		tmplData.Schedule = data.schedule
 
-		var srcs []tmpl.ExtraTrackSource
+		var srcs []tmpl.TrackSource
 		for _, v := range data.trackSources {
 			srcs = append(srcs, *v)
 		}

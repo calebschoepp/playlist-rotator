@@ -332,9 +332,9 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 			playlist.Input.TrackSources[i].ImageURL = srcImageURL
 		}
 
-		var extraTrackSources []tmpl.ExtraTrackSource
+		var extraTrackSources []tmpl.TrackSource
 		for _, ts := range playlist.Input.TrackSources {
-			ets := tmpl.ExtraTrackSource{TrackSource: ts, CountErr: "", CountString: ""}
+			ets := tmpl.TrackSource{TrackSource: ts, CountErr: "", CountString: ""}
 			extraTrackSources = append(extraTrackSources, ets)
 		}
 		tmplData.Sources = extraTrackSources
@@ -491,7 +491,7 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 	}
 	source.ImageURL = srcImageURL
 
-	s.Tmpl.TmplTrackSource(w, tmpl.TrackSource{Source: source})
+	s.Tmpl.TmplTrackSource(w, tmpl.TrackSource{TrackSource: source, CountErr: "", CountString: ""})
 }
 
 func (s *Server) playlistBuild(w http.ResponseWriter, r *http.Request) {
