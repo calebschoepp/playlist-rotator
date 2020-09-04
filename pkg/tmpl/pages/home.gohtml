@@ -5,7 +5,7 @@
     <main class="min-h-full flex flex-row items-stretch justify-center">
         <div class="w-full mt-24 flex flex-col justify-start items-center">
             {{/* Hero */}}
-            <div class="container mx-auto flex flex-col justify-start items-center md:flex-row md:justify-between md:items-center mb-24 px-4 xl:px-0">
+            <div class="container mx-auto flex flex-col justify-start items-center md:flex-row md:justify-between md:items-center mb-10 md:mb-24 px-4 xl:px-0">
                 {{/* Copy */}}
                 <div class="w-full md:w-4/12">
                     <h1 class="text-center md:text-left font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Manage Spotify Playlists with Ease</h1>
@@ -24,42 +24,42 @@
             </div>
 
             {{/* UI Illustration */}}
-            <img src="/static/wave_1.svg" class="w-full">
-            <div class="bg-green-100 w-full flex flex-col justify-center items-center px-4 xl:px-0">
+            <img src="/static/wave_1.svg" class="w-full -mb-1">
+            <div class="bg-green-100 w-full flex flex-col justify-center items-center px-4 xl:px-0 py-6 md:py-0">
                 <h1 class="font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">How's It Work</h1>
                 <img src="/static/ui_demo.png" alt="ui demo">
             </div>
-            <img id="use-case" src="/static/wave_2.svg" class="w-full mb-24">
+            <img id="use-case" src="/static/wave_2.svg" class="w-full mb-10 md:mb-24 -mt-1">
 
             {{/* Use case 1 */}}
-            <div class="container mx-auto flex flex-row justify-between items-center mb-24 px-4 xl:px-0">
+            <div class="container mx-auto flex flex-col-reverse justify-start items-center md:flex-row md:justify-between md:items-center mb-10 md:mb-24 px-4 xl:px-0">
                 {{/* Illustration */}}
-                <img class="w-1/2" src="/static/date_picker.svg" alt="date picker">
+                <img class="w-full md:w-1/2 mt-10 md:mt-0" src="/static/date_picker.svg" alt="date picker">
                 {{/* Copy */}}
-                <div class="w-4/12">
-                    <h1 class="w-10/12 font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Free up Space on Your Phone</h1>
-                    <h2 class="text-xl text-gray-700 pb-8">Got too many songs downloaded on your phone? Build a new playlist once a week that randomly picks 100 of your Liked Songs and download that.</h2>
+                <div class="w-full md:w-4/12">
+                    <h1 class="text-center md:text-left w-11/12 mx-auto md:w-10/12 font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Free up Space on Your Phone</h1>
+                    <h2 class="text-center md:text-left text-xl text-gray-700 pb-8">Got too many songs downloaded on your phone? Build a new playlist once a week that randomly picks 100 of your Liked Songs and download that.</h2>
                 </div>
             </div>
 
             {{/* Use case 2 */}}
-            <img src="/static/wave_3.svg" class="w-full">
-            <div class="bg-green-100 w-full px-4 xl:px-0">
-                <div class="container mx-auto flex flex-row justify-between items-center">
+            <img src="/static/wave_3.svg" class="w-full -mb-1">
+            <div class="bg-green-100 w-full px-4 xl:px-0 py-6 md:py-0">
+                <div class="container mx-auto flex flex-col justify-start items-center md:flex-row md:justify-between md:items-center">
                     {{/* Copy */}}
-                    <div class="w-4/12">
-                        <h1 class="w-11/12 font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Keep up with the Latest Music</h1>
-                        <h2 class="text-xl text-gray-700 pb-8">Want to listen to the latest Rap? Build a new playlist daily that pulls the latest music from all the top Rap playlists.</h2>
+                    <div class="w-full md:w-4/12">
+                        <h1 class="text-center md:text-left w-full md:w-11/12 font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Keep up with the Latest Music</h1>
+                        <h2 class="text-center md:text-left text-xl text-gray-700 pb-8">Want to listen to the latest Rap? Build a new playlist daily that pulls the latest music from all the top Rap playlists.</h2>
                     </div>
                     {{/* Illustration */}}
-                    <img class="w-1/2" src="/static/change_playlists.svg" alt="change playlists">
+                    <img class="w-full md:w-1/2" src="/static/change_playlists.svg" alt="change playlists">
                 </div>
             </div>
-            <img src="/static/wave_4.svg" class="w-full mb-24">
+            <img src="/static/wave_4.svg" class="w-full mb-10 md:mb-24 -mt-1">
 
             {{/* FAQ */}}
             <h1 class="text-center font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Frequently Asked Questions</h1>
-            <div class="w-3/4 md:w-2/3 flex flex-col justify-start items-stretch mb-24">
+            <div class="w-3/4 md:w-2/3 flex flex-col justify-start items-stretch mb-10 md:mb-24">
                 {{/* FAQ item 1 */}}
                 <div id="faq-1">
                     <hr class="border-gray-400 mb-4">
@@ -110,10 +110,10 @@
             </div>
 
             {{/* Final CTA */}}
-            <img src="/static/wave_5.svg" class="w-full">
-            <div class="w-full bg-green-100">
+            <img src="/static/wave_5.svg" class="w-full -mb-1">
+            <div class="w-full bg-green-100 pt-6 md:pt-0">
                 <div class="container mx-auto flex flex-col items-center justify-center pb-16">
-                    <h1 class="font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
+                    <h1 class="text-center font-black leading-tight text-4xl md:text-5xl text-gray-900 pb-8">Ready to Give It a Try?</h1>
                     <a href="{{ .SpotifyAuthURL }}" class="btn btn-primary mr-6">
                         Login With Spotify
                     </a>
