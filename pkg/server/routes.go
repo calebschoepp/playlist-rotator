@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
@@ -334,7 +332,12 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 			playlist.Input.TrackSources[i].ImageURL = srcImageURL
 		}
 
-		tmplData.Sources = playlist.Input.TrackSources
+		var extraTrackSources []tmpl.ExtraTrackSource
+		for _, ts := range playlist.Input.TrackSources {
+			ets := tmpl.ExtraTrackSource{TrackSource: ts, CountErr: "", CountString: ""}
+			extraTrackSources = append(extraTrackSources, ets)
+		}
+		tmplData.Sources = extraTrackSources
 	} else {
 		// New playlist so everything is empty
 		tmplData.IsNew = true
@@ -367,122 +370,33 @@ func (s *Server) playlistForm(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	// TODO can I extract some logic here somehow?
-	// Iterate over all form values and build up a playlist record
-	playlist := store.Playlist{}
-	trackSources := map[string]*store.TrackSource{}
-	for k, v := range r.Form {
-		if k == "name" {
-			playlist.Name = strings.Join(v, "")
-		} else if k == "description" {
-			playlist.Description = strings.Join(v, "")
-		} else if k == "access" {
-			switch strings.Join(v, "") {
-			case "public":
-				playlist.Public = true
-			case "private":
-				playlist.Public = false
-			}
-		} else if k == "schedule" {
-			switch strings.Join(v, "") {
-			case string(store.Never):
-				playlist.Schedule = store.Never
-			case string(store.Daily):
-				playlist.Schedule = store.Daily
-			case string(store.Weekly):
-				playlist.Schedule = store.Weekly
-			case string(store.BiWeekly):
-				playlist.Schedule = store.BiWeekly
-			case string(store.Monthly):
-				playlist.Schedule = store.Monthly
-			}
-		} else if strings.HasSuffix(k, "type") {
-			parts := strings.Split(k, "::")
-			id := parts[0]
-			typ := strings.Join(v, "")
-			var typEnum store.TrackSourceType
-			switch typ {
-			case string(store.AlbumSrc):
-				typEnum = store.AlbumSrc
-			case string(store.LikedSrc):
-				typEnum = store.LikedSrc
-			case string(store.PlaylistSrc):
-				typEnum = store.PlaylistSrc
-			}
-			if ts, ok := trackSources[id]; ok {
-				ts.Type = typEnum
-			} else {
-				trackSources[id] = &store.TrackSource{Type: typEnum}
-			}
-		} else if strings.HasSuffix(k, "id") {
-			parts := strings.Split(k, "::")
-			id := parts[0]
-			idVal := strings.Join(v, "")
-			if ts, ok := trackSources[id]; ok {
-				ts.ID = idVal
-			} else {
-				trackSources[id] = &store.TrackSource{ID: idVal}
-			}
-		} else if strings.HasSuffix(k, "count") {
-			parts := strings.Split(k, "::")
-			id := parts[0]
-			count := strings.Join(v, "")
-			countVal, err := strconv.Atoi(count)
-			if err != nil {
-				s.Log.Errorw("failed to parse count into integer", "err", err.Error())
-				http.Error(w, "count must be an integer", http.StatusInternalServerError)
-				return
-			}
-			if ts, ok := trackSources[id]; ok {
-				ts.Count = countVal
-			} else {
-				trackSources[id] = &store.TrackSource{Count: countVal}
-			}
-		} else if strings.HasSuffix(k, "method") {
-			parts := strings.Split(k, "::")
-			id := parts[0]
-			method := strings.Join(v, "")
-			var methodEnum store.ExtractMethod
-			switch method {
-			case string(store.Randomly):
-				methodEnum = store.Randomly
-			case string(store.Latest):
-				methodEnum = store.Latest
-			}
-			if ts, ok := trackSources[id]; ok {
-				ts.Method = methodEnum
-			} else {
-				trackSources[id] = &store.TrackSource{Method: methodEnum}
-			}
-		} else if strings.HasSuffix(k, "name") {
-			parts := strings.Split(k, "::")
-			id := parts[0]
-			name := strings.Join(v, "")
-			if ts, ok := trackSources[id]; ok {
-				ts.Name = name
-			} else {
-				trackSources[id] = &store.TrackSource{Name: name}
-			}
-		} else if k == "submit" {
-			// Do nothing in this case
-		} else {
-			s.Log.Warnw("extraneous form input", "key", k, "value", strings.Join(v, ""))
+	playlistPtr, playlistTmplPtr, err := parsePlaylistForm(r.Form)
+	if err != nil {
+		s.Log.Errorw("failed to parse form", "err", err.Error())
+		http.Error(w, "failed to parse form", http.StatusInternalServerError)
+		return
+	}
+	if playlistTmplPtr != nil {
+		s.Log.Info("parsed invalid form")
+		playlistTmpl := *playlistTmplPtr
+		ps, err := getPotentialSources(s.Store, s.Spotify, userID)
+		if err != nil {
+			s.Log.Errorw("failed to get potential sources", "err", err.Error())
+			http.Error(w, "server error", http.StatusInternalServerError)
 		}
+		s.Log.Debugw("before", "ps", playlistTmpl.PotentialSources)
+		playlistTmpl.PotentialSources = ps
+		s.Log.Debugw("after", "ps", playlistTmpl.PotentialSources)
+		s.Tmpl.TmplPlaylist(w, playlistTmpl)
+		return
 	}
-
-	// TODO validate that everything on playlist that should be filled in is
-	// Add input to playlist
-	input := store.Input{}
-	for _, ts := range trackSources {
-		input.TrackSources = append(input.TrackSources, *ts)
-	}
-	playlist.Input = input
 
 	// Move data into store
+	playlist := *playlistPtr
 	if playlistID == "new" {
 		err := s.Store.CreatePlaylist(
 			*userID,
-			input,
+			playlist.Input,
 			playlist.Name,
 			playlist.Description,
 			playlist.Public,

@@ -1,16 +1,17 @@
 {{ define "details-inputs" }}
-<div class="flex flex-col items-stretch justify-start px-4 pb-6">
-	{{/* Name and Description */}}
+<div class="flex flex-col items-stretch justify-start px-4 pb-8">
+	{{/* Name and Scehdule */}}
 	<div class="flex flex-row">
 		{{/* Name */}}
 		<div class="w-1/2">
-			<label class="input-label pt-6">Name</label>
+			<label class="input-label pt-8">Name</label>
 			<input class="text-input h-10 w-11/12 px-2 py-1" type="text" placeholder="My Playlist" name="name" maxlength="100" value="{{ .Name }}"/>
+			<div class="py-1 text-sm text-red-500">{{ .NameErr }}</div>
 		</div>
 
 		{{/* Schedule */}}
 		<div class="w-1/2">
-			<p class="input-label pt-6">Schedule</p>
+			<p class="input-label pt-8">Schedule</p>
 			<div class="inline-block relative w-11/12">
 				<select class="block w-full h-10 text-input px-4 py-2 pr-8 leading-tight" name="schedule">
 					<option {{ if eq "Never" .Schedule}} selected {{ end }}>Never</option>
@@ -26,12 +27,13 @@
 		</div>
 	</div>
 
-	{{/* Access, Schedule */}}
+	{{/* Description, Access */}}
 	<div class="flex flex-row">
 		{{/* Description */}}
 		<div class="w-3/4">
 			<label class="input-label pt-6">Description</label>
 			<textarea class="w-11/12 text-input px-2 py-1 " rows="3" type="text" placeholder="This is some of my favorite music." name="description" maxlength="300">{{ .Description }}</textarea>
+		<div class="py-1 text-sm text-red-500">{{ .DescriptionErr }}</div>
 		</div>
 
 		<div class="flex flex-row items-top justify-left w-1/4">

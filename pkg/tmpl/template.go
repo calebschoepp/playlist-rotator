@@ -45,13 +45,23 @@ type PlaylistInfo struct {
 type Playlist struct {
 	IsNew bool
 
-	Name        string
-	Description string
-	Schedule    store.Schedule
-	Public      bool
+	Name           string
+	NameErr        string
+	Description    string
+	DescriptionErr string
+	Schedule       store.Schedule
+	Public         bool
 
-	Sources          []store.TrackSource
+	Sources          []ExtraTrackSource
+	SourcesErr       string
 	PotentialSources []PotentialSource
+}
+
+// ExtraTrackSource is a trackSource with extra metadata for templating
+type ExtraTrackSource struct {
+	store.TrackSource
+	CountString string
+	CountErr    string
 }
 
 // PotentialSource is the data for a playlists potential source of tracks

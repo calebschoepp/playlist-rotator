@@ -9,10 +9,12 @@
 	</div>
 
 	{{/* Count */}}
+	{{/* TODO make the error not ruin the centering */}}
 	<div class="mr-16">
 		<label class="input-label pt-6">Count</label>
 		<input class="text-input h-10 w-16 px-2" type="text" placeholder="0" name="{{- .ID -}}::count" maxlength="100" value="{{ .Count }}"/>
 		<span class="pl-1 text-gray-700">songs</span>
+		<div class="py-1 text-sm text-red-500">{{ .CountErr }}</div>
 	</div>
 
 	{{/* Method */}}

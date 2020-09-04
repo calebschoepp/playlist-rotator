@@ -1,15 +1,9 @@
-# Tasks
-- (High effort; High return) Write unit/integration tests
-- (High effort; Low return) 404 page
-- (High effort; Medium return) Turn track sources into a table in PostgreSQL
-- (Medium effort; Medium return) Do useability testing on whole process through and add better explanations
-
 # Required before soft launch
 - [ ] Google analytics
 - [x] Less shit landing page
 - [ ] More clear help text throughout
 - [x] Handle ? and about buttons
-- [ ] Pop-up tutorial?
+- [ ] Make process of configuring and building a playlist more clear
 - [ ] Minimize tailwind css / dev/prod build-pipeline/makefile system
 - [x] Handle mobile case
 - [ ] Form validation
@@ -26,6 +20,10 @@
 - Make the logo's 'a' and 'p' in 'Mixtape' a cassete
 - Make sure name MixtapeManager is used everywhere
 - Lock out the heroku subdomain - it is a security risk
+- Integration tests
+- 404 not found bug when adding a new source (e.g. lofi hip hop beats to study to)
+- Add a special page for 404s
+- Track sources and build errors should be their own rows in Postgres
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
