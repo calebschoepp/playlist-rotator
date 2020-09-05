@@ -1,0 +1,31 @@
+name: CSS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  purge:
+    name: Purge
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        
+      - name: NPM install
+        run: npm i
+
+      - name: Purge CSS
+        run: make prod
+
+      - name: Run a multi-line script
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then 
+            exit 0
+          else 
+            echo "CSS has not been purged"
+            exit 1
+          fi
