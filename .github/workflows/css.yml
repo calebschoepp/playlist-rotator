@@ -21,7 +21,7 @@ jobs:
       - name: Purge CSS
         run: make prod
 
-      - name: Run a multi-line script
+      - name: Verify no changes
         run: |
           if [ -z "$(git status --porcelain)" ]; then 
             exit 0
