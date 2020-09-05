@@ -4,7 +4,8 @@
   "description": "Automatically rotate Spotify playlists",
   "main": "index.js",
   "scripts": {
-    "build": "postcss css/tailwind.css -o static/tailwind.css"
+    "build-local": "NODE_ENV=development postcss css/tailwind.css -o static/tailwind.css",
+    "build": "NODE_ENV=production postcss css/tailwind.css -o static/tailwind.css"
   },
   "repository": {
     "type": "git",

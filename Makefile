@@ -1,13 +1,31 @@
+# Shortcut command to put the repo in development mode
 .PHONY: local
-local: build
-	heroku local
+local: clean
+	air
 
+.PHONY: clean
+clean:
+	rm static/tailwind.css
+
+# Serve up the local binary
+.PHONY: serve
+serve:
+	env $$(grep -v '^#' .env | xargs) ./bin/playlist-rotator serve
+
+# Prepare a binary to serve locally. Depends on un-purged css
 .PHONY: build
 build: static/tailwind.css
 	go build -o bin/playlist-rotator .
 
 static/tailwind.css: tailwind.config.js postcss.config.js css/tailwind.css
+	npm run build-local
+
+# Prepare the repo for production
+.PHONY: prod
+prod:
 	npm run build
+
+# -------- Utility Commands --------
 
 .PHONY: local-db-shell
 local-db-shell:
@@ -21,5 +39,3 @@ heroku-db-shell:
 .PHONY: run-build-cmd
 run-build-cmd:
 	env $$(grep -v '^#' .env | xargs) go run . build
-
-# TODO figure out this whole asset pipeline thing
