@@ -4,7 +4,7 @@
 - [ ] More clear help text throughout
 - [x] Handle ? and about buttons
 - [ ] Make process of configuring and building a playlist more clear
-- [ ] Minimize tailwind css / dev/prod build-pipeline/makefile system
+- [x] Minimize tailwind css / dev/prod build-pipeline/makefile system
 - [x] Handle mobile case
 - [x] Form validation
 - [x] Name and logo
@@ -12,7 +12,7 @@
 - [x] Better copy on front page
 - [x] Grey background all the way on dashboard page
 - [x] Mobile styling for home page
-- [ ] Don't error on trying to pull too many songs from a list
+- [x] Don't error on trying to pull too many songs from a list
 
 # Long-term goals
 - Mobile styling for rest of website

@@ -39,6 +39,7 @@ type PlaylistInfo struct {
 	ScheduleBlurb    string
 	ScheduleSentence string
 	ImageURL         string
+	FailureBlurb     string
 }
 
 // Playlist is the data required to template '/playlist/{playlistID}'
