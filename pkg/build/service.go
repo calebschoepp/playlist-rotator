@@ -237,7 +237,7 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
@@ -271,7 +271,7 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
@@ -305,7 +305,7 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
@@ -332,7 +332,7 @@ func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 	}
 	totalTracks := trackPage.Total
 	if totalTracks < trackSource.Count {
-		// Not enough songs. Treat as error for now TODO don't treat as error
+		// Not enough songs
 		return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, totalTracks)
 	}
 
@@ -358,7 +358,7 @@ func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
@@ -397,7 +397,7 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 	totalTracks := trackPage.Total
 	fmt.Println(totalTracks)
 	if totalTracks < trackSource.Count {
-		// Not enough songs. Treat as error for now TODO don't treat as error
+		// Not enough songs
 		return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, totalTracks)
 	}
 
@@ -425,7 +425,7 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			fmt.Println(err)
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
@@ -463,7 +463,7 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 	}
 	totalTracks := trackPage.Total
 	if totalTracks < trackSource.Count {
-		// Not enough songs. Treat as error for now TODO don't treat as error
+		// Not enough songs
 		return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, totalTracks)
 	}
 
@@ -489,7 +489,7 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
-			// Not enough songs. Treat as error for now TODO don't treat as error
+			// Not enough songs
 			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 

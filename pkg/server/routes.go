@@ -247,6 +247,13 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 			p.Input.TrackSources[i].ImageURL = srcImageURL
 		}
 
+		var failureBlurb string
+		if p.FailureMsg != nil {
+			failureBlurb = *p.FailureMsg
+		} else {
+			failureBlurb = ""
+		}
+
 		pInfo := tmpl.PlaylistInfo{
 			Playlist:         p,
 			TotalSongs:       totalSongs,
@@ -254,6 +261,7 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 			ScheduleBlurb:    scheduleBlurb,
 			ScheduleSentence: scheduleSentence,
 			ImageURL:         imageURL,
+			FailureBlurb:     failureBlurb,
 		}
 		tmplData.Playlists = append(tmplData.Playlists, pInfo)
 	}

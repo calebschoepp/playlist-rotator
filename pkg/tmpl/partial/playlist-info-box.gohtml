@@ -15,10 +15,11 @@
 				<h1 class="text-2xl text-gray-900 font-black mr-4">{{ .Name }}</h1>
 				<img id="build-tag-{{- .ID -}}" src="{{ .BuildTagSrc }}" alt="built" class="mr-4">
 				{{ if eq .BuildTagSrc "/static/building_pill.svg" }}
-				<img id="refresh-{{- .ID -}}" src="/static/refresh.svg" onClick="location.reload();">
+				<img id="refresh-{{- .ID -}}" class="transform hover:scale-125 mr-4" src="/static/refresh.svg" onClick="location.reload();">
 				{{ else }}
-				<img id="refresh-{{- .ID -}}" class="hidden transform hover:scale-125" src="/static/refresh.svg" onClick="location.reload();">
+				<img id="refresh-{{- .ID -}}" class="hidden transform hover:scale-125 mr-4" src="/static/refresh.svg" onClick="location.reload();">
 				{{ end }}
+				<div class="py-1 text-sm text-red-500">{{ .FailureBlurb }}</div>
 			</div>
 
 			{{/* description */}}
