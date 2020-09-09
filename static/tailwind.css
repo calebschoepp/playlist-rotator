@@ -979,11 +979,6 @@ video {
   margin-bottom: 1rem;
 }
 
-.my-6 {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -1114,6 +1109,11 @@ video {
 .py-10 {
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
+}
+
+.px-12 {
+  padding-left: 3rem;
+  padding-right: 3rem;
 }
 
 .px-16 {
@@ -1632,8 +1632,8 @@ video {
     }
   }
 
-  .lg\:inline {
-    display: inline;
+  .lg\:w-10\/12 {
+    width: 83.333333%;
   }
 }
 
@@ -1669,5 +1669,9 @@ video {
   .xl\:px-0 {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .xl\:w-full {
+    width: 100%;
   }
 }
