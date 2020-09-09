@@ -13,6 +13,7 @@
 - [x] Grey background all the way on dashboard page
 - [x] Mobile styling for home page
 - [x] Don't error on trying to pull too many songs from a list
+- [x] Remove use cases and fix laptop stylings
 
 # Long-term goals
 - Mobile styling for rest of website
@@ -27,6 +28,7 @@
 - Track sources and build errors should be their own rows in Postgres
 - Figure out the freaking asset pipeline
 - Setup some CI/CD and stop pushing to master like a savage
+- Setup dev environment on heroku
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
