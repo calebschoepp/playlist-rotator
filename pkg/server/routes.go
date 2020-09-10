@@ -218,10 +218,15 @@ func (s *Server) dashboardPage(w http.ResponseWriter, r *http.Request) {
 		imageURL := "/static/missing_cover_image.svg"
 		if p.SpotifyID != nil {
 			spotifyPlaylist, err := client.GetPlaylistOpt(spotify.ID(*p.SpotifyID), "images")
-			if err != nil || len(spotifyPlaylist.Images) == 0 {
+			if err != nil {
 				s.Log.Warnw("failed to fetch cover image for playlist", "err", err.Error(), "spotifyID", *p.SpotifyID)
 			}
-			imageURL = spotifyPlaylist.Images[0].URL
+			if len(spotifyPlaylist.Images) == 0 {
+				s.Log.Warnw("no cover images for playlist", "spotifyID", *p.SpotifyID)
+			}
+			if err == nil && len(spotifyPlaylist.Images) > 0 {
+				imageURL = spotifyPlaylist.Images[0].URL
+			}
 		}
 
 		// Source cover images
