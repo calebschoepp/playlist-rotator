@@ -1,9 +1,9 @@
 # Required before soft launch
 - [x] Google analytics
 - [x] Less shit landing page
-- [ ] More clear help text throughout
+- [x] More clear help text throughout
 - [x] Handle ? and about buttons
-- [ ] Make process of configuring and building a playlist more clear
+- [x] Make process of configuring and building a playlist more clear
 - [x] Minimize tailwind css / dev/prod build-pipeline/makefile system
 - [x] Handle mobile case
 - [x] Form validation
@@ -29,6 +29,7 @@
 - Figure out the freaking asset pipeline
 - Setup some CI/CD and stop pushing to master like a savage
 - Setup dev environment on heroku
+- Not actually using Catamaran font, investigate actually using that and all of the associated styling changes. (Note that it isn't working because it is .body selector in tailwind.css instead of body selector)
 
 # Questions
 - Should build occur as soon as a scheduled playlist has been built? -> No, one manual build required
