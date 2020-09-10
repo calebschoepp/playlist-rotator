@@ -352,8 +352,23 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		}
 		tmplData.Sources = extraTrackSources
 	} else {
-		// New playlist so everything is empty
+		// New playlist so most things are empty. Set a few defaults
 		tmplData.IsNew = true
+		tmplData.Schedule = store.Weekly
+		// Build a default source which is 10 latest liked songs
+		tmplData.Sources = []tmpl.TrackSource{
+			tmpl.TrackSource{
+				TrackSource: store.TrackSource{
+					Count:    10,
+					Method:   store.Latest,
+					ImageURL: "/static/liked_songs_cover.svg",
+					ID:       "LIKEDID",
+					Name:     "Liked Songs",
+					Type:     store.LikedSrc,
+				},
+				CountErr: "",
+			},
+		}
 	}
 
 	// Regardless we gather the potential sources
