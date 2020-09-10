@@ -1,6 +1,7 @@
 package tmpl
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -24,11 +25,13 @@ type Templater interface {
 // Home is the data required to template '/' and `/login`
 type Home struct {
 	SpotifyAuthURL string
+	Env            string
 }
 
 // Dashboard is the data required to template `/dashboard`
 type Dashboard struct {
 	Playlists []PlaylistInfo
+	Env       string
 }
 
 // PlaylistInfo is a playlist wrapped with extra metadata
@@ -56,6 +59,8 @@ type Playlist struct {
 	Sources          []TrackSource
 	SourcesErr       string
 	PotentialSources []PotentialSource
+
+	Env string
 }
 
 // PotentialSource is the data for a playlists potential source of tracks
@@ -73,16 +78,41 @@ type TrackSource struct {
 	CountErr    string
 }
 
+// Help is the data required to template '/help'
+type Help struct {
+	Env string
+}
+
+// Mobile is the data required to template '/mobile'
+type Mobile struct {
+	Env string
+}
+
 // TemplateService is the concrete implmentation of Templater backed by html/template
 type TemplateService struct {
 	templates *template.Template
 	log       *zap.SugaredLogger
+	env       string
 }
 
 // New returns a pointer to a TemplateService
-func New(log *zap.SugaredLogger) (*TemplateService, error) {
+func New(log *zap.SugaredLogger, env string) (*TemplateService, error) {
 	funcMap := template.FuncMap{
 		"unixTime": func() string { return fmt.Sprintf("%v", time.Now().Unix()) },
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, errors.New("invalid dict call")
+			}
+			dict := make(map[string]interface{}, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, errors.New("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
 	}
 
 	pwd, err := os.Getwd()
@@ -98,21 +128,25 @@ func New(log *zap.SugaredLogger) (*TemplateService, error) {
 	return &TemplateService{
 		templates: templates,
 		log:       log,
+		env:       env,
 	}, nil
 }
 
 // TmplHome templates '/'
 func (t *TemplateService) TmplHome(w http.ResponseWriter, data Home) {
+	data.Env = t.env
 	t.renderTemplate(w, "home", data)
 }
 
 // TmplDashboard templates '/'
 func (t *TemplateService) TmplDashboard(w http.ResponseWriter, data Dashboard) {
+	data.Env = t.env
 	t.renderTemplate(w, "dashboard", data)
 }
 
 // TmplPlaylist templates '/playlist/{playlistID}'
 func (t *TemplateService) TmplPlaylist(w http.ResponseWriter, data Playlist) {
+	data.Env = t.env
 	t.renderTemplate(w, "playlist", data)
 }
 
@@ -123,12 +157,16 @@ func (t *TemplateService) TmplTrackSource(w http.ResponseWriter, data TrackSourc
 
 // TmplMobile templates `/mobile`
 func (t *TemplateService) TmplMobile(w http.ResponseWriter) {
-	t.renderTemplate(w, "mobile", nil)
+	data := Mobile{}
+	data.Env = t.env
+	t.renderTemplate(w, "mobile", data)
 }
 
 // TmplHelp templates `/help`
 func (t *TemplateService) TmplHelp(w http.ResponseWriter) {
-	t.renderTemplate(w, "help", nil)
+	data := Help{}
+	data.Env = t.env
+	t.renderTemplate(w, "help", data)
 }
 
 func (t *TemplateService) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
