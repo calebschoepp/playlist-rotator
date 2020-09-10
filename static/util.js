@@ -8,6 +8,7 @@ function addNewSourceInput() {
     id = "LIKEDID";
   }
   var name = potentialSources[idx].innerText;
+  name = name.replace(/\//, "SLASHREPLACEMENT");
   name = encodeURIComponent(name);
   var type = potentialSources[idx].classList[0];
 

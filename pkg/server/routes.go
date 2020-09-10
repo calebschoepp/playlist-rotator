@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"time"
 
 	"github.com/calebschoepp/playlist-rotator/pkg/store"
@@ -352,8 +353,23 @@ func (s *Server) playlistPage(w http.ResponseWriter, r *http.Request) {
 		}
 		tmplData.Sources = extraTrackSources
 	} else {
-		// New playlist so everything is empty
+		// New playlist so most things are empty. Set a few defaults
 		tmplData.IsNew = true
+		tmplData.Schedule = store.Weekly
+		// Build a default source which is 10 latest liked songs
+		tmplData.Sources = []tmpl.TrackSource{
+			tmpl.TrackSource{
+				TrackSource: store.TrackSource{
+					Count:    10,
+					Method:   store.Latest,
+					ImageURL: "/static/liked_songs_cover.svg",
+					ID:       "LIKEDID",
+					Name:     "Liked Songs",
+					Type:     store.LikedSrc,
+				},
+				CountErr: "",
+			},
+		}
 	}
 
 	// Regardless we gather the potential sources
@@ -452,6 +468,15 @@ func (s *Server) playlistTrackSourceAPI(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
+
+	// Remove hack to get slashes through Gorilla routing
+	re, err := regexp.Compile("SLASHREPLACEMENT")
+	if err != nil {
+		s.Log.Errorw("failed to compile regex", "err", err.Error())
+		http.Error(w, "server error", http.StatusInternalServerError)
+		return
+	}
+	name = re.ReplaceAllString(name, "/")
 
 	// Get userID
 	userID := getUserID(r.Context())
