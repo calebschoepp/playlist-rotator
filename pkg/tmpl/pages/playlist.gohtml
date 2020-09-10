@@ -17,18 +17,18 @@
 				{{/* Details edit modal */}}
 				{{ template "start-edit-modal" "Details" }}
 				<div class="text-gray-700 text-lg">
-					<p class="mb-4">Set the Name, Description, and Access for the Spotify playlist that is going to be built.</p>
-					<p class="mb-4">The Schedule is how often we’ll rebuild your playlist with new tracks.</p>
+					<p class="mb-4">Enter the Name, Description, and Privacy settings for the new playlist.</p>
+					<p class="mb-4">Under schedule, choose how often the playlist will be automatically updated.</p>
 				</div>
 				{{ template "start-edit-modal-input" }}
 				{{ template "details-inputs" . }}
 				{{ template "end-edit-modal" }}
 
 				{{/* Sources edit modal */}}
-				{{ template "start-edit-modal" "Sources" }}
+				{{ template "start-edit-modal" "Music" }}
 				<div class="text-gray-700 text-lg">
-					<p class="mb-4">Add new sources to build your playlist from. You can use your Liked Songs, Albums, and followed Playlists as sources.</p>
-					<p class="mb-4">Count is the number of songs pulled from a source and Method is how the are selected.</p>
+					<p class="mb-4">Add music to your new playlist from your Liked Songs, Albums, or Playlists.</p>
+					<p class="mb-4">From each source, choose the number of songs to include and how they are chosen.</p>
 				</div>
 				{{ template "start-edit-modal-input" }}
 				{{ template "sources-inputs" . }}
