@@ -1,5 +1,5 @@
 # Required before soft launch
-- [ ] Google analytics
+- [x] Google analytics
 - [x] Less shit landing page
 - [ ] More clear help text throughout
 - [x] Handle ? and about buttons

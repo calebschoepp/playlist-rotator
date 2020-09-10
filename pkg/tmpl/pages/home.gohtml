@@ -1,4 +1,4 @@
-{{ template "head" "Mixtape Manager" }}
+{{ template "head" dict "Title" "Mixtape Manager" "Env" .Env }}
 {{ template "header" .SpotifyAuthURL }}
 {{/* Flex box around copy on left and illustration on right */}}
 <div class="bg-white">

@@ -34,7 +34,7 @@ func New(log *zap.SugaredLogger, config *config.Config, db *sqlx.DB, router *mux
 	store := store.New(db)
 
 	// Build TmplService
-	tmpl, err := tmpl.New(log)
+	tmpl, err := tmpl.New(log, config.Environment)
 	if err != nil {
 		return nil, err
 	}

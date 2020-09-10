@@ -1,4 +1,4 @@
-{{ template "head" "Dashboard" }}
+{{ template "head" dict "Title" "Dashboard" "Env" .Env}}
 {{ template "header" "/logout" }}
 {{ if eq (len .Playlists) 0 }}
     {{ template "dashboard-empty" }}

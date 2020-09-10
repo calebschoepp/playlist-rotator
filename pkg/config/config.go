@@ -17,6 +17,7 @@ type Config struct {
 	SessionCookieName   string
 	SessionCookieExpiry time.Duration
 	OauthRedirectURL    string
+	Environment         string
 }
 
 // New returns a Config struct with sane defaults and env variable overrides
@@ -31,6 +32,7 @@ func New() (*Config, error) {
 		SessionCookieName:   "session",
 		SessionCookieExpiry: 60 * time.Minute,
 		OauthRedirectURL:    "",
+		Environment:         "local",
 	}
 
 	if clientID, present := os.LookupEnv("CLIENT_ID"); present {
@@ -71,6 +73,9 @@ func New() (*Config, error) {
 	}
 	if oauthRedirectURL, present := os.LookupEnv("OAUTH_REDIRECT_URL"); present {
 		config.OauthRedirectURL = oauthRedirectURL
+	}
+	if environment, present := os.LookupEnv("ENVIRONMENT"); present {
+		config.Environment = environment
 	}
 
 	return &config, nil
