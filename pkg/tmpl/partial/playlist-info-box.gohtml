@@ -69,7 +69,7 @@
 			<a href="/playlist/{{ .ID }}" class="pr-6 btn btn-tertiary-green">
 				Edit
 			</a>
-			<span onClick="buildPlaylist({{ .ID }});" class="btn btn-secondary-green">
+			<span id="build-button-{{- .ID -}}" onClick="buildPlaylist({{ .ID }});" class="btn btn-secondary-green">
 				Build
 			</span>
 		</div>

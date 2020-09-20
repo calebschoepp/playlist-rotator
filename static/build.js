@@ -1,10 +1,24 @@
+let BUILDING = {};
+
 function buildPlaylist(playlistID) {
+  if (BUILDING[playlistID]) {
+    return;
+  }
+  BUILDING[playlistID] = true;
+
   var buildTag = document.querySelector("#build-tag-" + playlistID);
   buildTag.setAttribute("src", "/static/building_pill.svg");
 
   var refresh = document.querySelector("#refresh-" + playlistID);
   refresh.classList.remove("hidden");
   refresh.classList.add("block");
+
+  var buildButton = document.querySelector("#build-button-" + playlistID);
+  buildButton.classList.add("cursor-not-allowed");
+  buildButton.classList.add("opacity-50");
+  buildButton.classList.add("btn-primary");
+  buildButton.classList.remove("btn-secondary-green");
+  buildButton.textContent = "Building";
 
   var url = window.location.protocol + "//" + window.location.host;
   url = url + "/playlist/" + playlistID + "/build";
