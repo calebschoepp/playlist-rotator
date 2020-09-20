@@ -238,7 +238,7 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in album but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		offset += limit
@@ -272,7 +272,7 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in Liked Songs but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		offset += limit
@@ -306,7 +306,7 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in playlist but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		offset += limit
@@ -333,7 +333,7 @@ func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 	totalTracks := trackPage.Total
 	if totalTracks < trackSource.Count {
 		// Not enough songs
-		return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, totalTracks)
+		return nil, fmt.Errorf("Expected to find %d songs in album but only found %d", trackSource.Count, totalTracks)
 	}
 
 	// Generate a set of random tracks to pull
@@ -359,7 +359,7 @@ func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in album but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in album but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		finishEarly := false
@@ -398,7 +398,7 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 	fmt.Println(totalTracks)
 	if totalTracks < trackSource.Count {
 		// Not enough songs
-		return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, totalTracks)
+		return nil, fmt.Errorf("Expected to find %d songs in Liked Songs but only found %d", trackSource.Count, totalTracks)
 	}
 
 	// Generate a set of random tracks to pull
@@ -426,7 +426,7 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in Liked Songs but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in Liked Songs but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		finishEarly := false
@@ -464,7 +464,7 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 	totalTracks := trackPage.Total
 	if totalTracks < trackSource.Count {
 		// Not enough songs
-		return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, totalTracks)
+		return nil, fmt.Errorf("Expected to find %d songs in playlist but only found %d", trackSource.Count, totalTracks)
 	}
 
 	// Generate a set of random tracks to pull
@@ -490,7 +490,7 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
 			// Not enough songs
-			return nil, fmt.Errorf("expected %d songs in playlist but found %d", trackSource.Count, len(trackPage.Tracks))
+			return nil, fmt.Errorf("Expected to find %d songs in playlist but only found %d", trackSource.Count, len(trackPage.Tracks))
 		}
 
 		finishEarly := false
