@@ -21,7 +21,9 @@ func New(redirectURL, clientID, clientSecret string) *Spotify {
 	scopes := []string{
 		zs.ScopeUserReadPrivate,
 		zs.ScopePlaylistReadPrivate,
+		zs.ScopePlaylistReadCollaborative,
 		zs.ScopePlaylistModifyPrivate,
+		zs.ScopePlaylistModifyPublic,
 		zs.ScopeUserLibraryRead,
 	}
 
