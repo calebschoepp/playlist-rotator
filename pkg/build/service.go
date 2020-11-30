@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -180,6 +181,17 @@ func buildPlaylist(client *motify.Client, userID string, input store.Input, outp
 		}
 	}
 
+	// Remove any invalid uris from tracks
+	// TODO figure out why some uris are empty
+	deleted := 0
+	for i := range tracks {
+		j := i - deleted
+		if tracks[j] == "" {
+			tracks = tracks[:j+copy(tracks[j:], tracks[j+1:])]
+			deleted++
+		}
+	}
+
 	// Build spotify playlist
 	playlist, err := client.CreatePlaylistForUser(userID, output.Name, output.Description, output.Public)
 	if err != nil {
@@ -244,7 +256,9 @@ func getTopAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
-			tracks = append(tracks, track.ID)
+			if strings.Contains(track.Endpoint, "tracks") {
+				tracks = append(tracks, track.ID)
+			}
 		}
 	}
 	return tracks, nil
@@ -278,7 +292,9 @@ func getTopLikedTracks(client *motify.Client, tracks []spotify.ID, trackSource s
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
-			tracks = append(tracks, track.ID)
+			if strings.Contains(track.Endpoint, "tracks") {
+				tracks = append(tracks, track.ID)
+			}
 		}
 	}
 	return tracks, nil
@@ -301,7 +317,7 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))")
+		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id, href))")
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
@@ -312,7 +328,9 @@ func getTopPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 		offset += limit
 
 		for _, track := range trackPage.Tracks {
-			tracks = append(tracks, track.Track.ID)
+			if strings.Contains(track.Track.Endpoint, "tracks") {
+				tracks = append(tracks, track.Track.ID)
+			}
 		}
 	}
 	return tracks, nil
@@ -369,7 +387,9 @@ func getRandomAlbumTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 				break
 			} else if randomOffsets[idx] == offset+i {
 				idx++
-				tracks = append(tracks, track.ID)
+				if strings.Contains(track.Endpoint, "tracks") {
+					tracks = append(tracks, track.ID)
+				}
 			}
 		}
 
@@ -395,7 +415,6 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 		return nil, err
 	}
 	totalTracks := trackPage.Total
-	fmt.Println(totalTracks)
 	if totalTracks < trackSource.Count {
 		// Not enough songs
 		return nil, fmt.Errorf("Expected to find %d songs in Liked Songs but only found %d", trackSource.Count, totalTracks)
@@ -404,7 +423,6 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 	// Generate a set of random tracks to pull
 	idx := 0
 	randomOffsets := generateRandomOffsets(trackSource.Count, totalTracks)
-	fmt.Println(randomOffsets)
 
 	// Iterate over all tracks in liked songs and pull the random ones
 	for {
@@ -436,7 +454,9 @@ func getRandomLikedTracks(client *motify.Client, tracks []spotify.ID, trackSourc
 				break
 			} else if randomOffsets[idx] == offset+i {
 				idx++
-				tracks = append(tracks, track.ID)
+				if strings.Contains(track.Endpoint, "tracks") {
+					tracks = append(tracks, track.ID)
+				}
 			}
 		}
 
@@ -485,7 +505,7 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 			Offset: &offset,
 		}
 
-		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id))")
+		trackPage, err := client.GetPlaylistTracksOpt(spotify.ID(trackSource.ID), &opts, "items(track(id, href))")
 		if err != nil {
 			return nil, err
 		} else if len(trackPage.Tracks) != limit {
@@ -500,7 +520,9 @@ func getRandomPlaylistTracks(client *motify.Client, tracks []spotify.ID, trackSo
 				break
 			} else if randomOffsets[idx] == offset+i {
 				idx++
-				tracks = append(tracks, track.Track.ID)
+				if strings.Contains(track.Track.Endpoint, "tracks") {
+					tracks = append(tracks, track.Track.ID)
+				}
 			}
 		}
 
