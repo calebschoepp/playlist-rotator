@@ -1,0 +1,100 @@
+2022-04-30T01:00:45.576662+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 320, "playlistID": "a9c6fd60-6db3-4acc-afc2-465f3037253a"}
+2022-04-30T01:00:45.576681+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 321, "playlistID": "c3b56b62-5829-4909-a7f3-623c5f19f361"}
+2022-04-30T01:00:45.576692+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:41	skip building playist that has never been manually built	{"idx": 322, "playlistID": "c2ddbb0a-46d3-495d-acc8-48bb9e5b5cbe"}
+2022-04-30T01:00:45.576704+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 323, "playlistID": "d80febad-7f77-48cf-bae5-09bc3a5b2166"}
+2022-04-30T01:00:45.576716+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 324, "playlistID": "951fcc53-617d-4fc3-b5a2-63c5075a910b"}
+2022-04-30T01:00:45.576727+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 325, "playlistID": "dcc338d6-f6be-4cfc-a7c0-7d88704548b1"}
+2022-04-30T01:00:45.576739+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 326, "playlistID": "74e3b1dd-6b47-4af5-8c6d-67ecc2bc9ee6"}
+2022-04-30T01:00:45.576750+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 327, "playlistID": "cc27d53e-0108-402e-a460-aeedf697cd39"}
+2022-04-30T01:00:45.576762+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 328, "playlistID": "4aa634a4-8f27-49db-9662-53e4c4068fde"}
+2022-04-30T01:00:45.576777+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 329, "playlistID": "46b09715-060f-4b7e-9dde-a2157466f306"}
+2022-04-30T01:00:45.576788+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 330, "playlistID": "32c34dce-3765-48e6-bc19-69673819ff5c"}
+2022-04-30T01:00:45.576799+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 331, "playlistID": "35339015-1fcb-457c-9ee4-9b67f50bf421"}
+2022-04-30T01:00:45.576824+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 332, "playlistID": "bdd6b49d-694e-4da6-ac0d-e5f7042f5bbc"}
+2022-04-30T01:00:45.576826+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 333, "playlistID": "4da7195b-d911-43d0-bf08-e79ba2b0a858"}
+2022-04-30T01:00:45.576828+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 334, "playlistID": "6ef72dff-0ba1-4586-8daf-d53a346a29a0"}
+2022-04-30T01:00:45.576846+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 335, "playlistID": "18c8df42-bab1-476c-ba67-2aaec2228695"}
+2022-04-30T01:00:45.576861+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 336, "playlistID": "1b4b5e8f-4c67-4164-903e-cac89349552b"}
+2022-04-30T01:00:45.576875+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 337, "playlistID": "fa9c3636-f09d-4012-a919-17e9e9ff916b"}
+2022-04-30T01:00:45.576891+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 338, "playlistID": "af6e8ba2-bffd-4f03-ab51-c46529a73402"}
+2022-04-30T01:00:45.576904+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 339, "playlistID": "91061f55-c72b-4590-a41c-3f9b4f4d8841"}
+2022-04-30T01:00:45.576918+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 340, "playlistID": "65fa3552-90b2-4ed4-a3b3-449f37876468"}
+2022-04-30T01:00:45.576926+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 341, "playlistID": "2443d8e9-6036-40d0-98e8-2c4f4dbef478"}
+2022-04-30T01:00:45.576942+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 342, "playlistID": "b28961f5-4974-4563-995b-a76ae6d84b77"}
+2022-04-30T01:00:45.576954+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 343, "playlistID": "5ab483d8-5ac1-45c8-a644-05cc866ad0ea"}
+2022-04-30T01:00:45.576965+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 344, "playlistID": "452c0a9c-7047-4f46-ac18-c4d382cf4087"}
+2022-04-30T01:00:45.576977+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 345, "playlistID": "73ab9eed-1791-43b5-bb86-9a6f3bc99e1c"}
+2022-04-30T01:00:45.576988+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.576Z	INFO	build/scheduled.go:61	skip building playist whose deadline hasn't passed	{"idx": 346, "playlistID": "341165ee-4129-4caf-bf97-bdbb4f3451bc"}
+2022-04-30T01:00:45.769467+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.769Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/falq0rxclsg2qyl2f57j24g7b/playlists/1TmDhkhX8TnbBU6uLkuYMR/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.769469+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.769469+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.769469+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.769470+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.769470+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.769471+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.769908+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.769Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/47dvy55do4zzrz1gdl2qif17n/playlists/05epveEXfpoSZYLevHxszr/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.769909+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.769909+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.769910+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.769910+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.769910+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.769911+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.794471+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.794Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/bw5eg96lsdc6yerm39wdcn1ei/playlists/73Fm70A8HJ2KjVG3U2Gd5h/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.794506+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.794509+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.794510+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.794510+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.794513+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.794513+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.833233+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.833Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Get https://api.spotify.com/v1/me/tracks?limit=1&offset=0: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.833235+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.833235+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.833236+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.833236+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:98
+2022-04-30T01:00:45.833237+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.833237+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.840958+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.840Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/19d7lp7pb7h1cfxalgupa892q/playlists/6wAJRMg7lSRimkvcogw9uF/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.840960+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.840960+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.840961+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.840961+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.840961+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.840962+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.848752+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.848Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/19d7lp7pb7h1cfxalgupa892q/playlists/6C6ASrC1xEds1Anaqq82VT/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.848752+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.848753+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.848753+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.848753+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.848754+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.848754+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:45.946522+00:00 app[scheduler.7441]: 2022-04-30T01:00:45.946Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/11128989599/playlists/2nixUOCZcJQ3vH5KKpMiKk/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:45.946524+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:45.946525+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:45.946525+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:45.946526+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:45.946526+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:45.946526+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:46.199955+00:00 app[scheduler.7441]: 2022-04-30T01:00:46.199Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/19d7lp7pb7h1cfxalgupa892q/playlists/21aWFJimR2o1qTTCi4siOA/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:46.199965+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:46.199966+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:46.199966+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:46.199966+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:46.199967+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:46.199967+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:00:46.206285+00:00 app[scheduler.7441]: 2022-04-30T01:00:46.206Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Delete https://api.spotify.com/v1/users/lwm.002/playlists/3xTQydxUoeq4kYgpKYpNMe/followers: oauth2: cannot fetch token: 400 Bad Request\nResponse: {\"error\":\"invalid_grant\",\"error_description\":\"Refresh token revoked\"}"}
+2022-04-30T01:00:46.206286+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:00:46.206287+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:00:46.206287+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:00:46.206288+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:90
+2022-04-30T01:00:46.206288+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:00:46.206291+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:01:06.935430+00:00 app[scheduler.7441]: 2022-04-30T01:01:06.935Z	ERROR	build/service.go:151	failure while building playlist	{"err": "Expected to find 50 songs in playlist but only found 39"}
+2022-04-30T01:01:06.935441+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).logBuildError
+2022-04-30T01:01:06.935441+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:151
+2022-04-30T01:01:06.935442+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildPlaylist
+2022-04-30T01:01:06.935442+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/service.go:98
+2022-04-30T01:01:06.935443+00:00 app[scheduler.7441]: github.com/calebschoepp/playlist-rotator/pkg/build.(*Service).BuildScheduledPlaylists.func1
+2022-04-30T01:01:06.935443+00:00 app[scheduler.7441]: /tmp/build_2ea1fbf1/pkg/build/scheduled.go:72
+2022-04-30T01:01:06.942803+00:00 app[scheduler.7441]: 2022-04-30T01:01:06.942Z	INFO	build/scheduled.go:79	Build summary	{"total": 347, "built": 10, "neverScheduled": 60, "neverManuallyBuilt": 33, "notDeadline": 244}
+2022-04-30T01:01:07.053221+00:00 heroku[scheduler.7441]: Process exited with status 0
+2022-04-30T01:01:07.117208+00:00 heroku[scheduler.7441]: State changed from up to complete
